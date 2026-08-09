@@ -275,19 +275,19 @@ Jika petambak mencatat hasil Anco dari pemberian pakan sebelumnya, AI akan melak
 
 **High Density Warning (> 100 shrimp/m²):**
 ```
-"⚠️ Kepadatan tebar tinggi ({density}/m²). 
+"Kepadatan tebar tinggi ({density}/m²). 
 Tingkatkan frekuensi feeding dan monitoring kualitas air."
 ```
 
 **Low Growth Warning (FCR > 1.5):**
 ```
-"⚠️ FCR tinggi ({fcr}). Evaluasi kualitas pakan dan 
+"FCR tinggi ({fcr}). Evaluasi kualitas pakan dan 
 kondisi lingkungan tambak."
 ```
 
 **Pre-Harvest Recommendation (DOC > 90):**
 ```
-"📊 Mendekati panen (DOC {doc}). Pertimbangkan 
+"Mendekati panen (DOC {doc}). Pertimbangkan 
 untuk mulai mengurangi pakan secara bertahap."
 ```
 
