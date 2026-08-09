@@ -26,7 +26,7 @@ Ini adalah sistem manajemen budidaya udang berbasis AI untuk petambak Indonesia.
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui

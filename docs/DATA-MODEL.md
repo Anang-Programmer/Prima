@@ -456,7 +456,7 @@ INSERT INTO cycles (pond_id, shrimp_count, start_date, status) VALUES
 
 | Layer | Teknologi |
 |-------|-----------|
-| Frontend | Next.js 15 (App Router) |
+| Frontend | Next.js 16 (App Router) |
 | Styling | Tailwind CSS |
 | Backend | Next.js API Routes / Server Actions |
 | Database | Supabase (PostgreSQL) |
