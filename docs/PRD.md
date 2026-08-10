@@ -4,7 +4,7 @@
 
 ## 1. Product Overview
 
-**Nama Produk:** (TBD - belum ditentukan)
+**Nama Produk:** Prima
 
 **Tagline:** Sistem manajemen budidaya udang berbasis AI untuk petambak Indonesia
 
