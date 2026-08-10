@@ -1,4 +1,4 @@
-﻿<!-- Penjelasan fitur-fitur aplikasi untuk presentasi tim -->
+<!-- Penjelasan fitur-fitur aplikasi untuk presentasi tim -->
 
 # FITUR - Daftar Fitur Aplikasi
 
@@ -403,4 +403,58 @@ A: WebView (fase 1) untuk hemat development time. Native jika ada budget.
 
 ---
 
-Dokumen ini untuk presentasi internal tim dan pitching ke stakeholder.
+
+---
+
+## 7. Referensi Halaman untuk UI/UX Designer
+
+Bagian ini memetakan struktur halaman yang perlu didesain, disesuaikan dengan alur pengguna (*User Flow*) agar UI/UX Designer memiliki acuan yang jelas.
+
+### 1. Halaman Landing Page (Sebelum Login)
+- **Tujuan:** Menampilkan *value proposition* aplikasi, edukasi (Kalkulator Pakan AI), dan *Call-to-Action* (CTA) untuk mendaftar.
+- **Komponen Utama:** Hero section, Penjelasan Fitur, Testimoni, FAQ, dan Tombol Login/Register.
+
+### 2. Halaman Register & Login (Autentikasi)
+- **Halaman Register:** Form pendaftaran (Nama Lengkap, Username, Email, Password, Konfirmasi Password).
+- **Halaman Login:** Form masuk (Email/Username dan Password)
+
+### 3. Halaman Utama (Dashboard)
+- **Tujuan:** Monitoring cepat (*Glanceable info*) status seluruh kolam setelah user login.
+- **Komponen Utama:**
+  - **Alert Banner:** Tampil di bagian paling atas jika ada kolam yang sedang dalam siklus berjalan, memuat info *urgent* atau target harian.
+  - **Ringkasan Kolam:** Daftar seluruh kolam dalam bentuk *Card*. Setiap card menampilkan preview status kolam secara ringkas (Nama Kolam, DOC, Total Biomassa, dll).
+
+### 4. Halaman Manajemen Kolam
+- **Tujuan:** Pusat pengelolaan (CRUD) semua kolam milik petambak.
+- **Komponen Utama:**
+  - **Daftar Kolam (List/Grid):** Menampilkan nama kolam, tanggal tebar benih, DOC (umur), estimasi populasi, dan status aktif/tidak.
+  - **Tombol Aksi:** "Tambah Kolam", "Hapus Kolam" (bulk action/individual), dan "Kelola Kolam" (mengarahkan ke Halaman Detail).
+  - *Note untuk Desainer:* Buat tampilan yang profesional dan *clean*, cocok untuk layar mobile maupun desktop.
+
+### 5. Halaman Tambah Kolam & Setup Siklus (Onboarding Kolam)
+- **Tujuan:** Menginput data fisik kolam sekaligus merencanakan siklus budidaya pertama.
+- **Komponen Utama (Bisa dibuat *Stepper* atau 1 halaman):**
+  - **Data Kolam:** Nama Kolam, Luas (m²), dan Kedalaman Air (m).
+  - **Data Siklus:** Jumlah benur (populasi awal tebar).
+  - **Setup Otomatis AI (Preview):** Menampilkan ringkasan awal berdasarkan input user, seperti:
+    - Rekomendasi dosis probiotik.
+    - Dosis pakan harian.
+    - Interval & jadwal waktu pemberian pakan.
+  - **Tombol Aksi:** "Simpan & Mulai Siklus".
+
+### 6. Halaman Detail Kelola Kolam
+- **Tujuan:** Melihat rincian teknis dan log harian untuk satu kolam spesifik.
+- **Komponen Utama:**
+  - Rincian spesifikasi kolam dan performa siklus saat ini (ABW, SR, Biomassa, FCR).
+  - Riwayat/log pemberian pakan dan hasil cek anco.
+  - Grafik pertumbuhan atau konsumsi pakan.
+  - **Tombol Aksi (Danger Zone):** Tombol "Akhiri Siklus" diletakkan di paling bawah, digunakan jika petambak ingin panen lebih cepat atau terpaksa panen (panen parsial/darurat).
+
+### 7. Halaman Edit Kolam
+- **Tujuan:** Memperbarui data kolam yang sudah ada.
+- **Komponen Utama:**
+  - Form yang sama dengan Halaman Tambah Kolam, namun data sudah terisi (*pre-filled*).
+  - Opsi mengubah status kolam (Aktif / Non-aktif).
+  - Opsi kontrol siklus (Jeda / Lanjutkan). *Note:* Berikan desain alert/warning keras di sini, karena menjeda siklus berisiko membuat perhitungan AI (seperti DOC) melenceng dari data aktual di lapangan.
+
+
