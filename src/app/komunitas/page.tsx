@@ -1,0 +1,239 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { BarChart3, Bell, Heart, Home, Loader2, MessageCircle, Plus, Send, Share2, User } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { DesktopSidebar } from "@/components/DesktopSidebar";
+
+type Post = {
+  id: string; author_name: string; avatar_url: string; content: string;
+  created_at: string; likes_count: number; comments_count: number; liked_by_me?: boolean;
+};
+type Comment = { id: string; author_name: string; avatar_url: string; content: string; created_at: string };
+
+const fmtDate = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "2-digit" })}, ${d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`;
+};
+
+function Avatar({ name, url, size = 40 }: { name: string; url?: string; size?: number }) {
+  if (url) return <img src={url} alt={name} className="shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />;
+  return (
+    <div className="flex shrink-0 items-center justify-center rounded-full bg-slate-300 font-bold text-slate-600" style={{ width: size, height: size, fontSize: size * 0.42 }}>
+      {(name || "?")[0]?.toUpperCase()}
+    </div>
+  );
+}
+
+const DEMO: Post[] = [0, 1, 2].map((i) => ({
+  id: `demo-${i}`, author_name: "Mahmud", avatar_url: "",
+  content: "Panen kemarin 4.2 ton dari 600m2. ABW 18gr, FCR 1.35. Pakai probiotik Bacillus sp sejak hari ke-7, cleaning 2x seminggu rutin.",
+  created_at: "2026-08-15T16:05:00+07:00", likes_count: 0, comments_count: 0,
+}));
+
+export default function KomunitasPage() {
+  const [posts, setPosts] = useState<Post[] | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+  const [reload, setReload] = useState(0);
+  const [me, setMe] = useState<{ id: string; name: string; avatar: string } | null>(null);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [newPost, setNewPost] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const [commentPost, setCommentPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("anon");
+        const [{ data: prof }, { data: rows }, { data: myLikes }] = await Promise.all([
+          supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle(),
+          supabase.from("v_posts").select("*").order("created_at", { ascending: false }).limit(50),
+          supabase.from("post_likes").select("post_id").eq("user_id", user.id),
+        ]);
+        setMe({ id: user.id, name: prof?.full_name || "Petambak", avatar: prof?.avatar_url || "" });
+        const liked = new Set((myLikes ?? []).map((l: any) => l.post_id));
+        setPosts(((rows ?? []) as Post[]).map((p) => ({ ...p, liked_by_me: liked.has(p.id) })));
+      } catch {
+        setPosts(DEMO); setIsDemo(true);
+      }
+    })();
+  }, [reload]);
+
+  const refresh = () => setReload((r) => r + 1);
+
+  async function requireLogin() {
+    if (!me) { window.location.href = "/masuk"; return false; }
+    return true;
+  }
+
+  async function toggleLike(p: Post) {
+    if (!(await requireLogin())) return;
+    setBusy(true);
+    if (p.liked_by_me) await supabase.from("post_likes").delete().eq("post_id", p.id).eq("user_id", me!.id);
+    else await supabase.from("post_likes").insert({ post_id: p.id, user_id: me!.id });
+    setBusy(false); refresh();
+  }
+
+  async function share(p: Post) {
+    const text = `${p.author_name} di Prima Komunitas: "${p.content}"`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else await navigator.clipboard.writeText(text);
+    } catch {}
+  }
+
+  async function createPost() {
+    if (!(await requireLogin()) || !newPost.trim()) return;
+    setBusy(true);
+    await supabase.from("posts").insert({ user_id: me!.id, author_name: me!.name, avatar_url: me!.avatar, content: newPost.trim() });
+    setNewPost(""); setShowCreate(false); setBusy(false); refresh();
+  }
+
+  async function openComments(p: Post) {
+    setCommentPost(p); setNewComment("");
+    const { data } = await supabase.from("post_comments").select("*").eq("post_id", p.id).order("created_at");
+    setComments((data ?? []) as Comment[]);
+  }
+
+  async function addComment() {
+    if (!(await requireLogin()) || !newComment.trim()) return;
+    setBusy(true);
+    await supabase.from("post_comments").insert({ post_id: commentPost!.id, user_id: me!.id, author_name: me!.name, avatar_url: me!.avatar, content: newComment.trim() });
+    setNewComment(""); setBusy(false); refresh();
+    openComments(commentPost!);
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+      <DesktopSidebar />
+      <div className="w-full md:flex-1 md:overflow-y-auto">
+      <div className="mx-auto w-full max-w-md pb-28 md:max-w-7xl md:pb-12 md:pt-4">
+        {/* ============ HEADER ============ */}
+        <header className="flex items-center justify-between px-4 pb-4 pt-6 md:px-8">
+          <h1 className="text-lg font-extrabold md:text-2xl">Komunitas</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="hidden items-center gap-1.5 rounded-full bg-[#4C9AA6] px-4 py-2 text-xs font-semibold text-white transition active:scale-95 md:flex"
+            >
+              <Plus size={14} /> Buat Post
+            </button>
+            <button className="rounded-full p-2 text-slate-700 hover:bg-white"><Bell size={20} /></button>
+          </div>
+        </header>
+
+        {isDemo && (
+          <p className="mx-4 mb-3 rounded-lg bg-amber-100 px-3 py-2 text-[11px] text-amber-700">
+            Mode pratinjau — <a href="/masuk" className="font-bold underline">login</a> untuk ikut berinteraksi.
+          </p>
+        )}
+
+        {/* ============ FEED ============ */}
+        <main className="space-y-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:space-y-0">
+          {!posts && <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>}
+          {posts?.map((p) => (
+            <article key={p.id} className="rounded-2xl bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Avatar name={p.author_name} url={p.avatar_url} />
+                <div>
+                  <p className="text-xs font-bold">{p.author_name}</p>
+                  <p className="text-[10px] text-slate-400">{fmtDate(p.created_at)}</p>
+                </div>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700">{p.content}</p>
+              <div className="mt-3 flex items-center gap-6 border-t border-slate-100 pt-3">
+                <button onClick={() => toggleLike(p)} className="transition active:scale-90">
+                  <Heart size={18} className={p.liked_by_me ? "fill-[#F26B4E] text-[#F26B4E]" : "text-slate-500"} />
+                </button>
+                <button onClick={() => openComments(p)} className="transition active:scale-90">
+                  <MessageCircle size={18} className="text-slate-500" />
+                </button>
+                <button onClick={() => share(p)} className="transition active:scale-90">
+                  <Share2 size={18} className="text-slate-500" />
+                </button>
+              </div>
+            </article>
+          ))}
+        </main>
+      </div>
+      </div>
+
+      {/* ============ BOTTOM NAV + FAB ============ */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+          <button onClick={() => setShowCreate(true)}
+            className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95">
+            <Plus size={24} />
+          </button>
+          <div className="grid grid-cols-4">
+            {[
+              { label: "Beranda", icon: Home, href: "/dashboard", active: false },
+              { label: "Proyeksi", icon: BarChart3, href: "/proyeksi", active: false },
+              { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: true },
+              { label: "Profil", icon: User, href: "/profil", active: false },
+            ].map(({ label, icon: Icon, href, active }) => (
+              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#3E97A5]" : "text-slate-400"}`}>
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#3E97A5]/20" : ""} />
+                {label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* ============ SHEET: BUAT POST ============ */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
+          <button aria-label="Tutup" onClick={() => setShowCreate(false)} className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-x-0 bottom-0 z-10 rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative md:w-full md:max-w-md md:rounded-[24px] md:p-6">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-300" />
+            <h3 className="mb-4 text-base font-extrabold">Bagikan Pengalaman</h3>
+            <textarea rows={4} value={newPost} onChange={(e) => setNewPost(e.target.value)}
+              placeholder="cth. Panen kemarin 4.2 ton dari 600m2. ABW 18gr, FCR 1.35..."
+              className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50" />
+            <button onClick={createPost} disabled={busy || !newPost.trim()}
+              className="mt-4 w-full rounded-[10px] bg-[#4C9AA6] py-3 text-sm font-semibold text-white disabled:opacity-60">
+              {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Posting"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ============ SHEET: KOMENTAR ============ */}
+      {commentPost && (
+        <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
+          <button aria-label="Tutup" onClick={() => setCommentPost(null)} className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-x-0 bottom-0 z-10 flex max-h-[80vh] flex-col rounded-t-[24px] bg-white px-4 pb-6 pt-3 md:relative md:h-auto md:w-full md:max-w-md md:rounded-[24px] md:p-6">
+            <div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full bg-slate-300" />
+            <h3 className="mb-3 text-base font-extrabold">Komentar</h3>
+            <div className="flex-1 space-y-3 overflow-y-auto">
+              {comments.length === 0 && <p className="py-6 text-center text-xs text-slate-400">Belum ada komentar.</p>}
+              {comments.map((c) => (
+                <div key={c.id} className="flex items-start gap-2.5">
+                  <Avatar name={c.author_name} url={c.avatar_url} size={32} />
+                  <div className="flex-1 rounded-xl bg-[#F2F5F7] px-3 py-2">
+                    <p className="text-[11px] font-bold">{c.author_name}</p>
+                    <p className="text-xs text-slate-700">{c.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex gap-2">
+              <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()}
+                placeholder="Tulis komentar..."
+                className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50" />
+              <button onClick={addComment} disabled={busy || !newComment.trim()} className="shrink-0 rounded-[10px] bg-[#4C9AA6] px-4 text-white disabled:opacity-60">
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

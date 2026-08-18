@@ -13,6 +13,19 @@ Dokumen ini menjelaskan formula, logika, dan standar yang digunakan untuk mengha
 
 ---
 
+## 1.5. Daftar Istilah Penting (Glossary)
+
+Agar tidak bingung membaca rumus-rumus di bawah atau saat presentasi, berikut adalah arti istilah teknis yang wajib diketahui:
+
+- **DOC (*Day of Culture*):** Umur udang, dihitung sejak hari pertama bibit ditebar ke kolam.
+- **Biomassa:** Total berat keseluruhan udang yang masih hidup di dalam satu kolam saat ini (satuannya Kilogram).
+- **ABW (*Average Body Weight*):** Rata-rata berat badan untuk **satu ekor** udang (satuannya gram).
+- **SR (*Survival Rate*):** Persentase Tingkat Kehidupan, alias berapa persen udang yang diprediksi masih hidup jika dibandingkan dengan jumlah tebar benur di awal.
+- **Feeding Rate (FR):** Porsi jatah makan harian. Ini adalah persentase pakan yang harus ditebar, dihitung dari total berat badan udang (Biomassa).
+- **FCR (*Feed Conversion Ratio*):** Rasio efisiensi pakan (Berapa kilogram pakan yang dihabiskan untuk menghasilkan 1 kilogram udang). Makin kecil nilainya, makin hemat!
+
+---
+
 ## 2. Feeding Rate Formula
 
 ### 2.1 Base Formula
