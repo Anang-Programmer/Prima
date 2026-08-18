@@ -26,7 +26,6 @@ export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, 
           <Label>Frekuensi (x/minggu)</Label>
           <input
             type="number"
-            min="0"
             min={1}
             max={7}
             className={inputCls}
