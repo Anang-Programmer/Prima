@@ -45,7 +45,7 @@ export default function DetailKolamPage() {
   // ======== LOGIKA EDIT PAKAN/PROBIOTIK (dari KolamDetailClient.tsx) ========
   const [editMode, setEditMode] = useState<"pakan" | "prob" | null>(null);
   // Edit values pakan
-  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
+  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, _rawDailyFeedKg: "", mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
   // Edit values probiotik
   const [editProbValues, setEditProbValues] = useState({ doseMl: 0, frequencyPerWeek: 2, method: "Ke Air" });
   // Alert SNI
