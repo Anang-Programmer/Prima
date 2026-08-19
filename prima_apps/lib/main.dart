@@ -32,11 +32,23 @@ class PrimaWebView extends StatefulWidget {
 
 class _PrimaWebViewState extends State<PrimaWebView> {
   InAppWebViewController? webViewController;
+  PullToRefreshController? pullToRefreshController;
   final String url = "https://prima-eta.vercel.app/";
 
   @override
   void initState() {
     super.initState();
+    
+    pullToRefreshController = PullToRefreshController(
+      settings: PullToRefreshSettings(
+        color: const Color(0xFF4C9AA6),
+      ),
+      onRefresh: () async {
+        if (webViewController != null) {
+          webViewController?.reload();
+        }
+      },
+    );
   }
 
   @override
@@ -46,11 +58,25 @@ class _PrimaWebViewState extends State<PrimaWebView> {
       body: SafeArea(
         child: InAppWebView(
           initialUrlRequest: URLRequest(url: WebUri(url)),
+          pullToRefreshController: pullToRefreshController,
           onWebViewCreated: (controller) {
             webViewController = controller;
           },
-          onLoadStop: (controller, url) async {},
-          onReceivedError: (controller, request, error) {},
+          onLoadStop: (controller, url) async {
+            pullToRefreshController?.endRefreshing();
+          },
+          onReceivedError: (controller, request, error) {
+            pullToRefreshController?.endRefreshing();
+          },
+          // Trik mengatasi bug SwipeRefreshLayout vs Bottom Nav:
+          // Matikan pull-to-refresh saat tidak di paling atas halaman
+          onScrollChanged: (controller, x, y) {
+            if (y <= 0) {
+              pullToRefreshController?.setEnabled(true);
+            } else {
+              pullToRefreshController?.setEnabled(false);
+            }
+          },
           initialSettings: InAppWebViewSettings(
             transparentBackground: true,
             javaScriptEnabled: true,
