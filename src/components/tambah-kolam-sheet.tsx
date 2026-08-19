@@ -47,6 +47,16 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Belum login, silakan masuk dulu.");
 
+      // Cek batasan kolam untuk akun Free
+      const { data: profile } = await supabase.from("profiles").select("is_premium").eq("id", user.id).single();
+      if (!profile?.is_premium) {
+        const { count } = await supabase.from("ponds").select("*", { count: "exact", head: true }).eq("user_id", user.id);
+        if (count && count >= 1) {
+          setLoading(false);
+          return setError("Akun Gratis maksimal hanya bisa memiliki 1 kolam. Upgrade ke Prime untuk tambah kolam tanpa batas!");
+        }
+      }
+
       // 1) Simpan kolam
       const { data: pond, error: pErr } = await supabase
         .from("ponds")

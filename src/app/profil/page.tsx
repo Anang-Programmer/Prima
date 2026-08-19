@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   BadgeCheck, BarChart3, Bell, ChevronRight, Crown, Fish, HelpCircle, History,
   Home, Info, Loader2, LogOut, MessageCircle, Plus, ShieldCheck, User, Warehouse,
-  CircleUser, FileText
+  CircleUser, FileText, Pencil
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -60,7 +60,8 @@ export default function ProfilPage() {
     (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("anon");
+        if (!user) { logout(); return; }
+        
         const [{ data: prof }, { count: aktif }, { count: selesai }, { data: harvests }] = await Promise.all([
           supabase.from("profiles").select("*").eq("id", user.id).single(),
           supabase.from("ponds").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "Aktif"),
@@ -69,25 +70,63 @@ export default function ProfilPage() {
         ]);
         const fcrs = (harvests ?? []).map((h: any) => Number(h.harvest_fcr)).filter((n: number) => n > 0);
         
-        // Tarik metadata registrasi (kota, provinsi) sebagai fallback lokasi
         const meta = user.user_metadata || {};
         const metaLocation = [meta.kota, meta.provinsi].filter(Boolean).join(", ");
         
         setD({
-          name: prof?.full_name || "Petambak", 
+          name: prof?.full_name || meta.full_name || user.email?.split('@')[0], 
           location: prof?.location || metaLocation || "", 
-          premium: !!prof?.is_premium,
+          isPremium: !!prof?.is_premium,
           premiumExpiry: prof?.premium_expires_at, 
           farmName: prof?.farm_name || "", 
           phone: prof?.phone || meta.phone || "",
           stats: { aktif: aktif ?? 0, selesai: selesai ?? 0, fcr: fcrs.length ? Math.min(...fcrs) : null },
           harvests: harvests ?? [],
         });
+
+        // Setup profile form for "Akun & Data Pribadi"
+        const fname = meta.firstName || prof?.full_name?.split(' ')[0] || "";
+        const lname = meta.lastName || prof?.full_name?.split(' ').slice(1).join(' ') || "";
+        setProfileForm({
+          firstName: fname,
+          lastName: lname,
+          email: user.email || "",
+          phone: prof?.phone || meta.phone || "",
+          kecamatan: meta.kecamatan || "",
+          kota: meta.kota || "",
+          provinsi: meta.provinsi || ""
+        });
       } catch {
         setD(DEMO); setIsDemo(true);
       }
     })();
   }, []);
+
+  async function saveProfile() {
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const fullName = `${profileForm.firstName} ${profileForm.lastName}`.trim();
+    // Update profiles table
+    await supabase.from("profiles").update({ 
+      full_name: fullName, 
+      phone: profileForm.phone 
+    }).eq("id", user.id);
+    
+    // Update auth metadata
+    await supabase.auth.updateUser({
+      data: {
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        phone: profileForm.phone,
+        kecamatan: profileForm.kecamatan,
+        kota: profileForm.kota,
+        provinsi: profileForm.provinsi,
+        full_name: fullName,
+      }
+    });
+    setBusy(false); setSheet(null); location.reload();
+  }
 
   async function saveFarm() {
     setBusy(true);
@@ -119,9 +158,15 @@ export default function ProfilPage() {
                 <h1 className="truncate text-[22px] font-semibold text-white tracking-wide md:text-2xl">{d.name}</h1>
                 <p className="truncate text-xs text-white/90 font-light mt-0.5 md:text-sm">{d.location || "Lokasi belum diisi"}</p>
                 <div className="mt-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#003746] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
-                    Prime <BadgeCheck size={12} className="text-white fill-white stroke-[#003746]" />
-                  </span>
+                  {d.isPremium ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#003746] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                      Prime <BadgeCheck size={12} className="text-white fill-white stroke-[#003746]" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm border border-white/30">
+                      Gratis
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -144,16 +189,18 @@ export default function ProfilPage() {
         <main className="mx-auto w-full max-w-md md:max-w-5xl md:px-10">
           
           {/* ============ UPGRADE CARD ============ */}
-          <section className="px-5 mt-4 md:px-0">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 shadow-md">
-              <div className="relative z-10">
-                <h3 className="text-[17px] font-medium text-white mb-8 tracking-wide">Upgrade Akun ke Prime</h3>
-                <button className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
-                  Upgrade <ChevronRight size={14} className="stroke-[2.5]" />
-                </button>
+          {!d.isPremium && (
+            <section className="px-5 mt-4 md:px-0">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 shadow-md">
+                <div className="relative z-10">
+                  <h3 className="text-[17px] font-medium text-white mb-8 tracking-wide">Upgrade Akun ke Prime</h3>
+                  <button className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
+                    Upgrade <ChevronRight size={14} className="stroke-[2.5]" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* ============ MENU ============ */}
           <section className="mt-4 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl md:mt-6 border-y border-slate-100 md:border-0">
@@ -197,6 +244,39 @@ export default function ProfilPage() {
           </div>
         </div>
       </nav>
+
+      {/* ============ SHEET: AKUN & DATA PRIBADI ============ */}
+      <Sheet open={sheet === "Akun & Data Pribadi"} onClose={() => setSheet(null)} title="Profile">
+        <div className="space-y-4">
+          <div className="flex justify-center mb-6">
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[#8E9F9F] text-white">
+               <Pencil size={24} className="opacity-80" />
+            </div>
+          </div>
+
+          <div>
+            <Label>Nama anda</Label>
+            <div className="grid grid-cols-2 gap-3 mt-1">
+              <input className={inputCls} placeholder="Nama depan" value={profileForm.firstName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })} />
+              <input className={inputCls} placeholder="Nama belakang" value={profileForm.lastName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })} />
+            </div>
+          </div>
+          <div><Label>Email</Label><input className={`${inputCls} bg-slate-100 opacity-70`} disabled placeholder="Ketik" value={profileForm.email ?? ""} /></div>
+          <div><Label>No HP</Label><input className={inputCls} type="tel" placeholder="Ketik" value={profileForm.phone ?? ""} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} /></div>
+          
+          <hr className="border-slate-200 my-2" />
+
+          <div><Label>Kecamatan</Label><input className={inputCls} placeholder="Ketik" value={profileForm.kecamatan ?? ""} onChange={(e) => setProfileForm({ ...profileForm, kecamatan: e.target.value })} /></div>
+          <div><Label>Kota</Label><input className={inputCls} placeholder="Ketik Nama" value={profileForm.kota ?? ""} onChange={(e) => setProfileForm({ ...profileForm, kota: e.target.value })} /></div>
+          <div><Label>Provinsi</Label><input className={inputCls} placeholder="Ketik Nama" value={profileForm.provinsi ?? ""} onChange={(e) => setProfileForm({ ...profileForm, provinsi: e.target.value })} /></div>
+          
+          <div className="pt-4">
+            <button onClick={saveProfile} disabled={busy} className="w-full rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition active:scale-[0.98]">
+              {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan"}
+            </button>
+          </div>
+        </div>
+      </Sheet>
 
       {/* ============ SHEET: DATA TAMBAK ============ */}
       <Sheet open={sheet === "farm"} onClose={() => setSheet(null)} title="Data Tambak">

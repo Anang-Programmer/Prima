@@ -114,23 +114,25 @@ export default function ProyeksiPage() {
             <>
               <section>
                 <h2 className="mb-3 text-xs font-bold">Kebutuhan Pakan Mingguan</h2>
-                <div className="flex gap-2">
-                  <div className="flex h-40 flex-col justify-between text-right text-[9px] text-slate-400">
-                    {[1, 0.75, 0.5, 0.25, 0].map((t) => <span key={t}>{Math.round(niceMax * t)}</span>)}
+                <div className="flex h-56 w-full gap-1">
+                  <div className="flex flex-col justify-between pb-6 pr-2 text-right text-[9px] text-slate-400">
+                    {[1, 0.75, 0.5, 0.25, 0].map((t) => <span key={t} className="leading-none">{Math.round(niceMax * t)}</span>)}
                   </div>
-                  <div className="relative h-40 flex-1">
-                    {[0, 25, 50, 75, 100].map((p) => (
-                      <div key={p} className="absolute inset-x-0 border-t border-dashed border-slate-200" style={{ top: `${p}%` }} />
-                    ))}
-                    <div className="absolute inset-0 flex items-end justify-around gap-1.5 overflow-x-auto px-1">
+                  <div className="relative flex-1 overflow-x-auto border-b border-slate-300">
+                    <div className="absolute inset-x-0 bottom-6 top-0">
+                      {[0, 25, 50, 75, 100].map((p) => (
+                        <div key={p} className="absolute inset-x-0 border-t border-dashed border-slate-200" style={{ top: `${p}%` }} />
+                      ))}
+                    </div>
+                    <div className="relative flex h-full items-end gap-3 px-1 pb-0 min-w-max">
                       {weeks.map((w: any) => (
-                        <div key={w.week} className="w-7 shrink-0 rounded-t-md bg-[#4C9AA6]" style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={fmtKg1(w.kg)} />
+                        <div key={w.week} className="flex h-full flex-col items-center justify-end w-7 shrink-0">
+                          <div className="w-full rounded-t-sm bg-[#4C9AA6] mb-1" style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={fmtKg1(w.kg)} />
+                          <span className="text-center text-[9px] text-slate-500 whitespace-nowrap h-5 flex items-center">Mgg {w.week}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
-                </div>
-                <div className="ml-8 mt-1 flex justify-around gap-1.5">
-                  {weeks.map((w: any) => <span key={w.week} className="w-7 shrink-0 text-center text-[9px] text-slate-500">Mgg {w.week}</span>)}
                 </div>
               </section>
 
