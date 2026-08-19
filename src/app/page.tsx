@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 /* ============================================================
    ONBOARDING / LANDING — halaman utama sebelum login & daftar
@@ -42,8 +44,15 @@ function Logo() {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace("/dashboard");
+    });
+  }, [router]);
 
   /* update dot aktif saat di-swipe */
   function handleScroll() {
