@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'services/notification_service.dart';
+// import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // --- Firebase ---
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // await Firebase.initializeApp();
+  // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // --- Notification Service ---
-  await NotificationService.instance.init();
+  // await NotificationService.instance.init();
 
   runApp(const MyApp());
 }
@@ -62,20 +62,13 @@ class _PrimaWebViewState extends State<PrimaWebView> {
     );
 
     // Setup notification tap handler → navigate WebView ke halaman kolam
-    NotificationService.instance.onNotificationTapped = (pondId) {
-      webViewController?.loadUrl(
-        urlRequest: URLRequest(
-          url: WebUri("https://prima-eta.vercel.app/kolam/$pondId"),
-        ),
-      );
-    };
-
-    // Listen auth state: begitu user login di WebView, simpan FCM token
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn) {
-        NotificationService.instance.saveTokenToSupabase();
-      }
-    });
+    // NotificationService.instance.onNotificationTapped = (pondId) {
+    //   webViewController?.loadUrl(
+    //     urlRequest: URLRequest(
+    //       url: WebUri("https://prima-eta.vercel.app/kolam/$pondId"),
+    //     ),
+    //   );
+    // };
   }
 
   @override
@@ -90,35 +83,35 @@ class _PrimaWebViewState extends State<PrimaWebView> {
             webViewController = controller;
 
             // Javascript Handler: berikan FCM token ke web
-            controller.addJavaScriptHandler(
-              handlerName: 'getFcmToken',
-              callback: (args) async {
-                final token = await FirebaseMessaging.instance.getToken();
-                return {'token': token};
-              },
-            );
+            // controller.addJavaScriptHandler(
+            //   handlerName: 'getFcmToken',
+            //   callback: (args) async {
+            //     final token = await FirebaseMessaging.instance.getToken();
+            //     return {'token': token};
+            //   },
+            // );
 
             // JavaScript handler: web bisa toggle notifikasi on/off
-            controller.addJavaScriptHandler(
-              handlerName: 'toggleNotification',
-              callback: (args) async {
-                if (args.isNotEmpty) {
-                  final enabled = args[0] as bool;
-                  await NotificationService.instance.setEnabled(enabled);
-                  return {'success': true, 'enabled': enabled};
-                }
-                return {'success': false};
-              },
-            );
+            // controller.addJavaScriptHandler(
+            //   handlerName: 'toggleNotification',
+            //   callback: (args) async {
+            //     if (args.isNotEmpty) {
+            //       final enabled = args[0] as bool;
+            //       await NotificationService.instance.setEnabled(enabled);
+            //       return {'success': true, 'enabled': enabled};
+            //     }
+            //     return {'success': false};
+            //   },
+            // );
 
             // JavaScript handler: web bisa cek status notifikasi
-            controller.addJavaScriptHandler(
-              handlerName: 'getNotificationStatus',
-              callback: (args) async {
-                final enabled = await NotificationService.instance.isEnabled();
-                return {'enabled': enabled};
-              },
-            );
+            // controller.addJavaScriptHandler(
+            //   handlerName: 'getNotificationStatus',
+            //   callback: (args) async {
+            //     final enabled = await NotificationService.instance.isEnabled();
+            //     return {'enabled': enabled};
+            //   },
+            // );
           },
           onLoadStop: (controller, url) async {
             pullToRefreshController?.endRefreshing();
