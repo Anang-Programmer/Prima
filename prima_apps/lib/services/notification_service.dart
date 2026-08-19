@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Background message handler (harus top-level function)
 @pragma('vm:entry-point')
@@ -67,46 +66,6 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen((msg) {
       _handleMessageTap(msg.data);
     });
-  }
-
-  /// Ambil FCM token dan simpan ke Supabase
-  Future<void> saveTokenToSupabase() async {
-    try {
-      final token = await _fcm.getToken();
-      if (token == null) return;
-
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) return;
-
-      // Upsert token ke tabel device_tokens
-      await Supabase.instance.client.from('device_tokens').upsert(
-        {
-          'user_id': user.id,
-          'fcm_token': token,
-          'platform': 'android',
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        onConflict: 'user_id,fcm_token',
-      );
-
-      // Listen perubahan token (jarang terjadi, tapi penting)
-      _fcm.onTokenRefresh.listen((newToken) async {
-        final currentUser = Supabase.instance.client.auth.currentUser;
-        if (currentUser == null) return;
-        await Supabase.instance.client.from('device_tokens').upsert(
-          {
-            'user_id': currentUser.id,
-            'fcm_token': newToken,
-            'platform': 'android',
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-          onConflict: 'user_id,fcm_token',
-        );
-      });
-    } catch (e) {
-      // Gagal simpan token, lanjut tanpa notifikasi (non-fatal)
-      print('FCM token save failed: $e');
-    }
   }
 
   /// Cek apakah notifikasi diaktifkan user

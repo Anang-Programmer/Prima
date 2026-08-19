@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -11,13 +10,6 @@ void main() async {
   // --- Firebase ---
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-  // --- Supabase (untuk menyimpan FCM token) ---
-  await Supabase.initialize(
-    url: 'https://pexrvyolxkjyhzdxgrst.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBleHJ2eW9seGtqeWh6ZHhncnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzY5NDcsImV4cCI6MjEwMjAxMjk0N30.wvAMhnOfXp3IoYTfzmF3304fG9dg04ne1SEsuqR2QDU',
-  );
 
   // --- Notification Service ---
   await NotificationService.instance.init();
@@ -97,6 +89,15 @@ class _PrimaWebViewState extends State<PrimaWebView> {
           onWebViewCreated: (controller) {
             webViewController = controller;
 
+            // Javascript Handler: berikan FCM token ke web
+            controller.addJavaScriptHandler(
+              handlerName: 'getFcmToken',
+              callback: (args) async {
+                final token = await FirebaseMessaging.instance.getToken();
+                return {'token': token};
+              },
+            );
+
             // JavaScript handler: web bisa toggle notifikasi on/off
             controller.addJavaScriptHandler(
               handlerName: 'toggleNotification',
@@ -121,10 +122,6 @@ class _PrimaWebViewState extends State<PrimaWebView> {
           },
           onLoadStop: (controller, url) async {
             pullToRefreshController?.endRefreshing();
-
-            // Coba simpan FCM token setiap kali halaman selesai dimuat
-            // (untuk kasus user sudah login sebelumnya)
-            NotificationService.instance.saveTokenToSupabase();
           },
           onReceivedError: (controller, request, error) {
             pullToRefreshController?.endRefreshing();
