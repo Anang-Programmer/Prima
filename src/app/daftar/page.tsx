@@ -47,18 +47,17 @@ function HeaderArt() {
 type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   icon?: React.ReactNode;
-  bordered?: boolean; 
 };
-function Field({ label, icon, bordered, ...rest }: FieldProps) {
+function Field({ label, icon, ...rest }: FieldProps) {
   return (
     <div>
       <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{label}</p>
       <div className="relative">
         <input
           {...rest}
-          className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 ${bordered ? "border-[1.5px] border-[#4C9AA6]" : ""}`}
+          className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all`}
         />
-        {icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-800">{icon}</span>}
+        {icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">{icon}</span>}
       </div>
     </div>
   );
@@ -158,14 +157,14 @@ export default function DaftarPage() {
                     value={form.firstName}
                     onChange={set("firstName")}
                     required
-                    className="w-full rounded-[10px] bg-[#E3F1F2] border-[1.5px] border-[#4C9AA6] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50"
+                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all"
                   />
                   <input
                     type="text"
                     placeholder="Nama Belakang"
                     value={form.lastName}
                     onChange={set("lastName")}
-                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50"
+                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -237,11 +236,22 @@ export default function DaftarPage() {
           </div>
 
           <form onSubmit={handleNext} className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex-1 space-y-4 overflow-y-auto px-4 pt-5 md:px-4 md:pt-0">
+            <div className="space-y-4 overflow-y-auto px-4 pt-5 md:px-4 md:pt-0">
+              <Field
+                label="Username"
+                icon={<User size={18} />}
+                
+                type="text"
+                placeholder="Ketik Username"
+                value={form.username}
+                onChange={set("username")}
+                required
+                autoComplete="username"
+              />
               <Field
                 label="Nomor hp"
                 icon={<Phone size={18} />}
-                bordered
+                
                 type="tel"
                 inputMode="numeric"
                 placeholder="No Hp"
@@ -251,20 +261,9 @@ export default function DaftarPage() {
                 autoComplete="tel"
               />
               <Field
-                label="Username"
-                icon={<User size={18} />}
-                bordered
-                type="text"
-                placeholder="Ketik Username"
-                value={form.username}
-                onChange={set("username")}
-                required
-                autoComplete="username"
-              />
-              <Field
                 label="Email"
                 icon={<Mail size={18} />}
-                bordered
+                
                 type="email"
                 placeholder="Ketik Email"
                 value={form.email}
@@ -275,7 +274,7 @@ export default function DaftarPage() {
               <Field
                 label="Password"
                 icon={<Lock size={18} />}
-                bordered
+                
                 type="password"
                 placeholder="Ketik Password"
                 value={form.password}
@@ -287,7 +286,7 @@ export default function DaftarPage() {
               <Field
                 label="Konfirmasi Password"
                 icon={<Lock size={18} />}
-                bordered
+                
                 type="password"
                 placeholder="Ketik Ulang Password"
                 value={form.confirm}

@@ -45,7 +45,7 @@ export default function DetailKolamPage() {
   // ======== LOGIKA EDIT PAKAN/PROBIOTIK (dari KolamDetailClient.tsx) ========
   const [editMode, setEditMode] = useState<"pakan" | "prob" | null>(null);
   // Edit values pakan
-  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, _rawDailyFeedKg: "", mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
+  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
   // Edit values probiotik
   const [editProbValues, setEditProbValues] = useState({ doseMl: 0, frequencyPerWeek: 2, method: "Ke Air" });
   // Alert SNI
@@ -85,7 +85,7 @@ export default function DetailKolamPage() {
           supabase.from("active_timers").select("*").eq("pond_id", id).eq("is_completed", false).order("due_time"),
           supabase.from("v_daily_logbook").select("*").eq("cycle_id", cycle.id),
         ]);
-        feeds = f.data ?? []; samps = s.data ?? []; probs = p.data ?? []; timers = t.data ?? []; 
+        feeds = f.data ?? []; samps = s.data ?? []; probs = p.data ?? []; timers = t.data ?? [];
         logbook = (lb.data ?? []).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
       }
       setData({ pond, cycle, feeds, probs, timers, samps, logbook });
@@ -329,29 +329,29 @@ export default function DetailKolamPage() {
           sniValues:
             editMode === "pakan"
               ? {
-                  dailyFeedKg: d.calc.dailyFeedKg,
-                  mealsPerDay: d.calc.mealsPerDay,
-                  feedingRate: d.calc.feedingRatePct,
-                  ancoHours: d.calc.ancoIntervalHours,
-                }
+                dailyFeedKg: d.calc.dailyFeedKg,
+                mealsPerDay: d.calc.mealsPerDay,
+                feedingRate: d.calc.feedingRatePct,
+                ancoHours: d.calc.ancoIntervalHours,
+              }
               : {
-                  dosis: `${d.sched.doseMl}ml`,
-                  frekuensi: `${d.sched.frequencyPerWeek}x per minggu`,
-                  metode: "Ke Air",
-                },
+                dosis: `${d.sched.doseMl}ml`,
+                frekuensi: `${d.sched.frequencyPerWeek}x per minggu`,
+                metode: "Ke Air",
+              },
           // Bentuk userValues DISESUAIKAN dgn key yang dibaca API route.
           userValues:
             editMode === "pakan"
               ? {
-                  dailyFeedKg: editFeedValues.dailyFeedKg,
-                  mealsPerDay: editFeedValues.mealsPerDay,
-                  ancoHours: editFeedValues.ancoHours,
-                }
+                dailyFeedKg: editFeedValues.dailyFeedKg,
+                mealsPerDay: editFeedValues.mealsPerDay,
+                ancoHours: editFeedValues.ancoHours,
+              }
               : {
-                  dosis: editProbValues.doseMl,
-                  freq: editProbValues.frequencyPerWeek,
-                  metode: editProbValues.method,
-                },
+                dosis: editProbValues.doseMl,
+                freq: editProbValues.frequencyPerWeek,
+                metode: editProbValues.method,
+              },
         }),
       });
 
@@ -448,7 +448,7 @@ export default function DetailKolamPage() {
       return;
     }
     const { error } = await supabase.from('cycles').update({ current_abw_gram: val }).eq('id', d.cycle.id);
-    
+
     if (!error) {
       await supabase.from('sampling_logs').insert({
         cycle_id: d.cycle.id,
@@ -621,7 +621,7 @@ export default function DetailKolamPage() {
       if (lastFeed) {
         const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
         const checkEntry = `[ANCO:${timeStr}:${ancoResult}]`;
-        
+
         // Fetch current notes first to avoid overwriting existing ones from other clients
         const { data: curr } = await supabase.from("feed_logs").select("notes").eq("id", lastFeed.id).single();
         const currentNotes = curr?.notes || "";
@@ -812,107 +812,107 @@ export default function DetailKolamPage() {
     <div suppressHydrationWarning className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full md:flex-1 md:overflow-y-auto">
-      <div className="w-full max-w-md pb-28 md:max-w-none md:pb-12">
-        {/* ============ HEADER ============ */}
-        <DetailHeader d={d} router={router} setPondForm={setPondForm} setSheet={setSheet} />
+        <div className="w-full max-w-md pb-28 md:max-w-none md:pb-12">
+          {/* ============ HEADER ============ */}
+          <DetailHeader d={d} router={router} setPondForm={setPondForm} setSheet={setSheet} />
 
-        <main className="mx-auto max-w-none space-y-4 px-4 pt-4 md:max-w-5xl md:px-8">
-          {/* ============ KARTU DOC ============ */}
-          {d.cycle ? (
-            <>
-              <DocCard 
-                d={d} 
-                stage={stage} 
-                popLabel={popLabel} 
-                tab={tab} 
-                setTab={setTab} 
-                onEditAbw={() => {
-                  setAbwInput(String(d.abw));
-                  setSheet("edit-abw");
-                }}
-              />
+          <main className="mx-auto max-w-none space-y-4 px-4 pt-4 md:max-w-5xl md:px-8">
+            {/* ============ KARTU DOC ============ */}
+            {d.cycle ? (
+              <>
+                <DocCard
+                  d={d}
+                  stage={stage}
+                  popLabel={popLabel}
+                  tab={tab}
+                  setTab={setTab}
+                  onEditAbw={() => {
+                    setAbwInput(String(d.abw));
+                    setSheet("edit-abw");
+                  }}
+                />
 
-              {/* ============ TAB: PAKAN ============ */}
-              {tab === "Pakan" && (
-                <>
-                  {/* Status banner */}
-                  <div className={`rounded-xl px-4 py-3 text-xs font-bold ${d.custom ? "bg-[#FDEBDD] text-[#B25E09]" : "bg-[#CFE8EB] text-[#1F6470]"}`}>
-                    {d.custom ? "Rekomendasi telah disesuaikan manual" : "Sesuai rekomendasi standar SNI 8008:2014"}
-                  </div>
+                {/* ============ TAB: PAKAN ============ */}
+                {tab === "Pakan" && (
+                  <>
+                    {/* Status banner */}
+                    <div className={`rounded-xl px-4 py-3 text-xs font-bold ${d.custom ? "bg-[#FDEBDD] text-[#B25E09]" : "bg-[#CFE8EB] text-[#1F6470]"}`}>
+                      {d.custom ? "Rekomendasi telah disesuaikan manual" : "Sesuai rekomendasi standar SNI 8008:2014"}
+                    </div>
 
-                  {/* ======== KARTU PAKAN (tampilan normal / edit mode) ======== */}
-                  {editMode !== "pakan" && !showAIChat ? (
-                    <FeedCard d={d} now={now} busy={busy} insertError={insertError} startEditPakan={startEditPakan} handleCatatPakan={handleCatatPakan} confirmFeedDone={confirmFeedDone} setAncoResult={setAncoResult} setAncoModal={setAncoModal} formatTimeLeft={formatTimeLeft} />
-                  ) : editMode === "pakan" && !showAIChat ? (
-                    <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} />
-                  ) : null}
+                    {/* ======== KARTU PAKAN (tampilan normal / edit mode) ======== */}
+                    {editMode !== "pakan" && !showAIChat ? (
+                      <FeedCard d={d} now={now} busy={busy} insertError={insertError} startEditPakan={startEditPakan} handleCatatPakan={handleCatatPakan} confirmFeedDone={confirmFeedDone} setAncoResult={setAncoResult} setAncoModal={setAncoModal} formatTimeLeft={formatTimeLeft} />
+                    ) : editMode === "pakan" && !showAIChat ? (
+                      <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} />
+                    ) : null}
 
-                  {/* ======== PANEL CHAT AI (muncul setelah klik "Konsultasi AI") ======== */}
-                  {showAIChat && editMode === "pakan" && (
-                    <AIChatPanel messages={messages} isAiTyping={isAiTyping} chatEndRef={chatEndRef} inputMsg={inputMsg} setInputMsg={setInputMsg} sendToAI={sendToAI} busy={busy} saveChanges={saveChanges} setShowAIChat={setShowAIChat} />
-                  )}
+                    {/* ======== PANEL CHAT AI (muncul setelah klik "Konsultasi AI") ======== */}
+                    {showAIChat && editMode === "pakan" && (
+                      <AIChatPanel messages={messages} isAiTyping={isAiTyping} chatEndRef={chatEndRef} inputMsg={inputMsg} setInputMsg={setInputMsg} sendToAI={sendToAI} busy={busy} saveChanges={saveChanges} setShowAIChat={setShowAIChat} />
+                    )}
 
-                  {/* ======== KARTU PROBIOTIK (tampilan normal / edit mode) ======== */}
-                  {editMode !== "prob" && !showAIChat ? (
-                    <ProbioticCard d={d} now={now} busy={busy} startEditProb={startEditProb} handleCatatProbiotik={handleCatatProbiotik} confirmProbioticDone={confirmProbioticDone} formatTimeLeft={formatTimeLeft} />
-                  ) : editMode === "prob" && !showAIChat ? (
-                    <ProbioticEditForm d={d} busy={busy} editProbValues={editProbValues} setEditProbValues={setEditProbValues} setEditMode={setEditMode} setShowSNIAlert={setShowSNIAlert} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} />
-                  ) : null}
+                    {/* ======== KARTU PROBIOTIK (tampilan normal / edit mode) ======== */}
+                    {editMode !== "prob" && !showAIChat ? (
+                      <ProbioticCard d={d} now={now} busy={busy} startEditProb={startEditProb} handleCatatProbiotik={handleCatatProbiotik} confirmProbioticDone={confirmProbioticDone} formatTimeLeft={formatTimeLeft} />
+                    ) : editMode === "prob" && !showAIChat ? (
+                      <ProbioticEditForm d={d} busy={busy} editProbValues={editProbValues} setEditProbValues={setEditProbValues} setEditMode={setEditMode} setShowSNIAlert={setShowSNIAlert} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} />
+                    ) : null}
 
-                  {/* ======== PANEL CHAT AI (probiotik) ======== */}
-                  {showAIChat && editMode === "prob" && (
-                    <AIChatPanel messages={messages} isAiTyping={isAiTyping} chatEndRef={chatEndRef} inputMsg={inputMsg} setInputMsg={setInputMsg} sendToAI={sendToAI} busy={busy} saveChanges={saveChanges} setShowAIChat={setShowAIChat} />
-                  )}
+                    {/* ======== PANEL CHAT AI (probiotik) ======== */}
+                    {showAIChat && editMode === "prob" && (
+                      <AIChatPanel messages={messages} isAiTyping={isAiTyping} chatEndRef={chatEndRef} inputMsg={inputMsg} setInputMsg={setInputMsg} sendToAI={sendToAI} busy={busy} saveChanges={saveChanges} setShowAIChat={setShowAIChat} />
+                    )}
 
-                  {/* ======== PANEL DEBUG: SIMULASI WAKTU ======== */}
-                  {!showAIChat && !editMode && (
-                    <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} />
-                  )}
+                    {/* ======== PANEL DEBUG: SIMULASI WAKTU ======== */}
+                    {!showAIChat && !editMode && (
+                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} />
+                    )}
 
-                  <button
-                    onClick={() => {
-                      setEndForm({ harvest: d.biomass, count: "", notes: "" });
-                      setSheet("endCycle");
-                    }}
-                    className="w-full rounded-xl border-[1.5px] border-[#F26B4E] bg-white py-3 text-sm font-semibold text-[#F26B4E] transition active:scale-[0.98]"
-                  >
-                    Akhiri Siklus
-                  </button>
-                </>
-              )}
+                    <button
+                      onClick={() => {
+                        setEndForm({ harvest: d.biomass, count: "", notes: "" });
+                        setSheet("endCycle");
+                      }}
+                      className="w-full rounded-xl border-[1.5px] border-[#F26B4E] bg-white py-3 text-sm font-semibold text-[#F26B4E] transition active:scale-[0.98]"
+                    >
+                      Akhiri Siklus
+                    </button>
+                  </>
+                )}
 
-              {tab === "Log Book" && <LogBookTab d={d} />}
+                {tab === "Log Book" && <LogBookTab d={d} />}
 
-              {tab === "Proyeksi" && <ProjectionTab d={d} />}
+                {tab === "Proyeksi" && <ProjectionTab d={d} />}
 
-              {tab === "Monitoring" && <MonitoringTab d={d} />}
-            </>
-          ) : (
-            <section className="rounded-2xl bg-white p-6 text-center shadow-sm">
-              <p className="text-sm font-bold">Belum ada siklus berjalan</p>
-              <p className="mt-1 text-xs text-slate-500">Mulai siklus baru untuk mengelola pakan & probiotik.</p>
-            </section>
-          )}
-        </main>
-      </div>
+                {tab === "Monitoring" && <MonitoringTab d={d} />}
+              </>
+            ) : (
+              <section className="rounded-2xl bg-white p-6 text-center shadow-sm">
+                <p className="text-sm font-bold">Belum ada siklus berjalan</p>
+                <p className="mt-1 text-xs text-slate-500">Mulai siklus baru untuk mengelola pakan & probiotik.</p>
+              </section>
+            )}
+          </main>
+        </div>
 
-      {/* ============ SHEET: EDIT KOLAM ============ */}
-      <EditPondSheet sheet={sheet} setSheet={setSheet} pondForm={pondForm} setPondForm={setPondForm} savePond={savePond} busy={busy} />
+        {/* ============ SHEET: EDIT KOLAM ============ */}
+        <EditPondSheet sheet={sheet} setSheet={setSheet} pondForm={pondForm} setPondForm={setPondForm} savePond={savePond} busy={busy} />
 
-      {/* ============ SHEET: TAMBAH PAKAN ============ */}
-      <AddFeedSheet sheet={sheet} setSheet={setSheet} logForm={logForm} setLogForm={setLogForm} addFeedLog={addFeedLog} busy={busy} />
+        {/* ============ SHEET: TAMBAH PAKAN ============ */}
+        <AddFeedSheet sheet={sheet} setSheet={setSheet} logForm={logForm} setLogForm={setLogForm} addFeedLog={addFeedLog} busy={busy} />
 
-      {/* ============ SHEET: AKHIRI SIKLUS ============ */}
-      <EndCycleSheet sheet={sheet} setSheet={setSheet} d={d} endForm={endForm} setEndForm={setEndForm} endCycle={endCycle} busy={busy} />
+        {/* ============ SHEET: AKHIRI SIKLUS ============ */}
+        <EndCycleSheet sheet={sheet} setSheet={setSheet} d={d} endForm={endForm} setEndForm={setEndForm} endCycle={endCycle} busy={busy} />
 
-      {/* ============ SHEET: EDIT ABW ============ */}
-      <EditAbwSheet sheet={sheet} setSheet={setSheet} abwInput={abwInput} setAbwInput={setAbwInput} handleEditAbw={handleEditAbw} busy={busy} />
+        {/* ============ SHEET: EDIT ABW ============ */}
+        <EditAbwSheet sheet={sheet} setSheet={setSheet} abwInput={abwInput} setAbwInput={setAbwInput} handleEditAbw={handleEditAbw} busy={busy} />
 
-      {/* ============ MODAL: CEK ANCO ============ */}
-      <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} />
+        {/* ============ MODAL: CEK ANCO ============ */}
+        <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} />
 
-      {/* ============ SHEET: KONSULTASI AI (bottom) ============ */}
-      <ConsultAISheet sheet={sheet} setSheet={setSheet} chat={chat} chatInput={chatInput} setChatInput={setChatInput} sendChat={sendChat} />
+        {/* ============ SHEET: KONSULTASI AI (bottom) ============ */}
+        <ConsultAISheet sheet={sheet} setSheet={setSheet} chat={chat} chatInput={chatInput} setChatInput={setChatInput} sendChat={sendChat} />
       </div>
     </div>
   );

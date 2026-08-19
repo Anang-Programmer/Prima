@@ -127,11 +127,10 @@ export default function MasukPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden md:flex-none md:overflow-visible">
-                        <div className="flex-1 space-y-4 overflow-y-auto px-4 pt-5 md:px-4 md:pt-0 md:overflow-visible">
+                        <div className="space-y-4 overflow-y-auto px-4 pt-5 md:px-4 md:pt-0 md:overflow-visible">
                             <Field
                                 label="Email atau Username"
                                 icon={<User size={18} />}
-                                bordered
                                 type="text"
                                 placeholder="Ketik Username / Email"
                                 value={identifier}
