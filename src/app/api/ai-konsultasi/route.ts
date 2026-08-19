@@ -50,24 +50,6 @@ ${isProb ?
     // Daftar AI Provider & Model untuk Fallback (Prioritas dari yang paling cerdas berdasarkan tes logika)
     const AI_PROVIDERS = [
       {
-        name: 'Bynara (Mistral Large)',
-        url: 'https://router.bynara.id/v1/chat/completions',
-        key: process.env.BYNARA_API_KEY,
-        model: 'mistral-large',
-      },
-      {
-        name: 'Bynara (Qwen Max)',
-        url: 'https://router.bynara.id/v1/chat/completions',
-        key: process.env.BYNARA_API_KEY,
-        model: 'qwen-3.8-max-free',
-      },
-      {
-        name: 'Bynara (DeepSeek V4)',
-        url: 'https://router.bynara.id/v1/chat/completions',
-        key: process.env.BYNARA_API_KEY,
-        model: 'deepseek-v4-flash-free',
-      },
-      {
         name: 'Groq (GPT-OSS 120b)',
         url: 'https://api.groq.com/openai/v1/chat/completions',
         key: process.env.GROQ_API_KEY,
@@ -86,10 +68,28 @@ ${isProb ?
         model: 'gemini-3.5-flash',
       },
       {
+        name: 'Bynara (Mistral Large)',
+        url: 'https://router.bynara.id/v1/chat/completions',
+        key: process.env.BYNARA_API_KEY,
+        model: 'mistral-large',
+      },
+      {
         name: 'Lynx (Gemini 3.6 Flash)',
         url: 'https://lynx-gateway-three.vercel.app/v1/chat/completions',
         key: process.env.LYNX_API_KEY,
         model: 'gemini-3.6-flash',
+      },
+      {
+        name: 'Bynara (Qwen Max)',
+        url: 'https://router.bynara.id/v1/chat/completions',
+        key: process.env.BYNARA_API_KEY,
+        model: 'qwen-3.8-max-free',
+      },
+      {
+        name: 'Bynara (DeepSeek V4)',
+        url: 'https://router.bynara.id/v1/chat/completions',
+        key: process.env.BYNARA_API_KEY,
+        model: 'deepseek-v4-flash-free',
       }
     ];
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -30,33 +31,48 @@ class PrimaWebView extends StatefulWidget {
 }
 
 class _PrimaWebViewState extends State<PrimaWebView> {
-  late final WebViewController controller;
+  InAppWebViewController? webViewController;
+  PullToRefreshController? pullToRefreshController;
+  final String url = "https://prima-eta.vercel.app/";
 
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF4C9AA6)) // Teal theme background while loading
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Loading indicator bisa ditaruh di sini
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onWebResourceError: (WebResourceError error) {},
-        ),
-      )
-      ..loadRequest(Uri.parse('https://prima-eta.vercel.app/'));
+    
+    pullToRefreshController = PullToRefreshController(
+      settings: PullToRefreshSettings(
+        color: const Color(0xFF4C9AA6),
+      ),
+      onRefresh: () async {
+        if (webViewController != null) {
+          webViewController?.reload();
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // SafeArea berfungsi supaya web tidak tertutup poni (notch) HP
+      backgroundColor: const Color(0xFF4C9AA6),
       body: SafeArea(
-        child: WebViewWidget(controller: controller),
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(url: WebUri(url)),
+          pullToRefreshController: pullToRefreshController,
+          onWebViewCreated: (controller) {
+            webViewController = controller;
+          },
+          onLoadStop: (controller, url) async {
+            pullToRefreshController?.endRefreshing();
+          },
+          onReceivedError: (controller, request, error) {
+            pullToRefreshController?.endRefreshing();
+          },
+          initialSettings: InAppWebViewSettings(
+            transparentBackground: true,
+            javaScriptEnabled: true,
+          ),
+        ),
       ),
     );
   }
