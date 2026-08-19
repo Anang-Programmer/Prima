@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Loader2, Lock, Mail, Phone, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 
@@ -309,6 +310,12 @@ export default function DaftarPage() {
               >
                 {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Selanjutnya"}
               </button>
+              <p className="mt-4 text-center text-xs text-slate-500">
+                Sudah punya akun?{" "}
+                <Link href="/masuk" className="font-semibold text-[#37808C]">
+                  Masuk
+                </Link>
+              </p>
             </div>
           </form>
         </div>
