@@ -38,8 +38,8 @@ export function buildDetail(data: any) {
   const latestAncoLog = feeds.find((f: any) => f.anco_result && f.anco_result !== "Belum Dicek");
   const latestAnco = latestAncoLog?.anco_result || null;
   const ancoMultiplier = latestAnco === "Sisa Banyak" ? 0.75 : latestAnco === "Sisa Sedikit" ? 0.9 : 1.0;
-  const rawPerMealKg = +(feed.dailyFeedKg / feed.mealsPerDay).toFixed(2);
-  const adjustedPerMealKg = +(rawPerMealKg * ancoMultiplier).toFixed(2);
+  const rawPerMealKg = feed.dailyFeedKg / feed.mealsPerDay;
+  const adjustedPerMealKg = rawPerMealKg * ancoMultiplier;
 
   let consecutiveHabis = 0;
   for (const f of feeds) {

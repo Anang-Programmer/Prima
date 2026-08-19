@@ -230,7 +230,7 @@ export default function DetailKolamPage() {
       const rawPakan = deal?.pakan ?? editFeedValues.dailyFeedKg;
       const pakanStr = typeof rawPakan === 'string' ? rawPakan.replace(',', '.') : rawPakan;
       const finalKg = Number(pakanStr);
-      const baseKgToSave = +(finalKg / (d.anco?.multiplier || 1)).toFixed(2);
+      const baseKgToSave = +(finalKg / (d.anco?.multiplier || 1)).toFixed(3);
 
       const feed = {
         dailyFeedKg: baseKgToSave,
