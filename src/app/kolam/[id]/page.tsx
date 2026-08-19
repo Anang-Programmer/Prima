@@ -326,6 +326,16 @@ export default function DetailKolamPage() {
             abw: d.abw,
             biomass: d.biomass,
           },
+          ancoContext: {
+            latestResult: d.anco?.latestResult ?? null,
+            multiplier: d.anco?.multiplier ?? 1,
+            consecutiveHabis: d.anco?.consecutiveHabis ?? 0,
+            adjustedDailyFeedKg: d.recommendedFeedKg,
+            last5Results: (d.feeds || [])
+              .filter((f: any) => f.anco_result && f.anco_result !== "Belum Dicek")
+              .slice(0, 5)
+              .map((f: any) => f.anco_result),
+          },
           sniValues:
             editMode === "pakan"
               ? {
@@ -844,7 +854,7 @@ export default function DetailKolamPage() {
                     {editMode !== "pakan" && !showAIChat ? (
                       <FeedCard d={d} now={now} busy={busy} insertError={insertError} startEditPakan={startEditPakan} handleCatatPakan={handleCatatPakan} confirmFeedDone={confirmFeedDone} setAncoResult={setAncoResult} setAncoModal={setAncoModal} formatTimeLeft={formatTimeLeft} />
                     ) : editMode === "pakan" && !showAIChat ? (
-                      <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} />
+                      <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} setEditMode={setEditMode} />
                     ) : null}
 
                     {/* ======== PANEL CHAT AI (muncul setelah klik "Konsultasi AI") ======== */}

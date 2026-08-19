@@ -3,10 +3,58 @@ export async function POST(req: Request) {
   try {
 
 
-    const { type, messages, pondContext, sniValues, userValues } = await req.json();
+    const { type, messages, pondContext, ancoContext, sniValues, userValues } = await req.json();
     const isProb = type === 'probiotik';
 
-    const systemPrompt = `Kamu adalah konsultan budidaya udang vaname bernama "Prima AI". Kamu sedang berdiskusi singkat dengan petambak yang ingin mengubah rekomendasi ${isProb ? 'probiotik' : 'pakan'} dari standar SNI.
+    // --- Hitung batas toleransi berdasarkan angka lapangan (anco-adjusted) ---
+    let toleranceBlock = '';
+    if (!isProb) {
+      const baselineKg = ancoContext?.adjustedDailyFeedKg ?? sniValues.dailyFeedKg;
+      const sniKg = sniValues.dailyFeedKg;
+      const absoluteFloor = +(sniKg * 0.50).toFixed(2); // Lantai absolut: 50% SNI
+      const rawLower = +(baselineKg * 0.80).toFixed(2);
+      const lower = Math.max(rawLower, absoluteFloor); // Tidak boleh di bawah lantai
+      const upper = +(baselineKg * 1.20).toFixed(2);
+      const isCritical = baselineKg < absoluteFloor;
+      toleranceBlock = `
+BATAS TOLERANSI (WAJIB DIPATUHI):
+- Angka acuan utamamu adalah pakan lapangan (anco-adjusted): ${baselineKg} kg/hari.
+- Angka SNI (rumus standar): ${sniKg} kg/hari.
+- Lantai absolut (50% SNI): ${absoluteFloor} kg — pakan TIDAK BOLEH turun di bawah ini dalam keadaan apapun.
+- Kamu DILARANG KERAS menyetujui pakan di bawah ${lower} kg atau di atas ${upper} kg.
+- Frekuensi makan hanya boleh 3x, 4x, atau 5x per hari.
+- Interval cek anco hanya boleh antara 1.0 - 3.0 jam.
+- Jika petambak meminta angka DI LUAR batas ini, TOLAK dengan sopan, jelaskan risikonya, dan sarankan angka terdekat yang masih dalam batas aman.
+- Kamu TIDAK BOLEH dibujuk atau dirayu untuk melebihi batas ini dalam keadaan apapun.${isCritical ? `
+- PERINGATAN KRITIS: Pakan lapangan saat ini (${baselineKg} kg) sudah turun di bawah 50% dari standar SNI (${sniKg} kg). Ini menandakan kemungkinan ada masalah serius di kolam (udang sakit, kualitas air buruk, dll). Sampaikan kekhawatiran ini ke petambak dan sarankan evaluasi menyeluruh.` : ''}`;
+    } else {
+      const baselineMl = Number(String(sniValues.dosis).replace('ml', ''));
+      const lower = +(baselineMl * 0.70).toFixed(0);
+      const upper = +(baselineMl * 1.30).toFixed(0);
+      toleranceBlock = `
+BATAS TOLERANSI (WAJIB DIPATUHI):
+- Angka acuan dosis probiotik: ${baselineMl} ml.
+- Kamu DILARANG KERAS menyetujui dosis di bawah ${lower} ml atau di atas ${upper} ml (±30% dari acuan).
+- Frekuensi hanya boleh 1x, 2x, atau 3x per minggu.
+- Jika petambak meminta angka DI LUAR batas ini, TOLAK dengan sopan dan sarankan angka terdekat yang masih aman.
+- Kamu TIDAK BOLEH dibujuk untuk melebihi batas ini.`;
+    }
+
+    // --- Blok data anco lapangan ---
+    let ancoBlock = '';
+    if (ancoContext) {
+      const last5 = (ancoContext.last5Results || []).length > 0
+        ? (ancoContext.last5Results as string[]).join(' → ')
+        : 'Belum ada data';
+      ancoBlock = `
+DATA LAPANGAN (KONDISI ANCO TERKINI):
+- Hasil anco terakhir: ${ancoContext.latestResult ?? 'Belum ada'}
+- Pakan sudah di-adjust otomatis menjadi: ${ancoContext.adjustedDailyFeedKg} kg/hari${ancoContext.multiplier !== 1 ? ` (dipotong ${Math.round((1 - ancoContext.multiplier) * 100)}% dari SNI)` : ' (belum ada koreksi anco)'}
+- 5 sesi cek anco terakhir: ${last5}
+- Anco habis berturut-turut: ${ancoContext.consecutiveHabis} kali`;
+    }
+
+    const systemPrompt = `Kamu adalah konsultan budidaya udang vaname bernama "Prima AI". Kamu sedang berdiskusi singkat dengan petambak yang ingin mengubah rekomendasi ${isProb ? 'probiotik' : 'pakan'} dari standar.
 
 KONTEKS KOLAM PETAMBAK:
 - DOC (umur pemeliharaan): ${pondContext.doc ?? '-'} hari
@@ -15,15 +63,18 @@ KONTEKS KOLAM PETAMBAK:
 - ABW (berat rata-rata): ${pondContext.abw ?? '-'} gram
 - Biomassa estimasi: ${pondContext.biomass ?? '-'} kg
 
-REKOMENDASI STANDAR:
+BASE 1 - REKOMENDASI SNI (angka dari rumus standar nasional):
 ${isProb ?
         `- Dosis: ${sniValues.dosis}
 - Frekuensi: ${sniValues.frekuensi}
 - Metode: ${sniValues.metode}` :
-        `- Pakan harian: ${sniValues.dailyFeedKg} kg
+        `- Pakan harian (SNI murni): ${sniValues.dailyFeedKg} kg
 - Frekuensi: ${sniValues.mealsPerDay}× per hari
 - Feeding rate: ${sniValues.feedingRate}%
-- Cek anco: ${sniValues.ancoHours}`}
+- Cek anco: ${sniValues.ancoHours} jam`}
+
+BASE 2 - DATA LAPANGAN (angka yang sudah disesuaikan berdasarkan kondisi anco nyata):
+${ancoBlock || '(Belum ada data anco. Gunakan Base 1 sebagai acuan utama.)'}
 
 YANG PETAMBAK INGIN UBAH:
 ${isProb ?
@@ -33,19 +84,21 @@ ${isProb ?
         `- Pakan harian → ${userValues.dailyFeedKg} kg
 - Frekuensi → ${userValues.mealsPerDay}× per hari
 - Cek anco → ${userValues.ancoHours} jam`}
+${toleranceBlock}
 
 ATURAN:
 1. Jawab dalam Bahasa Indonesia yang ramah, empatik, dan profesional layaknya konsultan budidaya. Panggil "Pak" atau "Bapak".
-2. Jangan langsung menutup percakapan atau memaksa "kesepakatan final" di awal. Gali dulu masalahnya jika petambak curhat (misal: krisis keuangan, udang sakit, air keruh).
-3. JIKA petambak meminta rekomendasi atau saran jalan tengah, berikan saran spesifik yang masuk akal secara budidaya.
-4. Diskusikan sampai petambak benar-benar setuju dengan suatu angka yang spesifik.
-5. HANYA JIKA petambak sudah bilang "setuju", "oke", "deal", "iya", barulah akhiri percakapan dengan merekap kesepakatan. 
-6. PENTING: Di baris paling akhir dari balasanmu jika SUDAH DEAL, WAJIB sertakan data kesepakatan dalam format persis seperti ini (tanpa format markdown):
+2. Kamu punya 2 BASIS DATA: Base 1 (SNI rumus standar) dan Base 2 (data lapangan dari anco). Gunakan KEDUANYA saat menilai permintaan petambak. Jika Base 2 tersedia, itu adalah acuan utamamu karena lebih dekat dengan kondisi nyata.
+3. Jangan langsung menutup percakapan atau memaksa "kesepakatan final" di awal. Gali dulu masalahnya jika petambak curhat (misal: krisis keuangan, udang sakit, air keruh).
+4. JIKA petambak meminta rekomendasi atau saran jalan tengah, berikan saran spesifik yang masuk akal secara budidaya.
+5. Diskusikan sampai petambak benar-benar setuju dengan suatu angka yang spesifik.
+6. HANYA JIKA petambak sudah bilang "setuju", "oke", "deal", "iya", barulah akhiri percakapan dengan merekap kesepakatan. 
+7. PENTING: Di baris paling akhir dari balasanmu jika SUDAH DEAL, WAJIB sertakan data kesepakatan dalam format persis seperti ini (tanpa format markdown):
 ${isProb ?
         `[DEAL_DATA: {"dosis": 600, "freq": 2, "metode": "Tebar ke air"}]` :
         `[DEAL_DATA: {"pakan": 0.45, "freq": 4, "anco": 2.0}] (Catatan: Nilai "pakan" WAJIB dalam satuan Kilogram (kg) menggunakan titik desimal, bukan koma. Dilarang mereturn dalam satuan gram!)`}
-7. Balasan jangan terlalu panjang seperti robot, gunakan gaya bahasa chat (maksimal 3-4 kalimat).
-8. DILARANG KERAS menggunakan format Markdown seperti tanda bintang (**) untuk menebalkan teks, atau membuat list. Tulis dengan teks murni biasa seperti membalas pesan WhatsApp.`;
+8. Balasan jangan terlalu panjang seperti robot, gunakan gaya bahasa chat (maksimal 3-4 kalimat).
+9. DILARANG KERAS menggunakan format Markdown seperti tanda bintang (**) untuk menebalkan teks, atau membuat list. Tulis dengan teks murni biasa seperti membalas pesan WhatsApp.`;
 
     // Daftar AI Provider & Model untuk Fallback (Prioritas dari yang paling cerdas berdasarkan tes logika)
     const AI_PROVIDERS = [
@@ -115,7 +168,7 @@ ${isProb ?
         const bodyPayload: any = {
           model: provider.model,
           temperature: 0.4,
-          max_tokens: 300,
+          max_tokens: 800,
           top_p: 1,
           messages: chatMessages
         };

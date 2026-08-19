@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Droplets, Loader2 } from "lucide-react";
 
@@ -16,23 +16,30 @@ export function AncoModal(props: any) {
         <p className="mb-5 text-xs text-slate-500">Bagaimana kondisi pakan di dalam anco saat ini?</p>
 
         <div className="space-y-2.5">
-          {["Habis", "Sisa Sedikit", "Sisa Banyak"].map((opt) => (
+          {([
+            { value: "Habis", desc: "Pakan habis bersih, tersisa < 10% di jaring anco" },
+            { value: "Sisa Sedikit", desc: "Tersisa sekitar 10% – 30%, butiran pakan tersebar tipis" },
+            { value: "Sisa Banyak", desc: "Tersisa > 30%, pakan masih menumpuk jelas terlihat" },
+          ]).map(({ value, desc }) => (
             <button
-              key={opt}
-              onClick={() => setAncoResult(opt)}
-              className={`flex w-full items-center gap-3 rounded-xl border-[1.5px] px-4 py-3 text-left transition ${
-                ancoResult === opt ? "border-[#4C9AA6] bg-[#4C9AA6]/10" : "border-slate-200 hover:bg-slate-50"
+              key={value}
+              onClick={() => setAncoResult(value)}
+              className={`flex w-full items-start gap-3 rounded-xl border-[1.5px] px-4 py-3 text-left transition ${
+                ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]/10" : "border-slate-200 hover:bg-slate-50"
               }`}
             >
-              <span className={`h-3.5 w-3.5 shrink-0 rounded-full border-2 ${ancoResult === opt ? "border-[#4C9AA6] bg-[#4C9AA6]" : "border-slate-300"}`} />
-              <span className={`text-sm font-semibold ${ancoResult === opt ? "text-[#3E97A5]" : "text-slate-600"}`}>{opt}</span>
+              <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]" : "border-slate-300"}`} />
+              <span>
+                <span className={`text-sm font-semibold ${ancoResult === value ? "text-[#3E97A5]" : "text-slate-600"}`}>{value}</span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">{desc}</span>
+              </span>
             </button>
           ))}
         </div>
         <p className="mt-3 text-[10px] leading-relaxed text-slate-400">
           {ancoResult === "Habis" && "Dosis aman. Pertahankan atau naikkan perlahan sesuai target."}
-          {ancoResult === "Sisa Sedikit" && "AI akan menyarankan kurangi pakan 5-10% untuk sesi berikutnya."}
-          {ancoResult === "Sisa Banyak" && "Indikasi overfeeding. AI akan menyarankan kurangi pakan 20-30%."}
+          {ancoResult === "Sisa Sedikit" && "Nafsu makan agak turun. Porsi sesi berikutnya otomatis dikurangi 10%."}
+          {ancoResult === "Sisa Banyak" && "Indikasi overfeeding. Porsi sesi berikutnya otomatis dikurangi 25%."}
         </p>
 
         <div className="mt-6 flex gap-3">

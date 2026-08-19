@@ -4,7 +4,7 @@ import { Minus, Plus, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react"
 import { Label } from "./Sheet";
 import { inputCls, fmt1, fmtFeed } from "../_lib/constants";
 
-export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation }: any) {
+export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation, setEditMode }: any) {
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm">
       <h4 className="text-sm font-bold text-slate-800 mb-5">Edit Pakan</h4>
@@ -105,14 +105,23 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
         </div>
       </div>
 
-      {/* Tombol Konfirmasi */}
-      <button
-        onClick={handleConfirmEdit}
-        disabled={busy}
-        className="mt-5 w-full rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
-      >
-        Konfirmasi
-      </button>
+      {/* Tombol Batal + Konfirmasi */}
+      <div className="mt-5 flex gap-3">
+        <button
+          onClick={() => setEditMode(null)}
+          disabled={busy}
+          className="flex-1 rounded-xl bg-slate-100 py-3.5 text-sm font-semibold text-slate-600 transition active:scale-[0.98] disabled:opacity-50"
+        >
+          Batal
+        </button>
+        <button
+          onClick={handleConfirmEdit}
+          disabled={busy}
+          className="flex-1 rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+        >
+          Konfirmasi
+        </button>
+      </div>
 
       {/* ======== ALERT SNI (inline, muncul di bawah form) ======== */}
       {showSNIAlert && (
@@ -120,11 +129,11 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
           <div className="flex gap-3 items-start mb-3">
             <AlertTriangle size={18} className="text-orange-600 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-bold text-orange-800">Menyimpang dari Standar SNI</h4>
+              <h4 className="text-xs font-bold text-orange-800">Menyimpang dari Rekomendasi PRIMA</h4>
               <p className="text-[11px] text-orange-700/80 mt-1">
                 Parameter yang Anda masukkan (
                 {[deviations.pakan ? "total pakan" : null, deviations.freq ? "frekuensi" : null, deviations.anco ? "jam cek anco" : null].filter(Boolean).join(", ")}
-                ) berbeda dari rekomendasi standar SNI untuk umur dan kepadatan kolam Anda.
+                ) berbeda dari rekomendasi berdasarkan standar SNI dan kondisi anco kolam Anda.
               </p>
             </div>
           </div>
