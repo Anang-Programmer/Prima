@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { fmt1 } from "../_lib/constants";
 
@@ -8,16 +8,16 @@ export default function ProjectionTab({ d }: { d: any }) {
       <h4 className="mb-4 text-xs font-bold text-slate-800">Kebutuhan Pakan Mingguan</h4>
       
       {(() => {
-        const maxFeed = Math.max(...d.proyeksiMingguan.map((w: any) => w.amount), 1);
-        const yMax = Math.ceil(maxFeed / 150) * 150; // Step by 150 to mimic screenshot
+        const maxFeed = Math.max(...d.proyeksiMingguan.map((w: any) => w.amount), 0.1);
+        const yMax = maxFeed * 1.2; 
         return (
           <div className="flex h-48 w-full">
             {/* Y-Axis */}
             <div className="flex flex-col justify-between pb-6 pr-3 text-right text-[10px] text-slate-500">
-              <span>{yMax}</span>
-              <span>{yMax * 0.75}</span>
-              <span>{yMax * 0.5}</span>
-              <span>{yMax * 0.25}</span>
+              <span>{fmt1(yMax)}</span>
+              <span>{fmt1(yMax * 0.75)}</span>
+              <span>{fmt1(yMax * 0.5)}</span>
+              <span>{fmt1(yMax * 0.25)}</span>
               <span>0</span>
             </div>
 
@@ -34,14 +34,16 @@ export default function ProjectionTab({ d }: { d: any }) {
 
               {/* Bars */}
               {d.proyeksiMingguan.map((w: any, i: number) => (
-                <div key={i} className="group relative z-10 flex h-full w-[12%] flex-col items-center justify-end">
+                <div key={i} className="group relative z-10 flex h-full flex-col items-center justify-end px-0.5" style={{ width: `${100 / d.proyeksiMingguan.length}%` }}>
                   <div
-                    className="w-full rounded-t-sm bg-[#4C9AA6] transition-all"
+                    className={`w-full max-w-[24px] rounded-t-sm transition-all ${w.isReal ? "bg-[#4C9AA6]" : "bg-[#4C9AA6]/40 border-t border-[#4C9AA6]"}`}
                     style={{ height: `${(w.amount / yMax) * 100}%`, minHeight: "2px" }}
                   />
-                  <span className="absolute -bottom-6 text-center text-[10px] leading-tight text-slate-500 whitespace-pre">
-                    {w.label}
-                  </span>
+                  {(d.proyeksiMingguan.length <= 8 || i % 2 === 0) && (
+                    <span className="absolute -bottom-6 text-center text-[9px] leading-tight text-slate-500 whitespace-nowrap">
+                      {w.label}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -56,7 +58,7 @@ export default function ProjectionTab({ d }: { d: any }) {
             <span className="text-xs font-semibold text-slate-700">{w.listLabel}</span>
             <div className="text-right">
               <p className="text-xs font-bold text-slate-800">{fmt1(w.amount)}kg</p>
-              <p className="text-[10px] text-slate-400">{w.type}</p>
+              <p className={`text-[10px] ${w.isReal ? "text-emerald-600 font-medium" : "text-slate-400"}`}>{w.type}</p>
             </div>
           </div>
         ))}

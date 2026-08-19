@@ -1,18 +1,27 @@
-﻿"use client";
+"use client";
 
-import { Sparkles, Send, CheckCircle2 } from "lucide-react";
+import { Sparkles, Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import { inputCls } from "../_lib/constants";
 
 export function AIChatPanel(props: any) {
   const { messages, isAiTyping, chatEndRef, inputMsg, setInputMsg, sendToAI, busy, saveChanges, setShowAIChat } = props;
+  
+  // Periksa apakah kesepakatan sudah dicapai oleh AI
+  const hasDeal = messages.some((m: any) => m.role === "assistant" && m.content.includes("DEAL_DATA"));
+
   return (
     <section className="rounded-2xl bg-white shadow-sm overflow-hidden">
       <div className="bg-[#4C9AA6] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-white" />
-          <span className="text-xs font-semibold text-white">Konsultasi Prima AI</span>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowAIChat(false)} className="text-white/80 hover:text-white transition">
+            <ArrowLeft size={16} />
+          </button>
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={14} className="text-white" />
+            <span className="text-xs font-semibold text-white">Konsultasi Prima AI</span>
+          </div>
         </div>
-        <button onClick={() => { setShowAIChat(false); }} className="text-white/70 hover:text-white text-xs font-medium">
+        <button onClick={() => { setShowAIChat(false); }} className="text-white/70 hover:text-white text-xs font-medium hidden">
           Tutup
         </button>
       </div>
@@ -51,8 +60,8 @@ export function AIChatPanel(props: any) {
         </form>
         <button
           onClick={() => saveChanges(true)}
-          disabled={busy}
-          className="w-full flex items-center justify-center gap-2 rounded-[10px] bg-[#4C9AA6] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+          disabled={busy || !hasDeal}
+          className="w-full flex items-center justify-center gap-2 rounded-[10px] bg-[#4C9AA6] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 mt-2"
         >
           <CheckCircle2 size={14} /> {busy ? "Menyimpan..." : "Simpan Kesepakatan Ini"}
         </button>

@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Scale } from "lucide-react";
+import { fmt1 } from "../_lib/constants";
 
 export default function MonitoringTab({ d }: { d: any }) {
   return (
@@ -44,92 +45,170 @@ export default function MonitoringTab({ d }: { d: any }) {
         </div>
       </div>
 
-      {/* ABW Chart */}
-      <div className="mt-8">
-        <h4 className="mb-6 text-xs font-bold text-slate-800">Pertumbuhan ABW (gram)</h4>
+      {/* Alert Sampling ABW */}
+      {d.abwSamplingAlert && (
+        <div
+          className={`rounded-xl p-4 shadow-sm flex items-start gap-3 ${d.abwSamplingAlert.type === "missed"
+              ? "bg-red-50 border border-red-200"
+              : "bg-amber-50 border border-amber-200"
+            }`}
+        >
+          <Scale
+            size={18}
+            className={d.abwSamplingAlert.type === "missed" ? "text-red-500 mt-0.5 shrink-0" : "text-amber-500 mt-0.5 shrink-0"}
+          />
+          <div>
+            <p
+              className={`text-[11px] font-bold ${d.abwSamplingAlert.type === "missed" ? "text-red-700" : "text-amber-700"
+                }`}
+            >
+              {d.abwSamplingAlert.type === "missed" ? "Sampling ABW Terlewat!" : "Pengingat Sampling ABW"}
+            </p>
+            <p
+              className={`mt-0.5 text-[10px] ${d.abwSamplingAlert.type === "missed" ? "text-red-600" : "text-amber-600"
+                }`}
+            >
+              {d.abwSamplingAlert.message}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ABW Chart Harian */}
+      <div className="mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="text-xs font-bold text-slate-800">Pertumbuhan ABW (gram)</h4>
+          <div className="flex items-center gap-3 text-[9px] text-slate-500">
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-0.5 w-4 bg-[#4C9AA6]" /> Aktual
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-0.5 w-4 border-t border-dashed border-[#94D1D9]" /> Target SNI
+            </span>
+          </div>
+        </div>
+
         {(() => {
-          const yMaxAbw = Math.max(50, ...d.abwChart.map((x: any) => x.act || 0), ...d.abwChart.map((x: any) => x.std));
-          const yMaxRound = Math.ceil(yMaxAbw / 10) * 10;
+          const daily: { doc: number; act: number | null; std: number }[] = d.abwDaily || [];
+          const samplingPoints: { doc: number; act: number }[] = (d.abwChart || []).filter((p: any) => p.act !== null);
+
+          if (daily.length === 0) {
+            return (
+              <div className="flex h-32 w-full items-center justify-center rounded-xl bg-slate-50 text-center text-[11px] text-slate-400">
+                Belum ada data ABW.
+                <br />
+                Sampling pertama di H-15.
+              </div>
+            );
+          }
+
+          const maxAbw = Math.max(0.1, ...daily.map((x) => x.act ?? 0), ...daily.map((x) => x.std));
+          const yMax = maxAbw * 1.2;
+          const chartTotalDays = Math.max(daily.length, 1);
+
+          // helper posisi: X dalam persentase (5% - 95%), Y (0 - 100)
+          const getX = (doc: number) => 5 + ((doc - 1) / Math.max(chartTotalDays - 1, 1)) * 90;
+          const getY = (val: number) => 100 - (val / yMax) * 100;
+
+          // Segmen garis aktual
+          const actualSegments: string[][] = [];
+          let current: string[] = [];
+          daily.forEach((p) => {
+            if (p.act !== null) {
+              current.push(`${getX(p.doc)},${getY(p.act)}`);
+            } else {
+              if (current.length > 1) actualSegments.push(current);
+              current = [];
+            }
+          });
+          if (current.length > 1) actualSegments.push(current);
+
+          const stdPoints = daily.map((p) => `${getX(p.doc)},${getY(p.std)}`).join(" ");
+
+          const yRatios = [1, 0.8, 0.6, 0.4, 0.2, 0];
+          const xLabels: number[] = [];
+          for (let d2 = 15; d2 <= chartTotalDays; d2 += 15) xLabels.push(d2);
+          if (!xLabels.includes(chartTotalDays)) xLabels.push(chartTotalDays);
+
           return (
             <div className="relative h-48 w-full">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible">
                 {/* Grid lines */}
-                {[0, 0.2, 0.4, 0.6, 0.8, 1].map((ratio, i) => (
+                {yRatios.map((ratio, i) => (
                   <line
                     key={i}
                     x1="0"
-                    y1={100 - ratio * 100}
+                    y1={getY(yMax * ratio)}
                     x2="100"
-                    y2={100 - ratio * 100}
+                    y2={getY(yMax * ratio)}
                     stroke="#E2E8F0"
                     strokeWidth="0.5"
                     vectorEffect="non-scaling-stroke"
                   />
                 ))}
 
-                {/* SNI standard (Dashed line) */}
+                {/* Garis SNI */}
                 <polyline
                   fill="none"
-                  stroke="#BEE5E8"
-                  strokeWidth="2"
+                  stroke="#94D1D9"
+                  strokeWidth="1.5"
                   strokeDasharray="4,2"
                   vectorEffect="non-scaling-stroke"
-                  points={d.abwChart
-                    .map((p: any, i: number) => `${(i / Math.max(1, d.abwChart.length - 1)) * 100},${100 - (p.std / yMaxRound) * 100}`)
-                    .join(" ")}
+                  points={stdPoints}
                 />
 
-                {/* Actual ABW (Solid line) */}
-                {d.abwChart.some((p: any) => p.act !== null) && (
+                {/* Garis Aktual */}
+                {actualSegments.map((seg, i) => (
                   <polyline
+                    key={i}
                     fill="none"
                     stroke="#4C9AA6"
-                    strokeWidth="2"
+                    strokeWidth="1.5"
                     vectorEffect="non-scaling-stroke"
-                    points={d.abwChart
-                      .map((p: any, i: number) => (p.act !== null ? `${(i / Math.max(1, d.abwChart.length - 1)) * 100},${100 - (p.act / yMaxRound) * 100}` : null))
-                      .filter(Boolean)
-                      .join(" ")}
+                    points={seg.join(" ")}
                   />
-                )}
-
-                {/* Actual Dots */}
-                {d.abwChart.map(
-                  (p: any, i: number) =>
-                    p.act !== null && (
-                      <circle
-                        key={i}
-                        cx={(i / Math.max(1, d.abwChart.length - 1)) * 100}
-                        cy={100 - (p.act / yMaxRound) * 100}
-                        r="4"
-                        fill="#4C9AA6"
-                        stroke="#fff"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    )
-                )}
+                ))}
               </svg>
 
-              {/* X Axis Labels */}
-              <div className="mt-2 flex justify-between text-[10px] text-slate-400">
-                {d.abwChart.map((p: any) => (
-                  <span key={p.label}>{p.label}</span>
+              {/* Titik Sampling (HTML Absolute supaya tidak gepeng) */}
+              {samplingPoints.map((p, i) => (
+                <div
+                  key={i}
+                  className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#4C9AA6] shadow-sm"
+                  style={{
+                    left: `${getX(p.doc)}%`,
+                    top: `${getY(p.act)}%`,
+                  }}
+                />
+              ))}
+
+              {/* X Axis Labels (HTML Absolute Position) */}
+              <div className="relative mt-3 h-4 w-full text-[9px] text-slate-400">
+                {xLabels.map((dv) => (
+                  <span
+                    key={dv}
+                    className="absolute -translate-x-1/2 whitespace-nowrap"
+                    style={{ left: `${getX(dv)}%` }}
+                  >
+                    H-{dv}
+                  </span>
                 ))}
               </div>
 
-              {/* Y Axis Labels */}
+              {/* Y Axis Labels (HTML Absolute Position) */}
               <div className="absolute -left-6 bottom-5 top-0 flex w-5 flex-col justify-between text-right text-[10px] text-slate-400">
-                <span>{yMaxRound}</span>
-                <span>{Math.round(yMaxRound * 0.8)}</span>
-                <span>{Math.round(yMaxRound * 0.6)}</span>
-                <span>{Math.round(yMaxRound * 0.4)}</span>
-                <span>{Math.round(yMaxRound * 0.2)}</span>
-                <span>0</span>
+                {yRatios.map((r, i) => (
+                  <span key={i}>{fmt1(yMax * r)}</span>
+                ))}
               </div>
             </div>
           );
         })()}
+
+        <p className="mt-5 text-[9px] text-slate-400">
+          Titik bulat = data timbang asli. Garis halus = interpolasi antar sampling.{" "}
+          {d.doc < 30 ? "Jadwal timbang tiap 15 hari." : "Jadwal timbang tiap 7 hari."}
+        </p>
       </div>
     </section>
   );

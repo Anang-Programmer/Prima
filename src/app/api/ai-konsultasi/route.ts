@@ -43,7 +43,7 @@ ATURAN:
 6. PENTING: Di baris paling akhir dari balasanmu jika SUDAH DEAL, WAJIB sertakan data kesepakatan dalam format persis seperti ini (tanpa format markdown):
 ${isProb ?
         `[DEAL_DATA: {"dosis": 600, "freq": 2, "metode": "Tebar ke air"}]` :
-        `[DEAL_DATA: {"pakan": 25.5, "freq": 3, "anco": 2.0}]`}
+        `[DEAL_DATA: {"pakan": 0.45, "freq": 4, "anco": 2.0}] (Catatan: Nilai "pakan" WAJIB dalam satuan Kilogram (kg) menggunakan titik desimal, bukan koma. Dilarang mereturn dalam satuan gram!)`}
 7. Balasan jangan terlalu panjang seperti robot, gunakan gaya bahasa chat (maksimal 3-4 kalimat).
 8. DILARANG KERAS menggunakan format Markdown seperti tanda bintang (**) untuk menebalkan teks, atau membuat list. Tulis dengan teks murni biasa seperti membalas pesan WhatsApp.`;
 

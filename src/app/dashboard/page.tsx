@@ -43,7 +43,7 @@ function fmtMs(ms: number) {
 
 function stageOf(doc: number) {
   if (doc <= 30) return { label: "Benur", cls: "bg-[#FDEBDD] text-[#F2811B]" };
-  if (doc <= 70) return { label: "Juvenil", cls: "bg-sky-100 text-sky-600" };
+  if (doc <= 70) return { label: "Remaja", cls: "bg-sky-100 text-sky-600" };
   return { label: "Pembesaran", cls: "bg-[#E3F1F2] text-[#2F6E7B]" };
 }
 

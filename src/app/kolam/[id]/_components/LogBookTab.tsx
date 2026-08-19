@@ -12,10 +12,11 @@ import {
   Layers,
   Sparkles
 } from "lucide-react";
-import { fmtFeed, fmtFeedWithHint } from "../_lib/constants";
+import { fmtFeed, fmtFeedWithHint, fmt1 } from "../_lib/constants";
 
 export default function LogBookTab({ d }: { d: any }) {
   const [filter, setFilter] = useState<"all" | "feed" | "prob">("all");
+  const [limit, setLimit] = useState(15);
 
   // Format tanggal & jam
   const formatTime = (dateStr: string) => {
@@ -112,7 +113,7 @@ export default function LogBookTab({ d }: { d: any }) {
             <Droplets size={11} className="text-[#4C9AA6]" /> Probiotik
           </p>
           <p className="mt-1 text-sm font-extrabold text-slate-800">
-            {(d.probs || []).reduce((acc: number, p: any) => acc + Number(p.amount_ml || 0), 0)} ml
+            {fmt1((d.probs || []).reduce((acc: number, p: any) => acc + Number(p.amount_ml || 0), 0))} ml
           </p>
           <p className="text-[9px] text-slate-400 mt-0.5">{d.probs?.length || 0} aplikasi</p>
         </div>
@@ -121,7 +122,7 @@ export default function LogBookTab({ d }: { d: any }) {
       {/* ============ FILTER CHIPS ============ */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button
-          onClick={() => setFilter("all")}
+          onClick={() => { setFilter("all"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "all"
               ? "bg-[#4C9AA6] text-white shadow-sm"
@@ -131,7 +132,7 @@ export default function LogBookTab({ d }: { d: any }) {
           <Layers size={12} /> Semua Log ({allLogs.length})
         </button>
         <button
-          onClick={() => setFilter("feed")}
+          onClick={() => { setFilter("feed"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "feed"
               ? "bg-[#4C9AA6] text-white shadow-sm"
@@ -141,7 +142,7 @@ export default function LogBookTab({ d }: { d: any }) {
           <Utensils size={12} /> Sesi Pakan & Anco ({d.feeds?.length || 0})
         </button>
         <button
-          onClick={() => setFilter("prob")}
+          onClick={() => { setFilter("prob"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "prob"
               ? "bg-[#4C9AA6] text-white shadow-sm"
@@ -165,7 +166,7 @@ export default function LogBookTab({ d }: { d: any }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {displayedLogs.map((log: any) => {
+          {displayedLogs.slice(0, limit).map((log: any) => {
             if (log.itemCategory === "pakan") {
               // Status Cek Anco
               const isAncoHabis = log.anco_result === "Habis";
@@ -365,6 +366,15 @@ export default function LogBookTab({ d }: { d: any }) {
               </article>
             );
           })}
+          
+          {limit < displayedLogs.length && (
+            <button
+              onClick={() => setLimit(l => l + 15)}
+              className="mt-4 w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-200"
+            >
+              Tampilkan Lebih Banyak
+            </button>
+          )}
         </div>
       )}
     </section>

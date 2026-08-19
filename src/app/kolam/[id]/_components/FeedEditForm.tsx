@@ -10,33 +10,55 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
       <h4 className="text-sm font-bold text-slate-800 mb-5">Edit Pakan</h4>
 
       {/* Stepper Total Pakan */}
-      <div className="flex items-center justify-center gap-4 mb-2">
+      <div className="flex items-center gap-2 mb-1">
         <button
-          onClick={() => setEditFeedValues({ ...editFeedValues, dailyFeedKg: Math.max(0, +(editFeedValues.dailyFeedKg - 0.5).toFixed(1)) })}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
+          onClick={() => {
+            const newVal = Math.max(0, +(editFeedValues.dailyFeedKg - 0.1).toFixed(2));
+            setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
+          }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
         >
-          <Minus size={18} />
+          <Minus size={16} />
         </button>
-        <div className="min-w-[100px] rounded-xl bg-[#EAEAEA] px-5 py-3 text-center">
-          <span className="text-xl font-extrabold text-slate-800">{fmtFeed(editFeedValues.dailyFeedKg)}</span>
-        </div>
+        <input
+          type="number"
+          min={0}
+          step={0.1}
+          className="min-w-0 flex-1 rounded-xl bg-[#EAEAEA] px-3 py-3 text-center text-xl font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#4C9AA6]/50"
+          value={editFeedValues._rawDailyFeedKg ?? editFeedValues.dailyFeedKg}
+          onChange={(e) => {
+            const val = e.target.value;
+            setEditFeedValues({ 
+              ...editFeedValues, 
+              _rawDailyFeedKg: val,
+              dailyFeedKg: val === "" ? 0 : Math.max(0, parseFloat(val) || 0) 
+            });
+          }}
+        />
         <button
-          onClick={() => setEditFeedValues({ ...editFeedValues, dailyFeedKg: +(editFeedValues.dailyFeedKg + 0.5).toFixed(1) })}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
+          onClick={() => {
+            const newVal = +(editFeedValues.dailyFeedKg + 0.1).toFixed(2);
+            setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
+          }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
         >
-          <Plus size={18} />
+          <Plus size={16} />
         </button>
       </div>
+      <p className="mb-2 text-center text-[10px] text-slate-400">kg / hari</p>
       {/* Status SNI pakan */}
-      <p className={`mb-5 text-center text-[11px] font-semibold ${
-        Math.abs(editFeedValues.dailyFeedKg - d.calc.dailyFeedKg) > 0.5
-          ? "text-orange-500"
-          : "text-[#3E97A5]"
-      }`}>
-        {Math.abs(editFeedValues.dailyFeedKg - d.calc.dailyFeedKg) > 0.5
-          ? `⚠ Berbeda dari rekomendasi PRIMA (${fmtFeed(d.calc.dailyFeedKg)})`
-          : "Pakan sudah sesuai dengan rekomendasi PRIMA"}
-      </p>
+      {(() => {
+        const ref = Math.max(d.recommendedFeedKg, 0.01);
+        const devPct = Math.abs(editFeedValues.dailyFeedKg - d.recommendedFeedKg) / ref;
+        const isOff = devPct > 0.15; // toleransi 15%
+        return (
+          <p className={`mb-5 text-center text-[11px] font-semibold ${isOff ? "text-orange-500" : "text-[#3E97A5]"}`}>
+            {isOff
+              ? `⚠ Berbeda dari rekomendasi PRIMA (${fmtFeed(d.recommendedFeedKg)})`
+              : "Pakan sudah sesuai dengan rekomendasi PRIMA"}
+          </p>
+        );
+      })()}
 
       <div className="space-y-4">
         {/* Merk Pakan (TIDAK dicek SNI) */}

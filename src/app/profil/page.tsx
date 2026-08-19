@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   BadgeCheck, BarChart3, Bell, ChevronRight, Crown, Fish, HelpCircle, History,
   Home, Info, Loader2, LogOut, MessageCircle, Plus, ShieldCheck, User, Warehouse,
+  CircleUser, FileText
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -67,9 +68,18 @@ export default function ProfilPage() {
           supabase.from("v_harvest_history").select("*").eq("user_id", user.id).order("end_date", { ascending: false }),
         ]);
         const fcrs = (harvests ?? []).map((h: any) => Number(h.harvest_fcr)).filter((n: number) => n > 0);
+        
+        // Tarik metadata registrasi (kota, provinsi) sebagai fallback lokasi
+        const meta = user.user_metadata || {};
+        const metaLocation = [meta.kota, meta.provinsi].filter(Boolean).join(", ");
+        
         setD({
-          name: prof?.full_name || "Petambak", location: prof?.location || "", premium: !!prof?.is_premium,
-          premiumExpiry: prof?.premium_expires_at, farmName: prof?.farm_name || "", phone: prof?.phone || "",
+          name: prof?.full_name || "Petambak", 
+          location: prof?.location || metaLocation || "", 
+          premium: !!prof?.is_premium,
+          premiumExpiry: prof?.premium_expires_at, 
+          farmName: prof?.farm_name || "", 
+          phone: prof?.phone || meta.phone || "",
           stats: { aktif: aktif ?? 0, selesai: selesai ?? 0, fcr: fcrs.length ? Math.min(...fcrs) : null },
           harvests: harvests ?? [],
         });
@@ -97,51 +107,72 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full pb-28 md:flex-1 md:overflow-y-auto md:pb-12">
-        {/* ============ HEADER (full width di desktop, seperti dashboard) ============ */}
-        <header className="relative overflow-hidden bg-[#4C9AA6] px-5 pb-6 pt-8 md:rounded-b-3xl md:px-10 md:pb-12 md:pt-10">
-          <div className="relative mx-auto w-full max-w-md md:max-w-5xl">
+        {/* ============ HEADER ============ */}
+        <header className="relative overflow-hidden bg-[#4C9AA6] px-5 pb-6 pt-12 md:rounded-b-3xl md:px-10 md:pb-12 md:pt-14 shadow-sm">
+          
+          <div className="relative mx-auto w-full max-w-md md:max-w-5xl z-10">
             <div className="flex items-center gap-4 md:gap-6">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#D8EEF0] text-2xl font-extrabold text-[#2F6E7B] md:h-20 md:w-20 md:text-3xl">
+              <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[#BEE5EA] text-[26px] font-medium text-[#2F6E7B] md:h-20 md:w-20 md:text-3xl shadow-sm">
                 {initial}
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-lg font-extrabold text-white md:text-2xl">{d.name}</h1>
-                <p className="truncate text-xs text-white/80 md:text-sm">{d.location || "Lokasi belum diisi"}</p>
-                <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-[#D8EEF0] px-2 py-0.5 text-[10px] font-bold text-[#2F6E7B]">
-                  <BadgeCheck size={12} /> {d.premium ? "Premium" : "Gratis"}
-                </span>
+                <h1 className="truncate text-[22px] font-semibold text-white tracking-wide md:text-2xl">{d.name}</h1>
+                <p className="truncate text-xs text-white/90 font-light mt-0.5 md:text-sm">{d.location || "Lokasi belum diisi"}</p>
+                <div className="mt-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#003746] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                    Prime <BadgeCheck size={12} className="text-white fill-white stroke-[#003746]" />
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="mt-6 grid grid-cols-3 divide-x divide-white/15 md:mt-8">
+            
+            <div className="mt-8 grid grid-cols-3 divide-x divide-white/20 md:mt-10">
               {[
                 [String(d.stats.aktif), "Kolam Aktif"],
                 [String(d.stats.selesai), "Siklus Selesai"],
                 [d.stats.fcr != null ? Number(d.stats.fcr).toFixed(2) : "–", "FCR Terbaik"],
               ].map(([v, l]) => (
-                <div key={l} className="text-center">
-                  <p className="text-xl font-extrabold text-white md:text-3xl">{v}</p>
-                  <p className="text-[11px] text-white/80 md:text-sm">{l}</p>
+                <div key={l} className="text-center px-1">
+                  <p className="text-[22px] font-semibold text-white md:text-3xl">{v}</p>
+                  <p className="text-[11px] text-white/80 font-light mt-0.5 md:text-sm">{l}</p>
                 </div>
               ))}
             </div>
           </div>
         </header>
 
-        {/* ============ MENU ============ */}
-        <main className="mx-auto mt-2 w-full max-w-md space-y-2.5 md:mt-6 md:grid md:max-w-5xl md:grid-cols-2 md:items-start md:gap-5 md:space-y-0 md:px-10">
-          <section className="overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl">
-            <MenuRow icon={User} label="Akun & Data Pribadi" onClick={() => setSheet("Akun & Data Pribadi")} />
-            <MenuRow icon={Warehouse} label="Data Tambak" onClick={() => { setFarm({ farmName: d.farmName, location: d.location, phone: d.phone }); setSheet("farm"); }} />
+        <main className="mx-auto w-full max-w-md md:max-w-5xl md:px-10">
+          
+          {/* ============ UPGRADE CARD ============ */}
+          <section className="px-5 mt-4 md:px-0">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 shadow-md">
+              <div className="relative z-10">
+                <h3 className="text-[17px] font-medium text-white mb-8 tracking-wide">Upgrade Akun ke Prime</h3>
+                <button className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
+                  Upgrade <ChevronRight size={14} className="stroke-[2.5]" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* ============ MENU ============ */}
+          <section className="mt-4 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl md:mt-6 border-y border-slate-100 md:border-0">
+            <MenuRow icon={CircleUser} label="Akun & Data Pribadi" onClick={() => setSheet("Akun & Data Pribadi")} />
+            <MenuRow icon={FileText} label="Data Tambak" onClick={() => { setFarm({ farmName: d.farmName, location: d.location, phone: d.phone }); setSheet("farm"); }} />
             <MenuRow icon={History} label="Riwayat Panen" onClick={() => setSheet("harvest")} />
-            <MenuRow icon={Crown} label="Langganan Premium" onClick={() => setSheet("premium")} />
-            <MenuRow icon={Bell} label="Notifikasi" onClick={() => setSheet("notif")} />
             <MenuRow icon={ShieldCheck} label="Privasi & Keamanan" onClick={() => setSheet("privacy")} />
           </section>
-          <section className="overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl">
+          
+          <section className="mt-3 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl border-y border-slate-100 md:border-0">
             <MenuRow icon={HelpCircle} label="Pusat Bantuan" onClick={() => setSheet("help")} />
             <MenuRow icon={Info} label="Tentang Aplikasi" onClick={() => setSheet("about")} />
-            <MenuRow icon={LogOut} label="Keluar" danger onClick={logout} />
           </section>
+
+          <div className="px-5 py-6">
+            <button onClick={logout} className="w-full rounded-xl bg-white border-[1.5px] border-[#F26B4E] py-3 text-sm font-bold text-[#F26B4E] transition active:bg-orange-50">
+              Keluar
+            </button>
+          </div>
         </main>
       </div>
 

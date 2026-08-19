@@ -23,6 +23,8 @@ import EditPondSheet from "./_components/EditPondSheet";
 import AddFeedSheet from "./_components/AddFeedSheet";
 import EndCycleSheet from "./_components/EndCycleSheet";
 import ConsultAISheet from "./_components/ConsultAISheet";
+import EditAbwSheet from "./_components/EditAbwSheet";
+import { toast } from "sonner";
 
 export default function DetailKolamPage() {
   const { id } = useParams() as { id: string };
@@ -43,7 +45,7 @@ export default function DetailKolamPage() {
   // ======== LOGIKA EDIT PAKAN/PROBIOTIK (dari KolamDetailClient.tsx) ========
   const [editMode, setEditMode] = useState<"pakan" | "prob" | null>(null);
   // Edit values pakan
-  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
+  const [editFeedValues, setEditFeedValues] = useState({ dailyFeedKg: 0, _rawDailyFeedKg: "", mealsPerDay: 0, ancoHours: 2.25, feedBrand: "" });
   // Edit values probiotik
   const [editProbValues, setEditProbValues] = useState({ doseMl: 0, frequencyPerWeek: 2, method: "Ke Air" });
   // Alert SNI
@@ -65,6 +67,7 @@ export default function DetailKolamPage() {
   // Modal Cek Anco
   const [ancoModal, setAncoModal] = useState<null | { timerId: string }>(null);
   const [ancoResult, setAncoResult] = useState("Habis");
+  const [abwInput, setAbwInput] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -127,8 +130,16 @@ export default function DetailKolamPage() {
   // fallback ke rekomendasi SNI). Perbandingan SNI tetap pakai d.calc.
   function startEditPakan() {
     if (!d) return;
+    // Kalau ada riwayat anco, pakai pakan yang sudah dikalibrasi anco terakhir.
+    // Kalau belum pernah ada anco sama sekali, fallback ke nilai plan/SNI biasa.
+    const hasAncoHistory = d.anco?.consecutiveHabis > 0 || d.anco?.latestResult !== null;
+    const ancoCalibratedKg = hasAncoHistory
+      ? +(d.anco.adjustedPerMealKg * d.feed.mealsPerDay).toFixed(2)
+      : d.feed.dailyFeedKg;
+
     setEditFeedValues({
-      dailyFeedKg: d.feed.dailyFeedKg,
+      dailyFeedKg: ancoCalibratedKg,
+      _rawDailyFeedKg: ancoCalibratedKg.toString(),
       mealsPerDay: d.feed.mealsPerDay,
       ancoHours: d.feed.ancoIntervalHours,
       feedBrand: d.feed.brand === "Pelet" ? "" : d.feed.brand,
@@ -157,7 +168,8 @@ export default function DetailKolamPage() {
   function handleConfirmEdit() {
     if (!d) return;
     if (editMode === "pakan") {
-      const pakanDev = Math.abs(editFeedValues.dailyFeedKg - d.calc.dailyFeedKg) > 0.5;
+      const refKg = Math.max(d.recommendedFeedKg, 0.01);
+      const pakanDev = Math.abs(editFeedValues.dailyFeedKg - d.recommendedFeedKg) / refKg > 0.15;
       const freqDev = editFeedValues.mealsPerDay !== d.calc.mealsPerDay;
       const ancoDev = Math.abs(editFeedValues.ancoHours - d.calc.ancoIntervalHours) > 0.3;
 
@@ -215,8 +227,13 @@ export default function DetailKolamPage() {
 
     let update: Record<string, any>;
     if (editMode === "pakan") {
+      const rawPakan = deal?.pakan ?? editFeedValues.dailyFeedKg;
+      const pakanStr = typeof rawPakan === 'string' ? rawPakan.replace(',', '.') : rawPakan;
+      const finalKg = Number(pakanStr);
+      const baseKgToSave = +(finalKg / (d.anco?.multiplier || 1)).toFixed(2);
+
       const feed = {
-        dailyFeedKg: Number(deal?.pakan ?? editFeedValues.dailyFeedKg),
+        dailyFeedKg: baseKgToSave,
         mealsPerDay: Number(deal?.freq ?? editFeedValues.mealsPerDay),
         ancoIntervalHours: Number(deal?.anco ?? editFeedValues.ancoHours),
         brand: editFeedValues.feedBrand || d.feed.brand || "Pelet",
@@ -270,10 +287,10 @@ export default function DetailKolamPage() {
     let openingMsg = "";
     if (editMode === "pakan") {
       const devText: string[] = [];
-      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (standar SNI: ${fmt1(d.calc.dailyFeedKg)}kg)`);
+      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (rekomendasi saat ini: ${fmt1(d.recommendedFeedKg)}kg)`);
       if (deviations.freq) devText.push(`frekuensi menjadi ${editFeedValues.mealsPerDay}x/hari (standar SNI: ${d.calc.mealsPerDay}x)`);
       if (deviations.anco) devText.push(`cek anco menjadi ${editFeedValues.ancoHours} jam (standar SNI: ${d.calc.ancoIntervalHours} jam)`);
-      openingMsg = `Halo Pak. Saya perhatikan Bapak ingin mengubah ${devText.join(", ")}. Hal ini berbeda dari standar SNI 8008:2014. Ada keluhan khusus di kolam, Pak?`;
+      openingMsg = `Halo Pak. Saya perhatikan Bapak ingin mengubah ${devText.join(", ")}. Ada pertimbangan atau keluhan khusus di kolam yang mendasari keputusan ini?`;
     } else {
       const devText: string[] = [];
       if (deviations.dosis) devText.push(`dosis menjadi ${editProbValues.doseMl}ml (standar: ${d.sched.doseMl}ml)`);
@@ -417,6 +434,38 @@ export default function DetailKolamPage() {
         due_time: new Date(baseTime + probIntervalMs()).toISOString(),
       });
       if (t1.error) throw new Error("Timer Probiotik: " + t1.error.message);
+    }
+  }
+
+  async function handleEditAbw(e: React.FormEvent) {
+    e.preventDefault();
+    if (!d?.cycle?.id) return;
+    setBusy(true);
+    const val = parseFloat(abwInput);
+    if (isNaN(val) || val <= 0) {
+      toast.error("ABW tidak valid");
+      setBusy(false);
+      return;
+    }
+    const { error } = await supabase.from('cycles').update({ current_abw_gram: val }).eq('id', d.cycle.id);
+    
+    if (!error) {
+      await supabase.from('sampling_logs').insert({
+        cycle_id: d.cycle.id,
+        doc: d.doc,
+        sample_count: 10,
+        total_weight_gram: val * 10,
+        notes: "Update Manual via Modal Edit ABW"
+      });
+    }
+
+    setBusy(false);
+    if (error) {
+      toast.error("Gagal menyimpan ABW: " + error.message);
+    } else {
+      toast.success("ABW berhasil diperbarui");
+      setSheet(null);
+      refresh();
     }
   }
 
@@ -756,7 +805,7 @@ export default function DetailKolamPage() {
       </div>
     );
 
-  const stage = d.doc <= 30 ? "Benur" : d.doc <= 70 ? "Juvenil" : "Pembesaran";
+  const stage = d.doc <= 30 ? "Benur" : d.doc <= 70 ? "Remaja" : "Pembesaran";
   const popLabel = d.cycle?.initial_shrimp_count >= 1000 ? `${Math.round(d.cycle.initial_shrimp_count / 1000)} rb` : `${d.cycle?.initial_shrimp_count ?? 0}`;
 
   return (
@@ -771,7 +820,17 @@ export default function DetailKolamPage() {
           {/* ============ KARTU DOC ============ */}
           {d.cycle ? (
             <>
-              <DocCard d={d} stage={stage} popLabel={popLabel} tab={tab} setTab={setTab} />
+              <DocCard 
+                d={d} 
+                stage={stage} 
+                popLabel={popLabel} 
+                tab={tab} 
+                setTab={setTab} 
+                onEditAbw={() => {
+                  setAbwInput(String(d.abw));
+                  setSheet("edit-abw");
+                }}
+              />
 
               {/* ============ TAB: PAKAN ============ */}
               {tab === "Pakan" && (
@@ -845,6 +904,9 @@ export default function DetailKolamPage() {
 
       {/* ============ SHEET: AKHIRI SIKLUS ============ */}
       <EndCycleSheet sheet={sheet} setSheet={setSheet} d={d} endForm={endForm} setEndForm={setEndForm} endCycle={endCycle} busy={busy} />
+
+      {/* ============ SHEET: EDIT ABW ============ */}
+      <EditAbwSheet sheet={sheet} setSheet={setSheet} abwInput={abwInput} setAbwInput={setAbwInput} handleEditAbw={handleEditAbw} busy={busy} />
 
       {/* ============ MODAL: CEK ANCO ============ */}
       <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} />
