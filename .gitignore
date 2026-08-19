@@ -45,3 +45,6 @@ next-env.d.ts
 /dump/
 test-ai.js
 chat.txt
+# Firebase keys
+google-services.json
+prima_apps/android/app/google-services.json
