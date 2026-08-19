@@ -142,7 +142,7 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
         <span>Hari ke-{pond.doc}</span>
         <span>Target {TARGET_HARI} hari</span>
       </div>
-      
+
       {/* Informasi Ekstra (Khusus Desktop) */}
       <div className="mt-4 hidden md:flex flex-col gap-2.5 border-t border-slate-100 pt-4">
         <div className="flex items-center justify-between">
@@ -191,6 +191,10 @@ function BottomNav({ onAdd }: { onAdd?: () => void }) {
   );
 }
 
+import { QuickActionModal, QuickActionType } from "./_components/QuickActionModal";
+import { SelectPondModal } from "./_components/SelectPondModal";
+import { buildDetail } from "@/app/kolam/[id]/_lib/derive";
+
 /* ============================================================
    HALAMAN DASHBOARD
 ============================================================ */
@@ -203,11 +207,138 @@ export default function DashboardPage() {
   const [now, setNow] = useState(() => Date.now());
   const [showTambah, setShowTambah] = useState(false);
 
+  // Quick Actions States
+  const [activeModal, setActiveModal] = useState<"quick_action" | "select_pond" | "anco_popup" | null>(null);
+  const [selectedAction, setSelectedAction] = useState<QuickActionType | null>(null);
+  const [selectedCycles, setSelectedCycles] = useState<string[]>([]);
+  const [isExecutingAction, setIsExecutingAction] = useState(false);
+
   /* tick countdown tiap 1 detik */
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  const handleExecuteQuickAction = async (cycleIds: string[], ancoResultOverride?: string) => {
+    if (!selectedAction || cycleIds.length === 0) return;
+    
+    // Khusus Cek Anco, minta result dulu jika belum ada
+    if (selectedAction === "Cek Anco" && !ancoResultOverride) {
+      setSelectedCycles(cycleIds);
+      setActiveModal("anco_popup");
+      return;
+    }
+
+    setIsExecutingAction(true);
+
+    try {
+      const actionTime = Date.now();
+
+      for (const cycleId of cycleIds) {
+        const pondOpt = data?.ponds.find(p => p.cycle_id === cycleId);
+        if (!pondOpt) continue;
+
+        // Tutup timer lama
+        await supabase
+          .from("active_timers")
+          .update({ is_completed: true })
+          .eq("pond_id", pondOpt.pond_id)
+          .eq("type", selectedAction)
+          .eq("is_completed", false);
+
+        if (selectedAction === "Pakan") {
+          // Tutup juga timer anco yang lama jika ada
+          await supabase
+            .from("active_timers")
+            .update({ is_completed: true })
+            .eq("pond_id", pondOpt.pond_id)
+            .eq("type", "Cek Anco")
+            .eq("is_completed", false);
+
+          // Fetch full data needed to calculate exact feed
+          const [f, s, p, c] = await Promise.all([
+            supabase.from("feed_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: false }),
+            supabase.from("sampling_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: true }),
+            supabase.from("ponds").select("*").eq("id", pondOpt.pond_id).single(),
+            supabase.from("cycles").select("*").eq("id", cycleId).single()
+          ]);
+
+          if (c.data && p.data) {
+            const d = buildDetail({
+              pond: p.data,
+              cycle: c.data,
+              feeds: f.data || [],
+              samps: s.data || [],
+              probs: [],
+              timers: [],
+              logbook: []
+            });
+            const meals = Math.max(d.feed.mealsPerDay || 1, 1);
+            const amount = +(d.feed.dailyFeedKg / meals).toFixed(2);
+            const brand = d.feed.brand || "Pelet";
+
+            const feedIntervalMs = (24 / meals) * 60 * 60 * 1000;
+            const ancoIntervalMs = (d.feed.ancoIntervalHours || 2.25) * 60 * 60 * 1000;
+
+            await supabase.from("feed_logs").insert({
+              cycle_id: cycleId,
+              date: new Date(actionTime).toISOString(),
+              feed_amount_kg: amount,
+              feed_type: brand,
+              anco_result: "Belum Dicek",
+              notes: "Aksi Cepat Pakan (Dashboard)"
+            });
+
+            await supabase.from("active_timers").insert({
+              pond_id: pondOpt.pond_id, type: "Pakan",
+              due_time: new Date(actionTime + feedIntervalMs).toISOString(),
+            });
+            await supabase.from("active_timers").insert({
+              pond_id: pondOpt.pond_id, type: "Cek Anco",
+              due_time: new Date(actionTime + ancoIntervalMs).toISOString(),
+            });
+          }
+        } else if (selectedAction === "Probiotik") {
+          // Interval probiotik default misal 2 kali seminggu -> ~3.5 hari
+          const probIntervalMs = (7 / 2) * 24 * 60 * 60 * 1000;
+          await supabase.from("probiotic_logs").insert({
+            cycle_id: cycleId,
+            date: new Date(actionTime).toISOString(),
+            dose_ml: 0, // Fallback
+            method: "Ke Air",
+            notes: "Aksi Cepat Probiotik (Dashboard)"
+          });
+          await supabase.from("active_timers").insert({
+            pond_id: pondOpt.pond_id, type: "Probiotik",
+            due_time: new Date(actionTime + probIntervalMs).toISOString(),
+          });
+        } else if (selectedAction === "Cek Anco") {
+          // Update last feed log with anco result
+          const { data: lastFeed } = await supabase
+            .from("feed_logs").select("id, notes").eq("cycle_id", cycleId)
+            .order("date", { ascending: false }).limit(1).maybeSingle();
+
+          if (lastFeed) {
+            const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+            const checkEntry = `[ANCO:${timeStr}:${ancoResultOverride}]`;
+            const currentNotes = lastFeed.notes || "";
+            const updatedNotes = currentNotes ? currentNotes + " " + checkEntry : checkEntry;
+
+            await supabase.from("feed_logs").update({ anco_result: ancoResultOverride, notes: updatedNotes }).eq("id", lastFeed.id);
+          }
+        }
+      }
+
+      setActiveModal(null);
+      setSelectedAction(null);
+      setReload(r => r + 1); // Refresh dashboard data
+    } catch (e: any) {
+      console.error("Gagal mengeksekusi quick action:", e);
+      alert("Terjadi kesalahan: " + e.message);
+    } finally {
+      setIsExecutingAction(false);
+    }
+  };
 
   /* ambil data dari Supabase */
   useEffect(() => {
@@ -316,23 +447,23 @@ export default function DashboardPage() {
     if (!data) return [];
     const byPond = new Map<string, Timer[]>();
     data.timers.forEach((t) => byPond.set(t.pond_id, [...(byPond.get(t.pond_id) ?? []), t]));
-    
+
     const pondsWithAlarms = data.ponds.filter((p) => byPond.has(p.pond_id));
-    
+
     const mapped = pondsWithAlarms.map((pond) => {
       const ts = byPond.get(pond.pond_id)!;
       const earliest = Math.min(...ts.map(t => new Date(t.due_time).getTime()));
-      return { 
-        pond, 
-        anco: ts.find((t) => t.type === "Cek Anco"), 
+      return {
+        pond,
+        anco: ts.find((t) => t.type === "Cek Anco"),
         pakan: ts.find((t) => t.type === "Pakan"),
-        earliest 
+        earliest
       };
     });
 
     // Urutkan dari yang paling mendesak (waktu paling kecil / sudah lewat)
     mapped.sort((a, b) => a.earliest - b.earliest);
-    
+
     // Hanya ambil 5 kolam teratas agar carousel tidak terlalu panjang
     return mapped.slice(0, 5);
   }, [data]);
@@ -502,7 +633,54 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <BottomNav onAdd={() => setShowTambah(true)} />
+      <BottomNav onAdd={() => setActiveModal("quick_action")} />
+
+      <QuickActionModal
+        open={activeModal === "quick_action"}
+        onClose={() => setActiveModal(null)}
+        onSelectAction={(action) => {
+          setSelectedAction(action);
+          setActiveModal("select_pond");
+        }}
+      />
+
+      <SelectPondModal
+        open={activeModal === "select_pond"}
+        action={selectedAction}
+        ponds={data?.ponds || []}
+        timers={data?.timers || []}
+        now={now}
+        onClose={() => setActiveModal(null)}
+        onExecute={handleExecuteQuickAction}
+        isExecuting={isExecutingAction}
+      />
+
+      {/* Pop-up Anco khusus Quick Action */}
+      {activeModal === "anco_popup" && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
+          <div className="relative w-full max-w-xs bg-white rounded-2xl shadow-xl p-5 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-slate-800 text-center mb-4">Kondisi Anco</h3>
+            <div className="space-y-2">
+              {[
+                { label: "Habis Bersih", value: "Habis", color: "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100" },
+                { label: "Sisa Sedikit", value: "Sisa Sedikit", color: "text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100" },
+                { label: "Sisa Banyak", value: "Sisa Banyak", color: "text-red-700 bg-red-50 border-red-200 hover:bg-red-100" }
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleExecuteQuickAction(selectedCycles, opt.value)}
+                  disabled={isExecutingAction}
+                  className={`w-full py-3 px-4 rounded-xl border text-sm font-bold transition-colors ${opt.color} disabled:opacity-50 flex items-center justify-center gap-2`}
+                >
+                  {isExecutingAction ? "Memproses..." : opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <TambahKolamSheet
         open={showTambah}
         onClose={() => setShowTambah(false)}
