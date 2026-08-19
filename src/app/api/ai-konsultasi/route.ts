@@ -11,9 +11,9 @@ export async function POST(req: Request) {
     if (!isProb) {
       const baselineKg = ancoContext?.adjustedDailyFeedKg ?? sniValues.dailyFeedKg;
       const sniKg = sniValues.dailyFeedKg;
-      const absoluteFloor = +(sniKg * 0.50).toFixed(2); // Lantai absolut: 50% SNI
+      const absoluteFloor = +(sniKg * 0.50).toFixed(2);
       const rawLower = +(baselineKg * 0.80).toFixed(2);
-      const lower = Math.max(rawLower, absoluteFloor); // Tidak boleh di bawah lantai
+      const lower = Math.max(rawLower, absoluteFloor);
       const upper = +(baselineKg * 1.20).toFixed(2);
       const isCritical = baselineKg < absoluteFloor;
       toleranceBlock = `

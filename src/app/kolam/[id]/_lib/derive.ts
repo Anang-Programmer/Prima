@@ -195,42 +195,45 @@ export function buildDetail(data: any) {
   }
 
   // ─── Alert Sampling ABW ────────────────────────────────────────────────────
-  // Cek apakah jadwal sampling hari ini sudah terlewat tanpa input
-  const nextSamplingDue = getNextSamplingDoc(doc);
-  const lastSamplingDoc = anchors.length > 1 ? anchors[anchors.length - 1].doc : 0;
+  // Jadwal sampling: H-15, H-30, lalu setiap 7 hari (H-37, H-44, H-51, ...)
+  // Alert hanya muncul untuk jadwal TERDEKAT yang belum dilakukan.
   const abwSamplingAlert = (() => {
     if (doc < 15) return null; // Belum saatnya sampling
 
-    // Jadwal yang harusnya sudah dilakukan berdasarkan DOC saat ini
+    // Bangun daftar semua jadwal sampling sampai DOC sekarang
     const scheduledDocs: number[] = [15, 30];
     if (doc > 30) {
       let s = 37;
-      while (s <= doc) { scheduledDocs.push(s); s += 7; }
+      while (s <= doc + 1) { scheduledDocs.push(s); s += 7; }
     }
 
-    // Cari jadwal yang terlewat (belum ada datanya ±2 hari toleransi)
-    const missedDocs = scheduledDocs.filter(sd =>
-      !Array.from(samplingMap.keys()).some(k => Math.abs(k - sd) <= 2)
-    );
+    // Cari jadwal terakhir yang seharusnya sudah dijalankan (≤ DOC sekarang)
+    const dueDocs = scheduledDocs.filter(sd => sd <= doc);
+    // Jadwal berikutnya (untuk reminder)
+    const upcomingDoc = scheduledDocs.find(sd => sd > doc) ?? null;
 
-    if (missedDocs.length > 0) {
-      const lastMissed = missedDocs[missedDocs.length - 1];
-      const isPhaseEarly = lastMissed <= 30;
-      return {
-        type: "missed" as const,
-        doc: lastMissed,
-        message: isPhaseEarly
-          ? `Belum ada data timbang udang di H-${lastMissed}. Segera lakukan pengecekan ABW!`
-          : `Sudah H-${doc}, belum ada sampling sejak H-${lastSamplingDoc}. Jadwal sampling terlewat!`,
-      };
+    // Cek jadwal terakhir yang sudah due — apakah sudah ada datanya?
+    if (dueDocs.length > 0) {
+      const latestDue = dueDocs[dueDocs.length - 1];
+      const hasSamplingNearby = Array.from(samplingMap.keys()).some(k => Math.abs(k - latestDue) <= 3);
+
+      if (!hasSamplingNearby) {
+        return {
+          type: "missed" as const,
+          doc: latestDue,
+          nextDoc: upcomingDoc,
+          message: `Jadwal sampling ABW di H-${latestDue} belum dilakukan. Segera lakukan penimbangan udang!`,
+        };
+      }
     }
 
-    // Cek apakah besok/hari ini jadwal sampling
-    if (nextSamplingDue === doc || nextSamplingDue === doc + 1) {
+    // Cek apakah besok/hari ini jadwal sampling (reminder)
+    if (upcomingDoc !== null && (upcomingDoc === doc || upcomingDoc === doc + 1)) {
       return {
         type: "reminder" as const,
-        doc: nextSamplingDue,
-        message: `Jadwal timbang udang (sampling ABW) di H-${nextSamplingDue}. Siapkan jala!`,
+        doc: upcomingDoc,
+        nextDoc: upcomingDoc,
+        message: `Jadwal timbang udang (sampling ABW) di H-${upcomingDoc}. Siapkan jala!`,
       };
     }
 

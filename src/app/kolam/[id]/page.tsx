@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { getProbioticSchedule, nextFeedTime } from "@/lib/feed-calculator";
+import { getProbioticSchedule, nextFeedTime, calculateDailyFeed, estimateAbw } from "@/lib/feed-calculator";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 import { fmt1 } from "./_lib/constants";
 import { buildDetail } from "./_lib/derive";
@@ -556,6 +556,120 @@ export default function DetailKolamPage() {
     }
   }
 
+  async function debugJumpDoc(targetDoc: number) {
+    if (!d?.cycle) return;
+    setBusy(true);
+    setInsertError(null);
+    setDebugMsg(null);
+    try {
+      const currentDoc = d.doc || 0;
+      if (targetDoc === currentDoc) {
+        setBusy(false);
+        return;
+      }
+
+      const isBackward = targetDoc < currentDoc;
+      let deletedFeeds = 0;
+      let deletedSamples = 0;
+
+      // Jika mundur, hapus log yang DOC-nya > targetDoc
+      // Tanggal cutoff = old_start_date + targetDoc hari
+      if (isBackward) {
+        const oldStartDate = new Date(d.cycle.start_date).getTime();
+        const cutoffTime = new Date(oldStartDate + targetDoc * 86400000).toISOString();
+        
+        const resFeed = await supabase.from("feed_logs").delete().eq("cycle_id", d.cycle.id).gt("date", cutoffTime);
+        if (resFeed.error) throw new Error("Gagal hapus pakan masa depan: " + resFeed.error.message);
+        
+        const resSamp = await supabase.from("sampling_logs").delete().eq("cycle_id", d.cycle.id).gt("date", cutoffTime);
+        if (resSamp.error) throw new Error("Gagal hapus sampling masa depan: " + resSamp.error.message);
+        
+        // Supabase tidak me-return count jika tidak dispesifikkan, tapi tidak apa-apa
+        deletedFeeds = 1; 
+      }
+
+      const mockFeeds = [];
+      const mockSamples = [];
+      
+      // Jika maju, generate logs untuk tiap hari yang dilompati
+      if (!isBackward) {
+        const area = Number(d.pond.area_m2);
+        const pop = Number(d.cycle.initial_shrimp_count);
+        let lastAbw = d.abw || estimateAbw(currentDoc);
+
+        for (let day = currentDoc + 1; day <= targetDoc; day++) {
+          const timeOfDay = Date.now() - ((targetDoc - day) * 86400000); 
+
+          let isSamplingDay = false;
+          if (day === 15 || day === 30 || (day > 30 && (day - 37) % 7 === 0)) {
+            isSamplingDay = true;
+          }
+
+          if (isSamplingDay) {
+            lastAbw = estimateAbw(day);
+            mockSamples.push({
+              cycle_id: d.cycle.id,
+              doc: day,
+              sample_count: 10,
+              total_weight_gram: lastAbw * 10,
+              notes: "Simulasi Sampling (Lompat Waktu)",
+              date: new Date(timeOfDay).toISOString()
+            });
+          }
+
+          const calc = calculateDailyFeed(day, pop, area, lastAbw);
+          const meals = Math.max(1, calc.mealsPerDay);
+          const perMeal = +(calc.dailyFeedKg / meals).toFixed(2);
+
+          for (let i = 0; i < meals; i++) {
+            const mealTime = timeOfDay + (i * 3600000 * (24 / meals)); 
+            const checkTime = new Date(mealTime + (2 * 3600000)); // Anggap cek anco 2 jam setelah pakan
+            const hours = checkTime.getHours().toString().padStart(2, '0');
+            const minutes = checkTime.getMinutes().toString().padStart(2, '0');
+            const ancoNoteStr = ` [ANCO:${hours}:${minutes}:Habis]`;
+
+            mockFeeds.push({
+              cycle_id: d.cycle.id,
+              feed_amount_kg: perMeal,
+              feed_type: d.feed?.brand || "Pelet",
+              anco_result: "Habis", 
+              notes: "Simulasi Pakan (Lompat Waktu)" + ancoNoteStr,
+              date: new Date(mealTime).toISOString()
+            });
+          }
+        }
+
+        if (mockFeeds.length > 0) {
+          const { error: err1 } = await supabase.from("feed_logs").insert(mockFeeds);
+          if (err1) throw new Error("Gagal insert feed_logs: " + err1.message);
+        }
+        
+        if (mockSamples.length > 0) {
+          const { error: err2 } = await supabase.from("sampling_logs").insert(mockSamples);
+          if (err2) throw new Error("Gagal insert sampling_logs: " + err2.message);
+        }
+      }
+
+      // Update start_date agar DOC berubah
+      const newStartDate = new Date(Date.now() - (targetDoc * 86400000)).toISOString();
+      const { error } = await supabase.from("cycles").update({ start_date: newStartDate }).eq("id", d.cycle.id);
+      
+      if (error) throw new Error("Gagal update waktu utama: " + error.message);
+      
+      if (isBackward) {
+        setDebugMsg(`Waktu berhasil DIBALIKKAN ke H-${targetDoc}! Data "masa depan" telah dihapus dari log.`);
+      } else {
+        setDebugMsg(`Waktu berhasil dimajukan drastis ke H-${targetDoc}! Otomatis mencatat ${mockFeeds.length} pakan & ${mockSamples.length} sampling.`);
+      }
+    } catch (e: any) {
+      console.error(e);
+      setInsertError(e.message);
+    } finally {
+      refresh();
+      setBusy(false);
+    }
+  }
+
   // Selesaikan (tandai is_completed) sebuah timer Pakan/Probiotik yang sudah due.
   async function completeTimer(timerId: string) {
     setBusy(true);
@@ -876,7 +990,7 @@ export default function DetailKolamPage() {
 
                     {/* ======== PANEL DEBUG: SIMULASI WAKTU ======== */}
                     {!showAIChat && !editMode && (
-                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} />
+                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} />
                     )}
 
                     <button

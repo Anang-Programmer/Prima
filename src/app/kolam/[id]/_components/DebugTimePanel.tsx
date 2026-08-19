@@ -1,9 +1,12 @@
 "use client";
 
 import { AlarmClock, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function DebugTimePanel(props: any) {
-  const { busy, insertError, debugMsg, debugAdvance } = props;
+  const { busy, insertError, debugMsg, debugAdvance, debugJumpDoc, currentDoc } = props;
+  const [targetDoc, setTargetDoc] = useState<number | "">(120);
+
   return (
     <section className="rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-4">
       <div className="mb-2 flex items-center gap-2 text-[11px] font-bold text-amber-700">
@@ -12,6 +15,8 @@ export function DebugTimePanel(props: any) {
       <p className="mb-3 text-[10px] leading-relaxed text-amber-700/80">
         Majukan waktu virtual. Timer pakan/probiotik yang jatuh tempo otomatis dicatat ke Log Book. Aktifkan Countdown dulu agar ada timer berjalan.
       </p>
+      
+      {/* Tombol Timer Biasa */}
       <div className="grid grid-cols-3 gap-2">
         {[
           { label: "+2 Jam", hours: 2 },
@@ -28,6 +33,26 @@ export function DebugTimePanel(props: any) {
           </button>
         ))}
       </div>
+
+      {/* Lompat DOC Ekstrim */}
+      <div className="mt-3 flex items-center gap-2 border-t border-amber-200/50 pt-3">
+        <span className="text-[10px] font-semibold text-amber-700">Menuju hari ke:</span>
+        <input 
+          type="number" 
+          className="w-16 rounded-lg bg-white px-2 py-1.5 text-xs text-center font-bold text-slate-700 outline-none focus:ring-1 focus:ring-amber-400" 
+          value={targetDoc}
+          onChange={(e) => setTargetDoc(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
+          max={120}
+        />
+        <button
+          onClick={() => debugJumpDoc(Number(targetDoc))}
+          disabled={busy || targetDoc === "" || Number(targetDoc) === currentDoc || Number(targetDoc) < 0}
+          className="flex-1 rounded-lg bg-amber-600 py-1.5 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+        >
+          {busy ? <Loader2 className="mx-auto animate-spin" size={12} /> : "Lompat Waktu"}
+        </button>
+      </div>
+
       {debugMsg && (
         <div className="mt-2 rounded-lg border border-[#4C9AA6]/30 bg-[#E3F1F2] p-2.5 text-[10px] leading-relaxed text-[#2F6E7B]">
           {debugMsg}

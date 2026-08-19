@@ -249,43 +249,6 @@ export default function LogBookTab({ d }: { d: any }) {
                       </div>
                     </div>
 
-                    {/* Kotak Feedback Evaluasi Anco Terpadu */}
-                    <div className="rounded-xl border border-slate-100 bg-white p-2.5">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                          <Clock size={12} className="text-slate-400" /> Kontrol Anco Rutin
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          Interval {d.feed?.ancoIntervalHours || 2} jam
-                        </span>
-                      </div>
-
-                      <div className="mt-1.5 text-[11px] leading-relaxed text-slate-600">
-                        {isAncoHabis && (
-                          <p className="text-emerald-700 bg-emerald-50/60 p-2 rounded-lg border border-emerald-100 flex items-start gap-1.5">
-                            <Sparkles size={13} className="shrink-0 mt-0.5 text-emerald-600" />
-                            <span><strong>Nafsu makan optimal:</strong> Pakan di jaring anco habis bersih. Rekomendasi pakan sesi berikutnya aman dilanjutkan 100%.</span>
-                          </p>
-                        )}
-                        {isAncoSedikit && (
-                          <p className="text-amber-800 bg-amber-50/60 p-2 rounded-lg border border-amber-100 flex items-start gap-1.5">
-                            <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-600" />
-                            <span><strong>Nafsu makan agak turun:</strong> Ada sedikit sisa pakan di anco. AI otomatis menyarankan penyesuaian porsi -10% di sesi berikutnya.</span>
-                          </p>
-                        )}
-                        {isAncoBanyak && (
-                          <p className="text-red-800 bg-red-50/60 p-2 rounded-lg border border-red-100 flex items-start gap-1.5">
-                            <AlertTriangle size={13} className="shrink-0 mt-0.5 text-red-600" />
-                            <span><strong>Indikasi kenyang / overfeeding:</strong> Pakan masih tersisa banyak di anco. AI memotong porsi sesi berikutnya -25% untuk menjaga stabilitas air.</span>
-                          </p>
-                        )}
-                        {isAncoPending && (
-                          <p className="text-slate-500 italic p-1.5 text-[10px]">
-                            Timer anco sedang memantau nafsu makan udang untuk sesi ini.
-                          </p>
-                        )}
-                      </div>
-                      
                       {/* Riwayat Cek Anco Tiap Jam */}
                       {ancoChecks.length > 0 && (
                         <div className="mt-2.5 pt-2.5 border-t border-slate-100/80">
@@ -306,7 +269,6 @@ export default function LogBookTab({ d }: { d: any }) {
                           </ul>
                         </div>
                       )}
-                    </div>
 
                     {/* Catatan / Notes bila ada */}
                     {cleanNotes && (
