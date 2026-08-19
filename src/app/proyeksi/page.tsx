@@ -8,12 +8,9 @@ import { projectRemainingFeed, pelletType } from "@/lib/feed-calculator";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 
 const TARGET_HARI = 120;
-const HARGA_PAKAN_PER_KG = 12000; // TODO: sesuaikan harga pakan di daerahmu
 
 const fmtKg = (n: number) => `${Math.round(n).toLocaleString("id-ID")}kg`;
 const fmtKg1 = (n: number) => `${n.toLocaleString("id-ID", { maximumFractionDigits: 1 })}kg`;
-const fmtJt = (v: number) => (v >= 1e6 ? `Rp ${(v / 1e6).toFixed(1)}jt` : `Rp ${(v / 1e3).toFixed(0)}rb`);
-const fmtJtRow = (v: number) => (v >= 1e6 ? `Rp. ${(v / 1e6).toFixed(0)}jt` : `Rp. ${(v / 1e3).toFixed(0)}rb`);
 
 export default function ProyeksiPage() {
   const router = useRouter();
@@ -44,7 +41,7 @@ export default function ProyeksiPage() {
     const list = ponds ?? [];
     const act = selected ? list.filter((p) => p.pond_id === selected) : list;
     const totalKg = act.reduce((a, p) => a + p.proj.totalKg, 0);
-    return { list, act, totalKg, cost: totalKg * HARGA_PAKAN_PER_KG };
+    return { list, act, totalKg };
   }, [ponds, selected]);
 
   if (!ponds) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>;
@@ -68,20 +65,15 @@ export default function ProyeksiPage() {
         <main className="space-y-4 px-4 md:px-8">
           {/* ============ KARTU RINGKASAN ============ */}
           {!single ? (
-            <div className="grid grid-cols-2 overflow-hidden rounded-xl shadow-sm">
+            <div className="grid grid-cols-1 overflow-hidden rounded-xl shadow-sm">
               <div className="bg-white p-4">
                 <p className="text-[11px] text-slate-500">Total Pakan</p>
                 <p className="mt-1 text-xl font-extrabold text-slate-800">{fmtKg(agg.totalKg)}</p>
               </div>
-              <div className="bg-[#BFDDE2] p-4">
-                <p className="text-[11px] text-[#2F6E7B]">Estimasi Biaya</p>
-                <p className="mt-1 text-xl font-extrabold text-slate-800">{fmtJt(agg.cost)}</p>
-              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-3 rounded-xl bg-white p-4 shadow-sm">
+            <div className="grid grid-cols-2 rounded-xl bg-white p-4 shadow-sm">
               <div><p className="text-base font-extrabold text-[#2F6E7B]">{fmtKg(single.proj.totalKg)}</p><p className="text-[10px] text-slate-500">Total Pakan</p></div>
-              <div><p className="text-base font-extrabold text-[#2F6E7B]">{fmtJt(single.proj.totalKg * HARGA_PAKAN_PER_KG)}</p><p className="text-[10px] text-slate-500">Estimasi Biaya</p></div>
               <div><p className="text-base font-extrabold text-[#2F6E7B]">{Math.max(0, TARGET_HARI - single.doc)} hari</p><p className="text-[10px] text-slate-500">Sisa Hari</p></div>
             </div>
           )}
@@ -100,7 +92,6 @@ export default function ProyeksiPage() {
                 <button key={p.pond_id} onClick={() => setSelected(p.pond_id)} className="flex w-full items-center justify-between px-4 py-3.5 text-left">
                   <span className="text-xs text-slate-500">{p.pond_name}</span>
                   <span className="flex items-center gap-2">
-                    <span className="text-[11px] text-[#3E97A5]">{fmtJtRow(p.proj.totalKg * HARGA_PAKAN_PER_KG)}</span>
                     <span className="text-xs font-bold text-slate-800">{fmtKg1(p.proj.dailyTodayKg)}</span>
                   </span>
                 </button>
