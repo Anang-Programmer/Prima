@@ -54,6 +54,7 @@ export default function ProfilPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [sheet, setSheet] = useState<null | string>(null);
   const [farm, setFarm] = useState<any>({});
+  const [profileForm, setProfileForm] = useState<any>({});
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
