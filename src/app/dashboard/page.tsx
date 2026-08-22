@@ -814,7 +814,7 @@ export default function DashboardPage() {
       <SelectPondModal
         open={activeModal === "select_pond"}
         action={selectedAction}
-        ponds={data?.ponds.map(p => ({ pond_id: p.pond_id, pond_name: p.pond_name, cycle_id: p.cycle_id })) || []}
+        ponds={data?.ponds.map(p => ({ pond_id: p.pond_id, pond_name: p.pond_name, cycle_id: p.cycle_id, doc: p.doc })) || []}
         timers={data?.timers || []}
         now={now}
         onClose={() => setActiveModal(null)}
