@@ -24,6 +24,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
   const [shape, setShape] = useState<"" | "Persegi" | "Lingkaran">("");
   const [area, setArea] = useState("");
   const [location, setLocation] = useState("");
+  const [isCycleActive, setIsCycleActive] = useState(false);
   const [benur, setBenur] = useState("");
   const [tebar, setTebar] = useState("");
   const [error, setError] = useState("");
@@ -72,8 +73,8 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
         .single();
       if (pErr) throw pErr;
 
-      // 2) Kalau benur + tanggal tebar diisi -> langsung mulai siklus
-      if (Number(benur) > 0 && tebar) {
+      // 2) Kalau toggle Mulai Siklus Aktif dan benur + tanggal tebar diisi -> mulai siklus
+      if (isCycleActive && Number(benur) > 0 && tebar) {
         const { error: cErr } = await supabase.from("cycles").insert({
           pond_id: pond.id,
           start_date: tebar,
@@ -143,23 +144,38 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
               <input className={inputCls} placeholder="cth. blok A kanan" value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
 
-            <div>
-              <Label>Jumlah Benur (Ekor)</Label>
-              <input className={inputCls} type="number" min="0" inputMode="numeric" placeholder="cth. 500" value={benur} onChange={(e) => setBenur(e.target.value)} />
+            <div className="flex items-center justify-between rounded-[10px] bg-slate-50 p-4 ring-1 ring-slate-100">
+              <div>
+                <p className="text-sm font-bold text-slate-800">Mulai Siklus Sekarang?</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">Aktifkan untuk mengisi jumlah benur & tanggal tebar.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCycleActive(!isCycleActive)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#4C9AA6]/50 ${isCycleActive ? "bg-[#4C9AA6]" : "bg-slate-300"}`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isCycleActive ? "translate-x-5" : "translate-x-0"}`}
+                />
+              </button>
             </div>
 
-            <div>
-              <Label>Tanggal Tebar</Label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={tebar}
-                  onChange={(e) => setTebar(e.target.value)}
-                  className={`${inputCls} appearance-none pr-11 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-11 [&::-webkit-calendar-picker-indicator]:opacity-0`}
-                />
-                <CalendarDays size={18} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-800" />
-              </div>
-            </div>
+            {isCycleActive && (
+              <>
+                <div>
+                  <Label>Jumlah Benur (Ekor)</Label>
+                  <input className={inputCls} type="number" min="0" inputMode="numeric" placeholder="cth. 500" value={benur} onChange={(e) => setBenur(e.target.value)} required />
+                </div>
+
+                <div>
+                  <Label>Tanggal Mulai (Tebar Benur)</Label>
+                  <div className="relative">
+                    <input type="date" className={inputCls} value={tebar} onChange={(e) => setTebar(e.target.value)} required />
+                    <CalendarDays size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </>
+            )}
 
             {est && (
               <div className="rounded-xl bg-[#E3F1F2] px-4 py-3 space-y-1.5">

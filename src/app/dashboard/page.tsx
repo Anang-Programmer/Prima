@@ -14,11 +14,13 @@ import {
   Search,
   Smile,
   User,
+  Menu,
+  CheckCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { LogoutButton } from "@/components/LogoutButton";
 import TambahKolamSheet from "@/components/tambah-kolam-sheet";
-
+import Link from "next/link";
 /* ============================================================
    KONSTANTA & HELPER
 ============================================================ */
@@ -97,12 +99,14 @@ const DEMO: DashData = {
 ============================================================ */
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-xl px-2 py-3 text-center shadow-sm ${highlight ? "bg-[#D9EDF0]" : "bg-white"}`}>
-      <p className={`text-[11px] font-medium ${highlight ? "text-[#2F6E7B]" : "text-slate-500"}`}>{label}</p>
-      <p className="mt-1 flex items-center justify-center gap-1 text-[22px] font-extrabold leading-none text-slate-800">
-        {value}
-        {highlight && <Smile size={18} className="text-[#4C9AA6]" />}
-      </p>
+    <div className={`rounded-xl p-3 shadow-sm flex flex-col justify-center ${highlight ? "bg-[#2A7B88]" : "bg-white"}`}>
+      <p className={`text-[11px] md:text-xs font-medium ${highlight ? "text-white/80" : "text-slate-400"}`}>{label}</p>
+      <div className="mt-1 flex items-center gap-1.5">
+        <p className={`text-[22px] md:text-2xl font-extrabold leading-none ${highlight ? "text-white" : "text-slate-800"}`}>
+          {value}
+        </p>
+        {highlight && <CheckCircle size={18} className="text-white" strokeWidth={2.5} />}
+      </div>
     </div>
   );
 }
@@ -135,12 +139,11 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
           <ChevronRight size={16} className="text-slate-400" />
         </span>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
-        <div className="h-full rounded-full bg-[#4C9AA6]" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-        <span>Hari ke-{pond.doc}</span>
-        <span>Target {TARGET_HARI} hari</span>
+      <div className="mt-3 flex items-center gap-3">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-[#4C9AA6]" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Hari {pond.doc}</span>
       </div>
 
       {/* Informasi Ekstra (Khusus Desktop) */}
@@ -193,9 +196,11 @@ function BottomNav({ onAdd }: { onAdd?: () => void }) {
 
 import { QuickActionModal, QuickActionType } from "./_components/QuickActionModal";
 import { SelectPondModal } from "./_components/SelectPondModal";
+import { ConfirmFeedModal } from "./_components/ConfirmFeedModal";
+import { ConfirmAncoModal } from "./_components/ConfirmAncoModal";
 import { buildDetail } from "@/app/kolam/[id]/_lib/derive";
 
-/* ============================================================
+/* =========================================================
    HALAMAN DASHBOARD
 ============================================================ */
 export default function DashboardPage() {
@@ -204,13 +209,21 @@ export default function DashboardPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [reload, setReload] = useState(0);
   const [query, setQuery] = useState("");
+  const [stageFilter, setStageFilter] = useState("Semua");
+  const [showFilter, setShowFilter] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [showTambah, setShowTambah] = useState(false);
+  const [communityNotifs, setCommunityNotifs] = useState<any[]>([]);
+
+  const unreadNotifsCount = communityNotifs.filter(n => !n.is_read).length;
 
   // Quick Actions States
-  const [activeModal, setActiveModal] = useState<"quick_action" | "select_pond" | "anco_popup" | null>(null);
+  const [activeModal, setActiveModal] = useState<"quick_action" | "select_pond" | "anco_popup" | "confirm_feed" | null>(null);
   const [selectedAction, setSelectedAction] = useState<QuickActionType | null>(null);
   const [selectedCycles, setSelectedCycles] = useState<string[]>([]);
+  const [confirmFeedCycleId, setConfirmFeedCycleId] = useState<string | null>(null);
+  const [confirmFeedAmount, setConfirmFeedAmount] = useState<number>(0);
+  const [isLoadingConfirm, setIsLoadingConfirm] = useState(false);
   const [isExecutingAction, setIsExecutingAction] = useState(false);
 
   /* tick countdown tiap 1 detik */
@@ -219,9 +232,41 @@ export default function DashboardPage() {
     return () => clearInterval(t);
   }, []);
 
+  const fetchConfirmFeedAmount = async (cycleId: string, pondId: string) => {
+    setIsLoadingConfirm(true);
+    try {
+      const [f, s, p, c] = await Promise.all([
+        supabase.from("feed_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: false }),
+        supabase.from("sampling_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: true }),
+        supabase.from("ponds").select("*").eq("id", pondId).single(),
+        supabase.from("cycles").select("*").eq("id", cycleId).single()
+      ]);
+      if (c.data && p.data) {
+        const d = buildDetail({
+          pond: p.data,
+          cycle: c.data,
+          feeds: f.data || [],
+          samps: s.data || [],
+          probs: [],
+          timers: [],
+          logbook: []
+        });
+        const meals = Math.max(d.feed.mealsPerDay || 1, 1);
+        const amount = +(d.feed.dailyFeedKg / meals).toFixed(2);
+        setConfirmFeedAmount(amount);
+      }
+    } catch(e) {
+      console.error(e);
+      setConfirmFeedAmount(0);
+    } finally {
+      setIsLoadingConfirm(false);
+      setActiveModal("confirm_feed");
+    }
+  };
+
   const handleExecuteQuickAction = async (cycleIds: string[], ancoResultOverride?: string) => {
     if (!selectedAction || cycleIds.length === 0) return;
-    
+
     // Khusus Cek Anco, minta result dulu jika belum ada
     if (selectedAction === "Cek Anco" && !ancoResultOverride) {
       setSelectedCycles(cycleIds);
@@ -326,6 +371,44 @@ export default function DashboardPage() {
 
             await supabase.from("feed_logs").update({ anco_result: ancoResultOverride, notes: updatedNotes }).eq("id", lastFeed.id);
           }
+
+          // Schedule next Anco check if still within feed cycle
+          const [pResp, cResp] = await Promise.all([
+            supabase.from("ponds").select("*").eq("id", pondOpt.pond_id).single(),
+            supabase.from("cycles").select("*").eq("id", cycleId).single()
+          ]);
+          
+          if (cResp.data && pResp.data) {
+            const d = buildDetail({
+              pond: pResp.data, cycle: cResp.data, feeds: [], samps: [], probs: [], timers: [], logbook: []
+            });
+            const ancoIntervalMs = (d.feed.ancoIntervalHours || 2.25) * 60 * 60 * 1000;
+            const nextAncoDue = new Date(actionTime + ancoIntervalMs);
+            
+            const { data: pakanTimer } = await supabase
+              .from("active_timers")
+              .select("due_time")
+              .eq("pond_id", pondOpt.pond_id)
+              .eq("type", "Pakan")
+              .eq("is_completed", false)
+              .maybeSingle();
+              
+            let shouldSchedule = true;
+            if (pakanTimer && pakanTimer.due_time) {
+              const pakanDue = new Date(pakanTimer.due_time).getTime();
+              // If next Anco due is at or after the next Pakan due, don't schedule it
+              if (nextAncoDue.getTime() >= pakanDue) {
+                shouldSchedule = false;
+              }
+            }
+            
+            if (shouldSchedule) {
+              await supabase.from("active_timers").insert({
+                pond_id: pondOpt.pond_id, type: "Cek Anco",
+                due_time: nextAncoDue.toISOString(),
+              });
+            }
+          }
         }
       }
 
@@ -350,9 +433,10 @@ export default function DashboardPage() {
         } = await supabase.auth.getUser();
         if (!user) throw new Error("not-logged-in");
 
-        const [{ data: profile }, { data: ponds }] = await Promise.all([
+        const [{ data: profile }, { data: ponds }, { data: notifs }] = await Promise.all([
           supabase.from("profiles").select("full_name, first_name, last_name").eq("id", user.id).maybeSingle(),
           supabase.from("v_pond_dashboard").select("*").eq("user_id", user.id),
+          supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
         ]);
 
         const rows = (ponds ?? []) as any[];
@@ -386,6 +470,13 @@ export default function DashboardPage() {
             if (!(s.cycle_id in srByCycle) && s.estimated_sr_pct != null)
               srByCycle[s.cycle_id] = Number(s.estimated_sr_pct);
           });
+          
+          rows.forEach((p) => {
+            if (p.cycle_id && !(p.cycle_id in srByCycle)) {
+              // Fallback: if no sampling sr, estimate based on doc
+              srByCycle[p.cycle_id] = Math.max(0, 100 - (Number(p.doc || 0) * 0.08));
+            }
+          });
         }
 
         const { data: timers } = pondIds.length
@@ -401,6 +492,8 @@ export default function DashboardPage() {
           const displayFullName = profile?.first_name
             ? `${profile.first_name} ${profile.last_name || ''}`.trim()
             : (profile?.full_name || "Petambak");
+
+          setCommunityNotifs(notifs ?? []);
 
           setData({
             fullName: displayFullName,
@@ -468,11 +561,31 @@ export default function DashboardPage() {
     return mapped.slice(0, 5);
   }, [data]);
 
+  const dueAlarms = useMemo(() => {
+    if (!data) return [];
+    const notifs: { pond: any; timer: Timer }[] = [];
+    data.timers.forEach(t => {
+      if (new Date(t.due_time).getTime() <= now) {
+        const pond = data.ponds.find(p => p.pond_id === t.pond_id);
+        if (pond) notifs.push({ pond, timer: t });
+      }
+    });
+    return notifs.sort((a, b) => new Date(a.timer.due_time).getTime() - new Date(b.timer.due_time).getTime());
+  }, [data, now]);
+
   const visiblePonds = useMemo(() => {
     if (!data) return [];
+    let ponds = data.ponds;
+    
+    // Filter by stage
+    if (stageFilter !== "Semua") {
+      ponds = ponds.filter(p => (p.stage || stageOf(p.doc).label) === stageFilter);
+    }
+    
+    // Filter by query
     const q = query.trim().toLowerCase();
-    return q ? data.ponds.filter((p) => p.pond_name.toLowerCase().includes(q)) : data.ponds;
-  }, [data, query]);
+    return q ? ponds.filter((p) => p.pond_name.toLowerCase().includes(q)) : ponds;
+  }, [data, query, stageFilter]);
 
   /* tandai timer selesai (TODO: arahkan ke form cek anco / beri pakan) */
   async function handleTimerAction(t?: Timer) {
@@ -530,13 +643,11 @@ export default function DashboardPage() {
                   <p className="text-xs text-white/80 md:text-sm">Selamat datang</p>
                   <h1 className="text-xl font-extrabold text-white md:text-3xl">{data.fullName}</h1>
                 </div>
-                <div className="flex items-center gap-1 md:hidden">
-                  <button type="button" className="rounded-full p-2 text-white transition hover:bg-white/10">
+                <div className="flex items-center gap-1 md:hidden relative">
+                  <Link href="/notifikasi" className="relative rounded-full p-2 text-white transition hover:bg-white/10">
                     <Bell size={20} />
-                  </button>
-                  {/* <div>
-                    <LogoutButton variant="icon" className="!text-white hover:!bg-white/10 rounded-full" />
-                  </div> */}
+                    {(dueAlarms.length + unreadNotifsCount) > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />}
+                  </Link>
                 </div>
               </div>
 
@@ -546,9 +657,12 @@ export default function DashboardPage() {
                   <div className="md:w-36"><StatCard label="SR Rata-rata" value={`${stats.sr}%`} /></div>
                   <div className="md:w-36"><StatCard label="FCR Rata-rata" value={stats.fcr.toFixed(2)} highlight /></div>
                 </div>
-                <button type="button" className="hidden md:flex rounded-full p-3 text-white transition hover:bg-white/20 items-center justify-center bg-white/10">
-                  <Bell size={24} />
-                </button>
+                <div className="hidden md:block relative">
+                  <Link href="/notifikasi" className="flex rounded-full p-3 text-white transition hover:bg-white/20 items-center justify-center bg-white/10 relative">
+                    <Bell size={24} />
+                    {(dueAlarms.length + unreadNotifsCount) > 0 && <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse border-2 border-[#74B6BE]" />}
+                  </Link>
+                </div>
               </div>
             </div>
           </header>
@@ -560,35 +674,53 @@ export default function DashboardPage() {
           )}
 
           {/* ================= KONTEN ================= */}
-          <main className="space-y-4 px-4 pb-28 pt-4 md:space-y-8 md:px-10 md:pb-12 md:pt-8">
+          <main className="space-y-4 px-4 pb-40 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-8">
             {/* --- Kartu Alarm --- */}
             {alarms.length > 0 && (
               <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-4 snap-x md:mx-0 md:px-0 md:grid md:grid-cols-1 md:gap-4 md:overflow-visible">
                 {alarms.map((alarm) => (
-                  <section key={alarm.pond.pond_id} className="min-w-[85vw] snap-center rounded-2xl border-2 border-[#F49E4C] bg-white p-4 shadow-sm md:min-w-0 md:flex-1 md:flex md:items-center md:justify-between md:p-6 md:gap-6">
-                    <div className="md:shrink-0 flex items-start justify-between">
-                      <div className="flex items-center md:gap-3">
-                        <AlertTriangle size={24} className="hidden md:block text-[#F49E4C]" />
-                        <div>
-                          <p className="text-[11px] text-slate-500 md:text-sm md:font-semibold">Alarm Kolam</p>
-                          <h3 className="text-base font-extrabold md:text-xl">{alarm.pond.pond_name}</h3>
+                  <section key={alarm.pond.pond_id} className="min-w-[85vw] snap-center rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col justify-between border border-slate-100 md:min-w-0 md:flex-none md:w-[350px]">
+                    <div className="p-4 flex items-start justify-between">
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5 text-red-500">
+                          <AlertTriangle size={14} />
+                          <span className="text-[10px] font-semibold">Alarm Kolam</span>
+                        </div>
+                        <h3 className="mt-1.5 text-sm font-extrabold text-slate-800">{alarm.pond.pond_name}</h3>
+                        <p className="text-[10px] text-slate-500 mt-0.5">{alarm.pond.stage || "Remaja"}</p>
+                      </div>
+
+                      <div className="flex flex-col gap-2 text-right">
+                        {/* Timer Cek Anco */}
+                        <div className={`flex overflow-hidden rounded-full ${
+                          alarm.anco?.due_time && new Date(alarm.anco.due_time).getTime() <= now
+                            ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                            : ""
+                        }`}>
+                          <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">Cek Anco</div>
+                          <div className="bg-[#F26B4E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">{alarm.anco?.due_time ? fmtMs(new Date(alarm.anco.due_time).getTime() - now) : "--:--:--"}</div>
+                        </div>
+
+                        {/* Timer Beri Pakan */}
+                        <div className={`flex overflow-hidden rounded-full ${
+                          alarm.pakan?.due_time && new Date(alarm.pakan.due_time).getTime() <= now
+                            ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                            : ""
+                        }`}>
+                          <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">Beri Pakan</div>
+                          <div className="bg-[#F26B4E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">{alarm.pakan?.due_time ? fmtMs(new Date(alarm.pakan.due_time).getTime() - now) : "--:--:--"}</div>
                         </div>
                       </div>
-                      <AlertTriangle size={20} className="md:hidden text-[#F49E4C]" />
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-3 md:mt-0 md:flex md:flex-1 md:justify-end md:gap-4">
-                      <div className="md:w-40"><AlarmBox label="Cek Anco" due={alarm.anco?.due_time} now={now} /></div>
-                      <div className="md:w-40"><AlarmBox label="Beri Pakan" due={alarm.pakan?.due_time} now={now} /></div>
-                    </div>
-                    <div className="mt-3 md:mt-0 md:shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/kolam/${alarm.pond.pond_id}`)}
-                        className="w-full rounded-lg bg-[#4C9AA6] py-3 text-xs font-semibold text-white transition active:scale-95 md:px-8 md:py-4 md:text-sm md:font-bold"
-                      >
-                        Buka Kolam
-                      </button>
-                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/kolam/${alarm.pond.pond_id}`)}
+                      className="flex items-center justify-between bg-[#A5E3E8] px-4 py-3 text-xs font-bold text-[#2A7B88] transition active:bg-[#91D0D5]"
+                    >
+                      Menuju Kolam
+                      <span className="text-base leading-none">→</span>
+                    </button>
                   </section>
                 ))}
               </div>
@@ -596,14 +728,49 @@ export default function DashboardPage() {
 
             {/* --- Search + Daftar Kolam --- */}
             <section className="space-y-4 md:space-y-6">
-              <div className="relative">
-                <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Cari kolam..."
-                  className="w-full rounded-full bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#4C9AA6]/40"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Cari kolam..."
+                    className="w-full rounded-full bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#4C9AA6]/40"
+                  />
+                </div>
+                <div className="relative">
+                  <button 
+                    type="button"
+                    onClick={() => setShowFilter(!showFilter)}
+                    className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#EAEFEF] text-slate-800 transition active:scale-95 shrink-0"
+                  >
+                    <Menu size={20} />
+                  </button>
+
+                  {/* Filter Dropdown */}
+                  {showFilter && (
+                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-100 z-50">
+                      <p className="mb-2 px-3 pt-1 text-xs font-bold text-slate-400">Filter Tahap</p>
+                      {["Semua", "Benur", "Remaja", "Pembesaran"].map((f) => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => {
+                            setStageFilter(f);
+                            setShowFilter(false);
+                          }}
+                          className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                            stageFilter === f
+                              ? "bg-[#E3F1F2] text-[#2F6E7B]"
+                              : "text-slate-600 hover:bg-slate-50"
+                          }`}
+                        >
+                          {f === "Semua" ? "Semua Tahap" : f}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between">
@@ -612,7 +779,7 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowTambah(true)}
-                  className="flex items-center gap-1 rounded-full bg-[#37808C] px-3.5 py-2 text-xs font-semibold text-white transition active:scale-95"
+                  className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] bg-white px-4 py-1.5 text-xs font-semibold text-[#1FB4B2] transition active:bg-slate-50"
                 >
                   <Plus size={14} /> Tambah
                 </button>
@@ -647,39 +814,57 @@ export default function DashboardPage() {
       <SelectPondModal
         open={activeModal === "select_pond"}
         action={selectedAction}
-        ponds={data?.ponds || []}
+        ponds={data?.ponds.map(p => ({ pond_id: p.pond_id, pond_name: p.pond_name, cycle_id: p.cycle_id })) || []}
         timers={data?.timers || []}
         now={now}
         onClose={() => setActiveModal(null)}
-        onExecute={handleExecuteQuickAction}
-        isExecuting={isExecutingAction}
+        onExecute={(cycleIds) => {
+          if (selectedAction === "Pakan" && cycleIds.length === 1) {
+            const pondId = data?.ponds.find(p => p.cycle_id === cycleIds[0])?.pond_id;
+            if (pondId) {
+              setConfirmFeedCycleId(cycleIds[0]);
+              fetchConfirmFeedAmount(cycleIds[0], pondId);
+            } else {
+              handleExecuteQuickAction(cycleIds);
+            }
+          } else {
+            handleExecuteQuickAction(cycleIds);
+          }
+        }}
+        isExecuting={isExecutingAction || isLoadingConfirm}
       />
 
-      {/* Pop-up Anco khusus Quick Action */}
-      {activeModal === "anco_popup" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-xs bg-white rounded-2xl shadow-xl p-5 animate-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-bold text-slate-800 text-center mb-4">Kondisi Anco</h3>
-            <div className="space-y-2">
-              {[
-                { label: "Habis Bersih", value: "Habis", color: "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100" },
-                { label: "Sisa Sedikit", value: "Sisa Sedikit", color: "text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100" },
-                { label: "Sisa Banyak", value: "Sisa Banyak", color: "text-red-700 bg-red-50 border-red-200 hover:bg-red-100" }
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleExecuteQuickAction(selectedCycles, opt.value)}
-                  disabled={isExecutingAction}
-                  className={`w-full py-3 px-4 rounded-xl border text-sm font-bold transition-colors ${opt.color} disabled:opacity-50 flex items-center justify-center gap-2`}
-                >
-                  {isExecutingAction ? "Memproses..." : opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Modal Konfirmasi Pakan Khusus */}
+      {confirmFeedCycleId && (
+        <ConfirmFeedModal
+          open={activeModal === "confirm_feed"}
+          pondName={data?.ponds.find(p => p.cycle_id === confirmFeedCycleId)?.pond_name || ""}
+          pondId={data?.ponds.find(p => p.cycle_id === confirmFeedCycleId)?.pond_id || ""}
+          feedAmount={confirmFeedAmount}
+          onClose={() => setActiveModal("select_pond")}
+          onConfirm={() => {
+            handleExecuteQuickAction([confirmFeedCycleId]);
+            setActiveModal(null);
+            setConfirmFeedCycleId(null);
+          }}
+          isExecuting={isExecutingAction}
+        />
       )}
+
+      {/* Pop-up Anco khusus Quick Action */}
+      <ConfirmAncoModal
+        open={activeModal === "anco_popup"}
+        pondName={
+          selectedCycles.length === 1 
+            ? data?.ponds.find(p => p.cycle_id === selectedCycles[0])?.pond_name || "Kolam"
+            : `${selectedCycles.length} Kolam`
+        }
+        onClose={() => setActiveModal("select_pond")}
+        onConfirm={(result) => {
+          handleExecuteQuickAction(selectedCycles, result);
+        }}
+        isExecuting={isExecutingAction}
+      />
 
       <TambahKolamSheet
         open={showTambah}

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BarChart3, Check, ChevronRight, Home, MessageCircle, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { projectRemainingFeed, pelletType } from "@/lib/feed-calculator";
+import { projectRemainingFeed, pelletType, calculateDailyFeed } from "@/lib/feed-calculator";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 
 const TARGET_HARI = 120;
@@ -24,15 +24,93 @@ export default function ProyeksiPage() {
       if (!user) { setPonds([]); return; }
       const { data: rows } = await supabase.from("v_pond_dashboard").select("*").eq("user_id", user.id).not("cycle_id", "is", null);
       const ids = (rows ?? []).map((r: any) => r.cycle_id);
+      
       let srMap: Record<string, number> = {};
+      let feedMap: Record<string, any[]> = {};
+      let cycleStartMap: Record<string, number> = {};
+      let planMap: Record<string, any> = {};
+      
       if (ids.length) {
-        const { data: samp } = await supabase.from("sampling_logs").select("cycle_id, estimated_sr_pct, date").in("cycle_id", ids).order("date", { ascending: false });
+        const { data: samp } = await supabase.from("sampling_logs").select("cycle_id, estimated_sr_pct").in("cycle_id", ids).order("date", { ascending: false });
         (samp ?? []).forEach((s: any) => { if (!(s.cycle_id in srMap) && s.estimated_sr_pct != null) srMap[s.cycle_id] = Number(s.estimated_sr_pct); });
+        
+        const { data: feeds } = await supabase.from("feed_logs").select("cycle_id, feed_amount_kg, date").in("cycle_id", ids);
+        (feeds ?? []).forEach((f: any) => {
+          if (!feedMap[f.cycle_id]) feedMap[f.cycle_id] = [];
+          feedMap[f.cycle_id].push(f);
+        });
+
+        // We need cycle start dates and plans to map feed logs and AI overrides
+        const { data: cycles } = await supabase.from("cycles").select("id, start_date, plan").in("id", ids);
+        (cycles ?? []).forEach((c: any) => {
+          cycleStartMap[c.id] = c.start_date ? new Date(c.start_date).getTime() : Date.now();
+          planMap[c.id] = c.plan;
+        });
       }
+      
       setPonds((rows ?? []).map((r: any) => {
         const doc = Number(r.doc);
         const sr = srMap[r.cycle_id] ?? 90;
-        return { ...r, doc, sr, proj: projectRemainingFeed(doc, Number(r.initial_shrimp_count), sr) };
+        const feeds = feedMap[r.cycle_id] ?? [];
+        const cycleStartMs = cycleStartMap[r.cycle_id] ?? Date.now();
+        const plan = planMap[r.cycle_id];
+        
+        // Calculate hybrid projection
+        const weeks = [];
+        let totalKg = 0;
+        let dailyTodayKg = 0;
+        
+        const currentWeekNum = Math.floor(doc / 7) + 1;
+        const totalWeeksToShow = Math.ceil(TARGET_HARI / 7); // 18 weeks for 120 days
+        
+        // Calculate today's SNI feed
+        const todayCalc = calculateDailyFeed(doc, Number(r.initial_shrimp_count), Number(r.area_m2), 0, sr);
+        const aiDailyFeed = plan?.feed?.dailyFeedKg ? Number(plan.feed.dailyFeedKg) : 0;
+        dailyTodayKg = aiDailyFeed > 0 ? aiDailyFeed : todayCalc.dailyFeedKg;
+        
+        // Ratio of AI feed to SNI feed (used to scale future projections so they reflect the user's intent)
+        const feedRatio = aiDailyFeed > 0 ? (aiDailyFeed / todayCalc.dailyFeedKg) : 1;
+
+        for (let w = 1; w <= totalWeeksToShow; w++) {
+          const weekStartDoc = (w - 1) * 7;
+          const weekEndDoc = w * 7 - 1;
+          
+          let weeklyFeed = 0;
+          let isReal = false;
+          
+          if (weekStartDoc <= doc) {
+            // Historical week
+            const realFeeds = feeds.filter((f: any) => {
+              const feedDoc = Math.floor((new Date(f.date).getTime() - cycleStartMs) / 86400000);
+              return feedDoc >= weekStartDoc && feedDoc <= weekEndDoc;
+            });
+            weeklyFeed = realFeeds.reduce((acc: number, f: any) => acc + Number(f.feed_amount_kg), 0);
+            isReal = true;
+            
+            // If current week is ongoing, add SNI projection for remaining days scaled by AI ratio
+            if (weekEndDoc > doc) {
+              let projectedRemainder = 0;
+              for (let dayDoc = doc + 1; dayDoc <= weekEndDoc; dayDoc++) {
+                const calcFuture = calculateDailyFeed(dayDoc, Number(r.initial_shrimp_count), Number(r.area_m2), 0, sr);
+                projectedRemainder += (calcFuture.dailyFeedKg * feedRatio);
+              }
+              weeklyFeed += projectedRemainder;
+            }
+          } else {
+            // Pure projection week scaled by AI ratio
+            for (let day = 0; day < 7; day++) {
+              const targetDoc = weekStartDoc + day;
+              const calcWeekly = calculateDailyFeed(targetDoc, Number(r.initial_shrimp_count), Number(r.area_m2), 0, sr);
+              weeklyFeed += (calcWeekly.dailyFeedKg * feedRatio);
+            }
+            isReal = false;
+          }
+          
+          totalKg += weeklyFeed;
+          weeks.push({ week: w, kg: weeklyFeed, docStart: weekStartDoc, isReal });
+        }
+        
+        return { ...r, doc, sr, proj: { totalKg, dailyTodayKg, weeks } };
       }));
     })();
   }, []);
@@ -48,8 +126,8 @@ export default function ProyeksiPage() {
 
   const single = selected ? agg.act[0] : null;
   const weeks = single?.proj.weeks ?? [];
-  const maxWeek = Math.max(...weeks.map((w: any) => w.kg), 1);
-  const niceMax = Math.max(600, Math.ceil(maxWeek / 150) * 150);
+  const maxWeek = Math.max(...weeks.map((w: any) => w.kg), 10);
+  const niceMax = maxWeek * 1.1;
 
   return (
     <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
@@ -118,7 +196,7 @@ export default function ProyeksiPage() {
                     <div className="relative flex h-full items-end gap-3 px-1 pb-0 min-w-max">
                       {weeks.map((w: any) => (
                         <div key={w.week} className="flex h-full flex-col items-center justify-end w-7 shrink-0">
-                          <div className="w-full rounded-t-sm bg-[#4C9AA6] mb-1" style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={fmtKg1(w.kg)} />
+                          <div className={`w-full rounded-t-sm mb-1 ${w.isReal ? 'bg-[#4C9AA6]' : 'bg-[#4C9AA6]/60'}`} style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={`${fmtKg1(w.kg)} ${w.isReal ? '(Historis)' : '(Proyeksi)'}`} />
                           <span className="text-center text-[9px] text-slate-500 whitespace-nowrap h-5 flex items-center">Mgg {w.week}</span>
                         </div>
                       ))}
@@ -132,10 +210,13 @@ export default function ProyeksiPage() {
                 <div className="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-sm">
                   {weeks.map((w: any) => (
                     <div key={w.week} className="flex items-center justify-between px-4 py-3">
-                      <span className="rounded-lg bg-[#F2F5F7] px-3 py-2 text-xs font-medium text-slate-700">Minggu {w.week}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-lg bg-[#F2F5F7] px-3 py-2 text-xs font-medium text-slate-700">Minggu {w.week}</span>
+                        {w.isReal && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Aktual</span>}
+                      </div>
                       <span className="text-right">
                         <p className="text-xs font-bold text-[#3E97A5]">{fmtKg1(w.kg)}</p>
-                        <p className="text-[10px] text-slate-400">{pelletType(single.doc + w.week * 7)}</p>
+                        <p className="text-[10px] text-slate-400">{pelletType(w.docStart + 3)}</p>
                       </span>
                     </div>
                   ))}

@@ -54,7 +54,6 @@ export default function ProfilPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [sheet, setSheet] = useState<null | string>(null);
   const [farm, setFarm] = useState<any>({});
-  const [profileForm, setProfileForm] = useState<any>({});
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -75,7 +74,7 @@ export default function ProfilPage() {
         const metaLocation = [meta.kota, meta.provinsi].filter(Boolean).join(", ");
         
         setD({
-          name: prof?.full_name || meta.full_name || user.email?.split('@')[0], 
+          name: meta.username || user.email?.split('@')[0], 
           location: prof?.location || metaLocation || "", 
           isPremium: !!prof?.is_premium,
           premiumExpiry: prof?.premium_expires_at, 
@@ -85,49 +84,12 @@ export default function ProfilPage() {
           harvests: harvests ?? [],
         });
 
-        // Setup profile form for "Akun & Data Pribadi"
-        const fname = meta.firstName || prof?.full_name?.split(' ')[0] || "";
-        const lname = meta.lastName || prof?.full_name?.split(' ').slice(1).join(' ') || "";
-        setProfileForm({
-          firstName: fname,
-          lastName: lname,
-          email: user.email || "",
-          phone: prof?.phone || meta.phone || "",
-          kecamatan: meta.kecamatan || "",
-          kota: meta.kota || "",
-          provinsi: meta.provinsi || ""
-        });
+        // Fetch is done
       } catch {
         setD(DEMO); setIsDemo(true);
       }
     })();
   }, []);
-
-  async function saveProfile() {
-    setBusy(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const fullName = `${profileForm.firstName} ${profileForm.lastName}`.trim();
-    // Update profiles table
-    await supabase.from("profiles").update({ 
-      full_name: fullName, 
-      phone: profileForm.phone 
-    }).eq("id", user.id);
-    
-    // Update auth metadata
-    await supabase.auth.updateUser({
-      data: {
-        firstName: profileForm.firstName,
-        lastName: profileForm.lastName,
-        phone: profileForm.phone,
-        kecamatan: profileForm.kecamatan,
-        kota: profileForm.kota,
-        provinsi: profileForm.provinsi,
-        full_name: fullName,
-      }
-    });
-    setBusy(false); setSheet(null); location.reload();
-  }
 
   async function saveFarm() {
     setBusy(true);
@@ -205,14 +167,14 @@ export default function ProfilPage() {
 
           {/* ============ MENU ============ */}
           <section className="mt-4 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl md:mt-6 border-y border-slate-100 md:border-0">
-            <MenuRow icon={CircleUser} label="Akun & Data Pribadi" onClick={() => setSheet("Akun & Data Pribadi")} />
+            <MenuRow icon={CircleUser} label="Akun & Data Pribadi" onClick={() => router.push("/profil/edit")} />
             <MenuRow icon={FileText} label="Data Tambak" onClick={() => { setFarm({ farmName: d.farmName, location: d.location, phone: d.phone }); setSheet("farm"); }} />
-            <MenuRow icon={History} label="Riwayat Panen" onClick={() => setSheet("harvest")} />
-            <MenuRow icon={ShieldCheck} label="Privasi & Keamanan" onClick={() => setSheet("privacy")} />
+            <MenuRow icon={History} label="Riwayat Panen" onClick={() => router.push("/riwayat-panen")} />
+            <MenuRow icon={ShieldCheck} label="Privasi & Keamanan" onClick={() => router.push("/privasi")} />
           </section>
           
           <section className="mt-3 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl border-y border-slate-100 md:border-0">
-            <MenuRow icon={HelpCircle} label="Pusat Bantuan" onClick={() => setSheet("help")} />
+            <MenuRow icon={HelpCircle} label="Pusat Bantuan" onClick={() => router.push("/profil/bantuan")} />
             <MenuRow icon={Info} label="Tentang Aplikasi" onClick={() => setSheet("about")} />
           </section>
 
@@ -246,39 +208,6 @@ export default function ProfilPage() {
         </div>
       </nav>
 
-      {/* ============ SHEET: AKUN & DATA PRIBADI ============ */}
-      <Sheet open={sheet === "Akun & Data Pribadi"} onClose={() => setSheet(null)} title="Profile">
-        <div className="space-y-4">
-          <div className="flex justify-center mb-6">
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[#8E9F9F] text-white">
-               <Pencil size={24} className="opacity-80" />
-            </div>
-          </div>
-
-          <div>
-            <Label>Nama anda</Label>
-            <div className="grid grid-cols-2 gap-3 mt-1">
-              <input className={inputCls} placeholder="Nama depan" value={profileForm.firstName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })} />
-              <input className={inputCls} placeholder="Nama belakang" value={profileForm.lastName ?? ""} onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })} />
-            </div>
-          </div>
-          <div><Label>Email</Label><input className={`${inputCls} bg-slate-100 opacity-70`} disabled placeholder="Ketik" value={profileForm.email ?? ""} /></div>
-          <div><Label>No HP</Label><input className={inputCls} type="tel" placeholder="Ketik" value={profileForm.phone ?? ""} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} /></div>
-          
-          <hr className="border-slate-200 my-2" />
-
-          <div><Label>Kecamatan</Label><input className={inputCls} placeholder="Ketik" value={profileForm.kecamatan ?? ""} onChange={(e) => setProfileForm({ ...profileForm, kecamatan: e.target.value })} /></div>
-          <div><Label>Kota</Label><input className={inputCls} placeholder="Ketik Nama" value={profileForm.kota ?? ""} onChange={(e) => setProfileForm({ ...profileForm, kota: e.target.value })} /></div>
-          <div><Label>Provinsi</Label><input className={inputCls} placeholder="Ketik Nama" value={profileForm.provinsi ?? ""} onChange={(e) => setProfileForm({ ...profileForm, provinsi: e.target.value })} /></div>
-          
-          <div className="pt-4">
-            <button onClick={saveProfile} disabled={busy} className="w-full rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition active:scale-[0.98]">
-              {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan"}
-            </button>
-          </div>
-        </div>
-      </Sheet>
-
       {/* ============ SHEET: DATA TAMBAK ============ */}
       <Sheet open={sheet === "farm"} onClose={() => setSheet(null)} title="Data Tambak">
         <div className="space-y-4">
@@ -291,25 +220,7 @@ export default function ProfilPage() {
         </div>
       </Sheet>
 
-      {/* ============ SHEET: RIWAYAT PANEN ============ */}
-      <Sheet open={sheet === "harvest"} onClose={() => setSheet(null)} title="Riwayat Panen">
-        <div className="space-y-2">
-          {d.harvests.length === 0 && <p className="py-6 text-center text-xs text-slate-400">Belum ada siklus selesai.</p>}
-          {d.harvests.map((h: any, i: number) => (
-            <div key={i} className="rounded-xl bg-[#F2F5F7] px-4 py-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold">{h.pond_name}</p>
-                <p className="text-[10px] text-slate-500">{new Date(h.end_date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p>
-              </div>
-              <div className="mt-1 flex gap-4 text-[11px] text-slate-600">
-                <span>{Number(h.harvest_biomass_kg).toLocaleString("id-ID")} kg</span>
-                <span>FCR {Number(h.harvest_fcr).toFixed(2)}</span>
-                <span>SR {Number(h.harvest_sr_pct).toFixed(0)}%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Sheet>
+
 
       {/* ============ SHEET: PREMIUM ============ */}
       <Sheet open={sheet === "premium"} onClose={() => setSheet(null)} title="Langganan Premium">
@@ -332,14 +243,18 @@ export default function ProfilPage() {
       <Sheet open={sheet === "notif"} onClose={() => setSheet(null)} title="Notifikasi">
         <p className="py-6 text-center text-xs text-slate-400">Belum ada notifikasi baru.</p>
       </Sheet>
-      <Sheet open={sheet === "privacy"} onClose={() => setSheet(null)} title="Privasi & Keamanan">
-        <p className="text-xs leading-relaxed text-slate-600">Data tambakmu hanya bisa diakses oleh akunmu sendiri (dilindungi Row Level Security). Untuk menghapus akun, hubungi support.</p>
-      </Sheet>
-      <Sheet open={sheet === "help"} onClose={() => setSheet(null)} title="Pusat Bantuan">
-        <p className="text-xs leading-relaxed text-slate-600">Butuh bantuan? Hubungi tim Prima di <b>support@prima.app</b> atau lewat halaman Komunitas.</p>
-      </Sheet>
       <Sheet open={sheet === "about"} onClose={() => setSheet(null)} title="Tentang Aplikasi">
-        <p className="text-xs leading-relaxed text-slate-600"><b>Prima v1.0</b> — asisten budidaya udang vaname. Catat pakan, sampling, dan probiotik; AI yang menghitungnya.</p>
+        <div className="space-y-4 text-xs leading-relaxed text-slate-600">
+          <p>Prima adalah platform budidaya udang berbasis AI yang membantu petambak mengelola kolam dengan lebih mudah dan terarah.</p>
+          <p>Prima membantu Anda mencatat aktivitas budidaya, memantau perkembangan kolam, serta mendapatkan rekomendasi operasional berdasarkan kondisi kolam Anda.</p>
+          <p>Mulai dari pakan, probiotik, kualitas air, hingga pertumbuhan udang. Prima membantu mengubah data budidaya menjadi informasi dan langkah yang lebih mudah dipahami. Tujuan kami sederhana: membantu Anda mengambil keputusan budidaya dengan lebih percaya diri, menggunakan sumber daya secara lebih efisien, dan mendapatkan hasil panen yang lebih konsisten.</p>
+          
+          <div className="pt-6 font-medium text-slate-800 text-center">
+            <h3 className="text-base font-bold text-[#4C9AA6] mb-1">Prima</h3>
+            <p className="text-[#8E9F9F]">Teman pintar untuk budidaya yang lebih terarah</p>
+            <p className="mt-4 text-[10px] text-slate-400">Versi Aplikasi: 1.0.0<br/>© 2026 Prima. All rights reserved.</p>
+          </div>
+        </div>
       </Sheet>
     </div>
   );

@@ -9,7 +9,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
     <section className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="h-9 w-9 rounded-full bg-[#F08C8C] shrink-0" />
+          <img src="/images/icon/pakan.webp" alt="Pakan" className="h-11 w-11 shrink-0" />
           <div>
             <p className="text-[11px] text-slate-500">Total Pakan per hari</p>
             <p className="text-lg font-extrabold">{fmtFeed(d.feed.dailyFeedKg)}</p>
@@ -17,7 +17,8 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
         </div>
         <button
           onClick={startEditPakan}
-          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#4C9AA6] px-4 py-1.5 text-xs font-semibold text-[#4C9AA6]"
+          disabled={d.doc < 0}
+          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#4C9AA6] px-4 py-1.5 text-xs font-semibold text-[#4C9AA6] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Pencil size={11} /> Modifikasi
         </button>
@@ -33,16 +34,27 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
         <Row l="Frekuensi" v={`${d.feed.mealsPerDay}x / hari`} />
         <Row l="Metode Tebar" v="Tabur Manual" />
         <Row l="Cek anco" v={`${d.feed.ancoIntervalHours} jam`} />
-        
+
         {(() => {
+          if (d.doc >= 120) {
+            return (
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                <div className="rounded-xl border border-[#4C9AA6]/20 bg-[#F2FAFB] p-4 text-center">
+                  <p className="text-sm font-bold text-[#4C9AA6]">Waktunya Panen!</p>
+                  <p className="mt-1 text-xs text-slate-500">Siklus budidaya telah mencapai target 120 hari. Hentikan pemberian pakan.</p>
+                </div>
+              </div>
+            );
+          }
+
           const feedTimers = d.timers.filter((t: any) => t.type === "Pakan" || t.type === "Cek Anco");
           if (feedTimers.length === 0) {
             return (
               <>
                 <button
                   onClick={() => handleCatatPakan()}
-                  disabled={busy}
-                  className="mt-3 w-full rounded-[10px] bg-[#4C9AA6] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                  disabled={busy || d.doc < 0}
+                  className="mt-3 w-full rounded-[10px] bg-[#4C9AA6] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Konfirmasi & Aktifkan Peringatan
                 </button>
@@ -84,8 +96,8 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                     {isDue && t.type === "Cek Anco" && (
                       <button
                         onClick={() => { setAncoResult("Habis"); setAncoModal({ timerId: t.id }); }}
-                        disabled={busy}
-                        className="mt-2 w-full rounded-lg bg-red-500 py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+                        disabled={busy || d.doc < 0}
+                        className="mt-2 w-full rounded-lg bg-red-500 py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Isi Hasil Anco
                       </button>
@@ -93,8 +105,8 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                     {isDue && t.type === "Pakan" && (
                       <button
                         onClick={() => confirmFeedDone(t.id)}
-                        disabled={busy}
-                        className="mt-2 w-full rounded-lg bg-[#4C9AA6] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+                        disabled={busy || d.doc < 0}
+                        className="mt-2 w-full rounded-lg bg-[#4C9AA6] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Sudah Diberi Pakan
                       </button>

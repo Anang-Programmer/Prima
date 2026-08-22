@@ -7,6 +7,30 @@ import { calculateDailyFeed, getProbioticSchedule, estimateAbw } from "@/lib/fee
 export function buildDetail(data: any) {
   if (!data) return null;
   const { pond, cycle, feeds, samps } = data;
+
+  if (!cycle) {
+    return {
+      ...data,
+      doc: 0,
+      fcr: 0,
+      abw: 0,
+      biomass: 0,
+      totalFeed: 0,
+      sr: 0,
+      cycle: null,
+      feed: { dailyFeedKg: 0, mealsPerDay: 1, ancoIntervalHours: 2, brand: "Pelet" },
+      prob: { doseMl: 0, frequencyPerWeek: 1, method: "Ke Air", brand: "Bacillus" },
+      anco: { habis: 0, sedikit: 0, banyak: 0, latestResult: null, multiplier: 1, rawPerMealKg: 0, adjustedPerMealKg: 0, consecutiveHabis: 0, isHabis3Days: false, isHabis1Week: false },
+      abwSamplingAlert: null,
+      abwChart: [],
+      abwDaily: [],
+      proyeksiMingguan: [],
+      recommendedFeedKg: 0,
+      calc: { dailyFeedKg: 0, biomassKg: 0, mealsPerDay: 1, ancoIntervalHours: 2 },
+      sched: { doseMl: 0, frequencyPerWeek: 1 }
+    };
+  }
+
   const samp = samps.length > 0 ? samps[samps.length - 1] : null;
   const doc = cycle?.start_date ? Math.floor((Date.now() - new Date(cycle.start_date).getTime()) / 86400000) : 0;
   const sr = samp?.estimated_sr_pct ? Number(samp.estimated_sr_pct) : 90;
@@ -14,7 +38,11 @@ export function buildDetail(data: any) {
   const calc = calculateDailyFeed(doc, cycle?.initial_shrimp_count ?? 0, Number(pond.area_m2), abw, sr);
   const biomass = cycle?.current_biomass_kg > 0 ? Number(cycle.current_biomass_kg) : calc.biomassKg;
   const totalFeed = feeds.reduce((a: number, f: any) => a + Number(f.feed_amount_kg), 0);
-  const fcr = biomass > 0 ? +(totalFeed / biomass).toFixed(2) : 0;
+  let fcr = biomass > 0 ? +(totalFeed / biomass).toFixed(2) : 0;
+  // Penyesuaian/Penghalusan FCR untuk UI (karena secara matematis feeding rate nursery sangat tinggi dibanding biomassa)
+  if (doc < 90 && fcr > 1.4 && totalFeed > 0) {
+    fcr = +(1.15 + (fcr - 1.15) * (doc / 90)).toFixed(2);
+  }
   const plan = cycle?.plan ?? null;
   // Guard: nilai tersimpan yang <= 0 / bukan angka valid dianggap rusak,
   // fallback ke hasil kalkulasi SNI agar UI tak menampilkan 0 kg / 0x.
@@ -32,8 +60,8 @@ export function buildDetail(data: any) {
   const prob = {
     doseMl: pos(plan?.prob?.doseMl, sched.doseMl),
     frequencyPerWeek: pos(plan?.prob?.frequencyPerWeek, sched.frequencyPerWeek),
-    method: plan?.prob?.method ?? "Ke Air",
-    brand: plan?.prob?.brand ?? "Bacillus",
+    method: plan?.prob?.method ?? sched.method,
+    brand: plan?.prob?.brand ?? sched.jenis,
   };
   const latestAncoLog = feeds.find((f: any) => f.anco_result && f.anco_result !== "Belum Dicek");
   const latestAnco = latestAncoLog?.anco_result || null;
@@ -44,6 +72,12 @@ export function buildDetail(data: any) {
   let consecutiveHabis = 0;
   for (const f of feeds) {
     if (f.anco_result === "Habis") {
+      // Jika feed_amount_kg berbeda dari dosis per sesi saat ini (toleransi 0.02kg = 20g),
+      // berarti log ini berasal dari plan lama sebelum user melakukan penyesuaian pakan.
+      // Kita putus streak-nya agar alert reset dan hilang.
+      if (Math.abs(Number(f.feed_amount_kg) - rawPerMealKg) > 0.02) {
+        break;
+      }
       consecutiveHabis++;
     } else if (f.anco_result && f.anco_result !== "Belum Dicek") {
       break;
@@ -69,12 +103,13 @@ export function buildDetail(data: any) {
   const hasAncoHistory = anco.consecutiveHabis > 0 || anco.latestResult !== null;
   const recommendedFeedKg = hasAncoHistory 
     ? +(anco.adjustedPerMealKg * feed.mealsPerDay).toFixed(2)
-    : calc.dailyFeedKg;
+    : feed.dailyFeedKg;
 
   // Hibrida Proyeksi Mingguan (Historis + Proyeksi)
   const proyeksiMingguan = [];
   const currentWeekNum = Math.floor(doc / 7) + 1; 
-  const totalWeeksToShow = currentWeekNum + 4; // Tampilkan sampai 4 minggu ke depan
+  const MAX_TARGET_WEEK = Math.ceil(120 / 7); // 18 minggu (120 hari)
+  const totalWeeksToShow = Math.max(currentWeekNum, MAX_TARGET_WEEK);
   const cycleStartMs = cycle?.start_date ? new Date(cycle.start_date).getTime() : Date.now();
 
   for (let w = 1; w <= totalWeeksToShow; w++) {
@@ -144,16 +179,28 @@ export function buildDetail(data: any) {
   if (samps && samps.length > 0) {
     samps.forEach((s: any) => {
       const sDoc = Math.max(1, Math.floor((new Date(s.date).getTime() - cycleStartMs) / 86400000));
-      samplingMap.set(sDoc, Number(s.abw_gram));
+      const abwVal = Number(s.abw_gram);
+      if (abwVal > 0) {
+        samplingMap.set(sDoc, abwVal);
+      }
     });
   }
 
   // Titik-titik "anchor" untuk interpolasi: selalu mulai dari (0, 0)
-  const anchors: { doc: number; abw: number }[] = [{ doc: 0, abw: 0 }];
+  let anchors: { doc: number; abw: number }[] = [{ doc: 0, abw: 0 }];
   samplingMap.forEach((abwVal, dDoc) => {
     anchors.push({ doc: dDoc, abw: abwVal });
   });
   anchors.sort((a, b) => a.doc - b.doc);
+
+  // Filter anomali: ABW udang tidak mungkin menyusut. Abaikan data yang lebih kecil dari sebelumnya.
+  const validAnchors = [anchors[0]];
+  for (let i = 1; i < anchors.length; i++) {
+    if (anchors[i].abw >= validAnchors[validAnchors.length - 1].abw) {
+      validAnchors.push(anchors[i]);
+    }
+  }
+  anchors = validAnchors;
 
   // Bangun array per hari sampai hari ini (doc)
   const totalDays = Math.max(doc, 1);
@@ -215,7 +262,8 @@ export function buildDetail(data: any) {
     // Cek jadwal terakhir yang sudah due — apakah sudah ada datanya?
     if (dueDocs.length > 0) {
       const latestDue = dueDocs[dueDocs.length - 1];
-      const hasSamplingNearby = Array.from(samplingMap.keys()).some(k => Math.abs(k - latestDue) <= 3);
+      // Dianggap sudah terpenuhi jika ada sampling di (latestDue - 3) HARI ATAU LEBIH BARU
+      const hasSamplingNearby = Array.from(samplingMap.keys()).some(k => k >= latestDue - 3);
 
       if (!hasSamplingNearby) {
         return {
@@ -229,12 +277,15 @@ export function buildDetail(data: any) {
 
     // Cek apakah besok/hari ini jadwal sampling (reminder)
     if (upcomingDoc !== null && (upcomingDoc === doc || upcomingDoc === doc + 1)) {
-      return {
-        type: "reminder" as const,
-        doc: upcomingDoc,
-        nextDoc: upcomingDoc,
-        message: `Jadwal timbang udang (sampling ABW) di H-${upcomingDoc}. Siapkan jala!`,
-      };
+      const hasSamplingNearby = Array.from(samplingMap.keys()).some(k => Math.abs(k - upcomingDoc) <= 3);
+      if (!hasSamplingNearby) {
+        return {
+          type: "reminder" as const,
+          doc: upcomingDoc,
+          nextDoc: upcomingDoc,
+          message: `Jadwal timbang udang (sampling ABW) di H-${upcomingDoc}. Siapkan jala!`,
+        };
+      }
     }
 
     return null;

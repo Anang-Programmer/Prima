@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BarChart3, Bell, Heart, Home, Loader2, MessageCircle, Plus, Send, Share2, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 
 type Post = {
@@ -32,6 +33,7 @@ const DEMO: Post[] = [0, 1, 2].map((i) => ({
 }));
 
 export default function KomunitasPage() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [isDemo, setIsDemo] = useState(false);
   const [reload, setReload] = useState(0);
@@ -95,18 +97,10 @@ export default function KomunitasPage() {
   }
 
   async function openComments(p: Post) {
-    setCommentPost(p); setNewComment("");
-    const { data } = await supabase.from("post_comments").select("*").eq("post_id", p.id).order("created_at");
-    setComments((data ?? []) as Comment[]);
+    router.push(`/komunitas/${p.id}`);
   }
 
-  async function addComment() {
-    if (!(await requireLogin()) || !newComment.trim()) return;
-    setBusy(true);
-    await supabase.from("post_comments").insert({ post_id: commentPost!.id, user_id: me!.id, author_name: me!.name, avatar_url: me!.avatar, content: newComment.trim() });
-    setNewComment(""); setBusy(false); refresh();
-    openComments(commentPost!);
-  }
+  // addComment is no longer used here as it's moved to the detail page
 
   return (
     <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
@@ -137,7 +131,11 @@ export default function KomunitasPage() {
         <main className="space-y-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:space-y-0">
           {!posts && <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>}
           {posts?.map((p) => (
-            <article key={p.id} className="rounded-2xl bg-white p-4 shadow-sm">
+            <article 
+              key={p.id} 
+              onClick={() => router.push(`/komunitas/${p.id}`)}
+              className="rounded-2xl bg-white p-4 shadow-sm hover:bg-slate-50 transition cursor-pointer"
+            >
               <div className="flex items-center gap-3">
                 <Avatar name={p.author_name} url={p.avatar_url} />
                 <div>
@@ -145,15 +143,26 @@ export default function KomunitasPage() {
                   <p className="text-[10px] text-slate-400">{fmtDate(p.created_at)}</p>
                 </div>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-slate-700">{p.content}</p>
-              <div className="mt-3 flex items-center gap-6 border-t border-slate-100 pt-3">
-                <button onClick={() => toggleLike(p)} className="transition active:scale-90">
+              <p className="mt-3 text-sm leading-relaxed text-slate-700 line-clamp-3">{p.content}</p>
+              
+              <div className="mt-4 flex items-center gap-6 border-t border-slate-100 pt-3">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleLike(p); }} 
+                  className="transition active:scale-90 flex items-center gap-1.5"
+                >
                   <Heart size={18} className={p.liked_by_me ? "fill-[#F26B4E] text-[#F26B4E]" : "text-slate-500"} />
+                  <span className="text-xs font-semibold text-slate-500">{p.likes_count}</span>
                 </button>
-                <button onClick={() => openComments(p)} className="transition active:scale-90">
+                <button 
+                  className="transition active:scale-90 flex items-center gap-1.5"
+                >
                   <MessageCircle size={18} className="text-slate-500" />
+                  <span className="text-xs font-semibold text-slate-500">{p.comments_count}</span>
                 </button>
-                <button onClick={() => share(p)} className="transition active:scale-90">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); share(p); }} 
+                  className="transition active:scale-90 ml-auto"
+                >
                   <Share2 size={18} className="text-slate-500" />
                 </button>
               </div>
@@ -205,35 +214,7 @@ export default function KomunitasPage() {
       )}
 
       {/* ============ SHEET: KOMENTAR ============ */}
-      {commentPost && (
-        <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
-          <button aria-label="Tutup" onClick={() => setCommentPost(null)} className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-x-0 bottom-0 z-10 flex max-h-[80vh] flex-col rounded-t-[24px] bg-white px-4 pb-6 pt-3 md:relative md:h-auto md:w-full md:max-w-md md:rounded-[24px] md:p-6">
-            <div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full bg-slate-300" />
-            <h3 className="mb-3 text-base font-extrabold">Komentar</h3>
-            <div className="flex-1 space-y-3 overflow-y-auto">
-              {comments.length === 0 && <p className="py-6 text-center text-xs text-slate-400">Belum ada komentar.</p>}
-              {comments.map((c) => (
-                <div key={c.id} className="flex items-start gap-2.5">
-                  <Avatar name={c.author_name} url={c.avatar_url} size={32} />
-                  <div className="flex-1 rounded-xl bg-[#F2F5F7] px-3 py-2">
-                    <p className="text-[11px] font-bold">{c.author_name}</p>
-                    <p className="text-xs text-slate-700">{c.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex gap-2">
-              <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()}
-                placeholder="Tulis komentar..."
-                className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50" />
-              <button onClick={addComment} disabled={busy || !newComment.trim()} className="shrink-0 rounded-[10px] bg-[#4C9AA6] px-4 text-white disabled:opacity-60">
-                <Send size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Komentar Popup dihilangkan, sekarang menggunakan halaman detail */}
     </div>
   );
 }

@@ -16,8 +16,19 @@ export async function POST(req: Request) {
       const lower = Math.max(rawLower, absoluteFloor);
       const upper = +(baselineKg * 1.20).toFixed(2);
       const isCritical = baselineKg < absoluteFloor;
+      const userFeed = userValues.dailyFeedKg;
+      const isIncrease = userFeed > baselineKg;
+      const actionText = isIncrease ? `MENAIKKAN pakan dari ${baselineKg} kg menjadi ${userFeed} kg` : `MENURUNKAN pakan dari ${baselineKg} kg menjadi ${userFeed} kg`;
+      const directionAlert = userFeed > upper 
+        ? `PERHATIAN: Angka ${userFeed} kg ini MELEBIHI batas atas aman (${upper} kg). Tolak dengan halus dan sarankan maksimal ${upper} kg.`
+        : userFeed < lower 
+          ? `PERHATIAN: Angka ${userFeed} kg ini DI BAWAH batas bawah aman (${lower} kg). Tolak dengan halus dan sarankan minimal ${lower} kg.`
+          : `PERHATIAN: Angka ${userFeed} kg ini MASIH DALAM BATAS AMAN (${lower} - ${upper} kg). Kamu BOLEH menyetujuinya.`;
+
       toleranceBlock = `
 BATAS TOLERANSI (WAJIB DIPATUHI):
+- Niat Petambak: Ingin ${actionText}.
+- Status Permintaan: ${directionAlert}
 - Angka acuan utamamu adalah pakan lapangan (anco-adjusted): ${baselineKg} kg/hari.
 - Angka SNI (rumus standar): ${sniKg} kg/hari.
 - Lantai absolut (50% SNI): ${absoluteFloor} kg — pakan TIDAK BOLEH turun di bawah ini dalam keadaan apapun.

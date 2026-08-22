@@ -24,6 +24,7 @@ import AddFeedSheet from "./_components/AddFeedSheet";
 import EndCycleSheet from "./_components/EndCycleSheet";
 import ConsultAISheet from "./_components/ConsultAISheet";
 import EditAbwSheet from "./_components/EditAbwSheet";
+import StartCycleSheet from "./_components/StartCycleSheet";
 import { toast } from "sonner";
 
 export default function DetailKolamPage() {
@@ -210,9 +211,21 @@ export default function DetailKolamPage() {
     const match = lastAsst.content.match(/DEAL_DATA:\s*(\{[\s\S]*?\})/);
     if (!match) return null;
     try {
-      return JSON.parse(match[1]);
+      // AI sering mengembalikan angka desimal dengan koma (format Indonesia), mis. 0,30.
+      // Ini menyebabkan JSON.parse gagal. Kita sanitasi dulu:
+      // Ganti pola "angka,angka" (desimal koma) menjadi "angka.angka" (desimal titik).
+      let raw = match[1].replace(/(\d),(\d)/g, "$1.$2");
+      const parsed = JSON.parse(raw);
+      // AI kadang juga mengembalikan nilai sebagai string ("0.30"), konversi ke number.
+      const result: any = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        const n = Number(v);
+        result[k] = Number.isFinite(n) ? n : v;
+      }
+      console.log("✅ DEAL_DATA berhasil diekstrak:", result);
+      return result;
     } catch (e) {
-      console.error("Gagal parse DEAL_DATA", e);
+      console.error("Gagal parse DEAL_DATA", e, "raw:", match[1]);
       return null;
     }
   }
@@ -287,7 +300,7 @@ export default function DetailKolamPage() {
     let openingMsg = "";
     if (editMode === "pakan") {
       const devText: string[] = [];
-      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (rekomendasi saat ini: ${fmt1(d.recommendedFeedKg)}kg)`);
+      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (catatan: rekomendasi lapangan saat ini ${fmt1(d.recommendedFeedKg)}kg, sedangkan SNI murni ${fmt1(d.calc.dailyFeedKg)}kg)`);
       if (deviations.freq) devText.push(`frekuensi menjadi ${editFeedValues.mealsPerDay}x/hari (standar SNI: ${d.calc.mealsPerDay}x)`);
       if (deviations.anco) devText.push(`cek anco menjadi ${editFeedValues.ancoHours} jam (standar SNI: ${d.calc.ancoIntervalHours} jam)`);
       openingMsg = `Halo Pak. Saya perhatikan Bapak ingin mengubah ${devText.join(", ")}. Ada pertimbangan atau keluhan khusus di kolam yang mendasari keputusan ini?`;
@@ -404,7 +417,7 @@ export default function DetailKolamPage() {
     const logRes = await supabase.from("feed_logs").insert({
       cycle_id: d.cycle.id,
       date: new Date(baseTime).toISOString(),
-      feed_amount_kg: +(d.feed.dailyFeedKg / safeMeals).toFixed(2),
+      feed_amount_kg: +(d.feed.dailyFeedKg / safeMeals).toFixed(3),
       feed_type: d.feed.brand || "Pelet",
       anco_result: "Belum Dicek",
       notes: note,
@@ -572,25 +585,32 @@ export default function DetailKolamPage() {
       let deletedFeeds = 0;
       let deletedSamples = 0;
 
-      // Jika mundur, hapus log yang DOC-nya > targetDoc
-      // Tanggal cutoff = old_start_date + targetDoc hari
+      // Jika mundur, hapus SEMUA log siklus ini tanpa syarat.
+      // Data simulasi di-insert dengan tanggal masa lalu, jadi cutoff berbasis waktu tidak akan bekerja.
       if (isBackward) {
-        const oldStartDate = new Date(d.cycle.start_date).getTime();
-        const cutoffTime = new Date(oldStartDate + targetDoc * 86400000).toISOString();
-        
-        const resFeed = await supabase.from("feed_logs").delete().eq("cycle_id", d.cycle.id).gt("date", cutoffTime);
-        if (resFeed.error) throw new Error("Gagal hapus pakan masa depan: " + resFeed.error.message);
-        
-        const resSamp = await supabase.from("sampling_logs").delete().eq("cycle_id", d.cycle.id).gt("date", cutoffTime);
-        if (resSamp.error) throw new Error("Gagal hapus sampling masa depan: " + resSamp.error.message);
-        
-        // Supabase tidak me-return count jika tidak dispesifikkan, tapi tidak apa-apa
-        deletedFeeds = 1; 
+        // Hapus SEMUA feed_logs siklus ini
+        const resFeed = await supabase.from("feed_logs").delete().eq("cycle_id", d.cycle.id);
+        if (resFeed.error) throw new Error("Gagal hapus pakan: " + resFeed.error.message);
+
+        // Hapus SEMUA sampling_logs siklus ini
+        const resSamp = await supabase.from("sampling_logs").delete().eq("cycle_id", d.cycle.id);
+        if (resSamp.error) throw new Error("Gagal hapus sampling: " + resSamp.error.message);
+
+        // Hapus SEMUA probiotic_logs siklus ini
+        const resProb = await supabase.from("probiotic_logs").delete().eq("cycle_id", d.cycle.id);
+        if (resProb.error) throw new Error("Gagal hapus probiotik: " + resProb.error.message);
+
+        // Hapus SEMUA timer aktif kolam ini
+        const resTimer = await supabase.from("active_timers").delete().eq("pond_id", d.pond.id);
+        if (resTimer.error) throw new Error("Gagal hapus timer: " + resTimer.error.message);
+
+        deletedFeeds = 1;
       }
 
       const mockFeeds = [];
       const mockSamples = [];
-      
+      const mockProbs = [];
+
       // Jika maju, generate logs untuk tiap hari yang dilompati
       if (!isBackward) {
         const area = Number(d.pond.area_m2);
@@ -598,15 +618,18 @@ export default function DetailKolamPage() {
         let lastAbw = d.abw || estimateAbw(currentDoc);
 
         for (let day = currentDoc + 1; day <= targetDoc; day++) {
-          const timeOfDay = Date.now() - ((targetDoc - day) * 86400000); 
+          const timeOfDay = Date.now() - ((targetDoc - day) * 86400000);
 
+          // Update ABW harian berdasarkan SNI saat simulasi maju
+          lastAbw = estimateAbw(day);
+
+          // Simulasi Sampling
           let isSamplingDay = false;
           if (day === 15 || day === 30 || (day > 30 && (day - 37) % 7 === 0)) {
             isSamplingDay = true;
           }
 
           if (isSamplingDay) {
-            lastAbw = estimateAbw(day);
             mockSamples.push({
               cycle_id: d.cycle.id,
               doc: day,
@@ -617,12 +640,26 @@ export default function DetailKolamPage() {
             });
           }
 
+          // Simulasi Probiotik (Misal diberikan tiap kelipatan 3 atau 4 hari)
+          if (day % 4 === 0) {
+            const prob = getProbioticSchedule(day, area);
+            mockProbs.push({
+              cycle_id: d.cycle.id,
+              amount_ml: prob.doseMl,
+              method: prob.method,
+              probiotic_type: prob.jenis,
+              notes: "Simulasi Probiotik",
+              date: new Date(timeOfDay).toISOString()
+            });
+          }
+
+          // Simulasi Pakan
           const calc = calculateDailyFeed(day, pop, area, lastAbw);
           const meals = Math.max(1, calc.mealsPerDay);
           const perMeal = +(calc.dailyFeedKg / meals).toFixed(2);
 
           for (let i = 0; i < meals; i++) {
-            const mealTime = timeOfDay + (i * 3600000 * (24 / meals)); 
+            const mealTime = timeOfDay + (i * 3600000 * (24 / meals));
             const checkTime = new Date(mealTime + (2 * 3600000)); // Anggap cek anco 2 jam setelah pakan
             const hours = checkTime.getHours().toString().padStart(2, '0');
             const minutes = checkTime.getMinutes().toString().padStart(2, '0');
@@ -632,7 +669,7 @@ export default function DetailKolamPage() {
               cycle_id: d.cycle.id,
               feed_amount_kg: perMeal,
               feed_type: d.feed?.brand || "Pelet",
-              anco_result: "Habis", 
+              anco_result: "Habis",
               notes: "Simulasi Pakan (Lompat Waktu)" + ancoNoteStr,
               date: new Date(mealTime).toISOString()
             });
@@ -643,19 +680,47 @@ export default function DetailKolamPage() {
           const { error: err1 } = await supabase.from("feed_logs").insert(mockFeeds);
           if (err1) throw new Error("Gagal insert feed_logs: " + err1.message);
         }
-        
+
         if (mockSamples.length > 0) {
           const { error: err2 } = await supabase.from("sampling_logs").insert(mockSamples);
           if (err2) throw new Error("Gagal insert sampling_logs: " + err2.message);
+        }
+
+        if (mockProbs.length > 0) {
+          const { error: err3 } = await supabase.from("probiotic_logs").insert(mockProbs);
+          if (err3) throw new Error("Gagal insert probiotic_logs: " + err3.message);
         }
       }
 
       // Update start_date agar DOC berubah
       const newStartDate = new Date(Date.now() - (targetDoc * 86400000)).toISOString();
-      const { error } = await supabase.from("cycles").update({ start_date: newStartDate }).eq("id", d.cycle.id);
-      
+      const updatePayload: any = { start_date: newStartDate };
+
+      // Hitung ABW & Biomassa baru berdasarkan SNI untuk target DOC
+      const newAbw = estimateAbw(targetDoc);
+      const newSr = targetDoc <= 30 ? 95 : targetDoc <= 60 ? 90 : targetDoc <= 90 ? 85 : 80;
+      const initialPop = Number(d.cycle.initial_shrimp_count || 0);
+      const currentPop = Math.round(initialPop * (newSr / 100));
+      const newBiomass = Number(((currentPop * newAbw) / 1000).toFixed(2));
+
+      updatePayload.current_abw_gram = newAbw;
+      updatePayload.current_biomass_kg = newBiomass;
+
+      if (isBackward) {
+        updatePayload.status = "Berjalan";
+        updatePayload.end_date = null;
+        updatePayload.harvest_biomass_kg = null;
+        updatePayload.harvest_shrimp_count = null;
+        updatePayload.harvest_abw_gram = null;
+        updatePayload.harvest_fcr = null;
+        updatePayload.harvest_sr_pct = null;
+        updatePayload.plan = null;
+      }
+
+      const { error } = await supabase.from("cycles").update(updatePayload).eq("id", d.cycle.id);
+
       if (error) throw new Error("Gagal update waktu utama: " + error.message);
-      
+
       if (isBackward) {
         setDebugMsg(`Waktu berhasil DIBALIKKAN ke H-${targetDoc}! Data "masa depan" telah dihapus dari log.`);
       } else {
@@ -938,23 +1003,46 @@ export default function DetailKolamPage() {
       <div className="w-full md:flex-1 md:overflow-y-auto">
         <div className="w-full max-w-md pb-28 md:max-w-none md:pb-12">
           {/* ============ HEADER ============ */}
-          <DetailHeader d={d} router={router} setPondForm={setPondForm} setSheet={setSheet} />
+          <DetailHeader d={d} router={router} setPondForm={setPondForm} setSheet={setSheet} onEndCycle={() => {
+            setEndForm({ harvest: d.biomass, count: "", notes: "" });
+            setSheet("endCycle");
+          }} onDeletePond={async () => {
+            if (window.confirm("Apakah Anda yakin ingin menghapus kolam ini beserta seluruh datanya? Tindakan ini tidak dapat dibatalkan.")) {
+              setBusy(true);
+              const { error } = await supabase.from("ponds").delete().eq("id", id);
+              if (error) {
+                alert("Gagal menghapus kolam: " + error.message);
+                setBusy(false);
+              } else {
+                router.push("/dashboard");
+              }
+            }
+          }} />
 
           <main className="mx-auto max-w-none space-y-4 px-4 pt-4 md:max-w-5xl md:px-8">
             {/* ============ KARTU DOC ============ */}
-            {d.cycle ? (
+            <DocCard
+              d={d}
+              stage={stage}
+              popLabel={popLabel}
+              tab={tab}
+              setTab={setTab}
+              onEditAbw={() => {
+                setAbwInput(String(d.abw));
+                setSheet("edit-abw");
+              }}
+              onEndCycle={() => {
+                setEndForm({ harvest: d.biomass, count: "", notes: "" });
+                setSheet("endCycle");
+              }}
+            />
+
+            {!d.cycle ? (
+              <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-[#E8EBED]/50 py-16 text-center">
+                <p className="text-[13px] font-medium text-slate-500">Mulai Siklus untuk menambahkan data</p>
+              </div>
+            ) : (
               <>
-                <DocCard
-                  d={d}
-                  stage={stage}
-                  popLabel={popLabel}
-                  tab={tab}
-                  setTab={setTab}
-                  onEditAbw={() => {
-                    setAbwInput(String(d.abw));
-                    setSheet("edit-abw");
-                  }}
-                />
 
                 {/* ============ TAB: PAKAN ============ */}
                 {tab === "Pakan" && (
@@ -993,15 +1081,7 @@ export default function DetailKolamPage() {
                       <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} />
                     )}
 
-                    <button
-                      onClick={() => {
-                        setEndForm({ harvest: d.biomass, count: "", notes: "" });
-                        setSheet("endCycle");
-                      }}
-                      className="w-full rounded-xl border-[1.5px] border-[#F26B4E] bg-white py-3 text-sm font-semibold text-[#F26B4E] transition active:scale-[0.98]"
-                    >
-                      Akhiri Siklus
-                    </button>
+
                   </>
                 )}
 
@@ -1011,11 +1091,6 @@ export default function DetailKolamPage() {
 
                 {tab === "Monitoring" && <MonitoringTab d={d} />}
               </>
-            ) : (
-              <section className="rounded-2xl bg-white p-6 text-center shadow-sm">
-                <p className="text-sm font-bold">Belum ada siklus berjalan</p>
-                <p className="mt-1 text-xs text-slate-500">Mulai siklus baru untuk mengelola pakan & probiotik.</p>
-              </section>
             )}
           </main>
         </div>
@@ -1033,11 +1108,23 @@ export default function DetailKolamPage() {
         <EditAbwSheet sheet={sheet} setSheet={setSheet} abwInput={abwInput} setAbwInput={setAbwInput} handleEditAbw={handleEditAbw} busy={busy} />
 
         {/* ============ MODAL: CEK ANCO ============ */}
-        <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} />
+        <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} lastAncoResult={d?.anco?.latestResult} />
 
         {/* ============ SHEET: KONSULTASI AI (bottom) ============ */}
         <ConsultAISheet sheet={sheet} setSheet={setSheet} chat={chat} chatInput={chatInput} setChatInput={setChatInput} sendChat={sendChat} />
+
+        {/* ============ SHEET: MULAI SIKLUS ============ */}
+        <StartCycleSheet open={sheet === "startCycle"} pond={d.pond} onClose={() => setSheet(null)} onSaved={() => { setSheet(null); refresh(); }} />
       </div>
+
+      {/* Sticky Mulai Siklus button if !d.cycle */}
+      {!d.cycle && (
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none px-4">
+          <button className="pointer-events-auto flex w-full max-w-[200px] items-center justify-center gap-2 rounded-xl bg-[#25C4D4] px-6 py-3 text-[15px] font-bold text-white shadow-lg transition active:scale-95" onClick={() => setSheet("startCycle")}>
+            Mulai Siklus <span className="text-xl leading-none">→</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

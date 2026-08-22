@@ -285,7 +285,7 @@ Karena proyek ini harus $0, sistem menggunakan **7 provider AI gratis** secara b
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    HIRARKI KEPUTUSAN                      │
+│                    HIRARKI KEPUTUSAN                     │
 │                                                          │
 │  1. FONDASI (Base 1)                                     │
 │     → Rumus SNI 8008:2014 (selalu dihitung)              │
@@ -301,7 +301,7 @@ Karena proyek ini harus $0, sistem menggunakan **7 provider AI gratis** secara b
 │  4. NEGOSIASI AI → Jika menyimpang >15%, AI berdiskusi   │
 │       AI punya KEDUA base (SNI + Anco) sebagai acuan     │
 │       Batas toleransi: ±20% dari angka anco-adjusted     │
-│       AI TIDAK BISA dibujuk melewati batas ini            │
+│       AI TIDAK BISA dibujuk melewati batas ini           │
 │       ↓                                                  │
 │  5. KESEPAKATAN → Angka final disimpan ke database       │
 └──────────────────────────────────────────────────────────┘

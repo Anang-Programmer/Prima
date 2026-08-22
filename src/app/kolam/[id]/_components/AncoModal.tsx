@@ -3,8 +3,12 @@
 import { Droplets, Loader2 } from "lucide-react";
 
 export function AncoModal(props: any) {
-  const { ancoModal, ancoResult, setAncoResult, setAncoModal, busy, submitAnco } = props;
+  const { ancoModal, ancoResult, setAncoResult, setAncoModal, busy, submitAnco, lastAncoResult } = props;
   if (!ancoModal) return null;
+
+  // Jika anco sebelumnya "Habis", tidak masuk akal makanan tiba-tiba muncul kembali
+  const prevWasHabis = lastAncoResult === "Habis";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button aria-label="Tutup" onClick={() => setAncoModal(null)} className="absolute inset-0 bg-black/40" />
@@ -17,20 +21,29 @@ export function AncoModal(props: any) {
 
         <div className="space-y-2.5">
           {([
-            { value: "Habis", desc: "Pakan habis bersih, tersisa < 10% di jaring anco" },
-            { value: "Sisa Sedikit", desc: "Tersisa sekitar 10% – 30%, butiran pakan tersebar tipis" },
-            { value: "Sisa Banyak", desc: "Tersisa > 30%, pakan masih menumpuk jelas terlihat" },
-          ]).map(({ value, desc }) => (
+            { value: "Habis", desc: "Pakan habis bersih, tersisa < 10% di jaring anco", disabled: false },
+            { value: "Sisa Sedikit", desc: "Tersisa sekitar 10% – 30%, butiran pakan tersebar tipis", disabled: prevWasHabis },
+            { value: "Sisa Banyak", desc: "Tersisa > 30%, pakan masih menumpuk jelas terlihat", disabled: prevWasHabis },
+          ]).map(({ value, desc, disabled }) => (
             <button
               key={value}
-              onClick={() => setAncoResult(value)}
+              onClick={() => !disabled && setAncoResult(value)}
+              disabled={disabled}
               className={`flex w-full items-start gap-3 rounded-xl border-[1.5px] px-4 py-3 text-left transition ${
-                ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]/10" : "border-slate-200 hover:bg-slate-50"
+                disabled
+                  ? "border-slate-100 bg-slate-50 opacity-40 cursor-not-allowed"
+                  : ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]/10" : "border-slate-200 hover:bg-slate-50"
               }`}
             >
-              <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]" : "border-slate-300"}`} />
+              <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${
+                disabled ? "border-slate-200" :
+                ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]" : "border-slate-300"
+              }`} />
               <span>
-                <span className={`text-sm font-semibold ${ancoResult === value ? "text-[#3E97A5]" : "text-slate-600"}`}>{value}</span>
+                <span className={`text-sm font-semibold ${
+                  disabled ? "text-slate-400" :
+                  ancoResult === value ? "text-[#3E97A5]" : "text-slate-600"
+                }`}>{value}</span>
                 <span className="block text-[10px] text-slate-400 mt-0.5">{desc}</span>
               </span>
             </button>

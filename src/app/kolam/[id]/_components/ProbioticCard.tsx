@@ -8,7 +8,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
     <section className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="h-9 w-9 rounded-full bg-[#9BD4DB] shrink-0" />
+          <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-11 w-11 shrink-0" />
           <div>
             <p className="text-[11px] text-slate-500">Probiotik</p>
             <p className="text-lg font-extrabold">{d.prob.doseMl} ml</p>
@@ -16,7 +16,8 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
         </div>
         <button
           onClick={startEditProb}
-          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#4C9AA6] px-4 py-1.5 text-xs font-semibold text-[#4C9AA6]"
+          disabled={d.doc < 0}
+          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#4C9AA6] px-4 py-1.5 text-xs font-semibold text-[#4C9AA6] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Pencil size={11} /> Modifikasi
         </button>
@@ -28,12 +29,23 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
         
         {(() => {
           const probTimer = d.timers.find((t: any) => t.type === "Probiotik");
+          if (d.doc >= 120) {
+            return (
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                <div className="rounded-xl border border-[#4C9AA6]/20 bg-[#F2FAFB] p-4 text-center">
+                  <p className="text-sm font-bold text-[#4C9AA6]">Waktunya Panen!</p>
+                  <p className="mt-1 text-xs text-slate-500">Hentikan pemberian probiotik karena siklus sudah selesai.</p>
+                </div>
+              </div>
+            );
+          }
+
           if (!probTimer) {
             return (
               <button
                 onClick={() => handleCatatProbiotik()}
-                disabled={busy}
-                className="mt-3 w-full rounded-[10px] bg-[#4C9AA6] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+                disabled={busy || d.doc < 0}
+                className="mt-3 w-full rounded-[10px] bg-[#4C9AA6] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Konfirmasi & Aktifkan Peringatan
               </button>
@@ -58,8 +70,8 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
                 {isDue && (
                   <button
                     onClick={() => confirmProbioticDone(probTimer.id)}
-                    disabled={busy}
-                    className="mt-2 w-full rounded-lg bg-[#4C9AA6] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+                    disabled={busy || d.doc < 0}
+                    className="mt-2 w-full rounded-lg bg-[#4C9AA6] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Sudah Diberi Probiotik
                   </button>

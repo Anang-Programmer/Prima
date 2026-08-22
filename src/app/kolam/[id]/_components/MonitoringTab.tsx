@@ -102,15 +102,21 @@ export default function MonitoringTab({ d }: { d: any }) {
             );
           }
 
-          const maxAbw = Math.max(0.1, ...daily.map((x) => x.act ?? 0), ...daily.map((x) => x.std));
-          const yMax = maxAbw * 1.2;
-          const chartTotalDays = Math.max(daily.length, 1);
+          // Fixed target is 120 days (M1 = 30, M2 = 60, M3 = 90, M4 = 120)
+          const chartTotalDays = 120;
+          
+          // Helper for SNI target up to 120 days
+          const getStdAbw = (doc: number) => Number((0.0005 * Math.pow(doc, 2) + 0.05 * doc).toFixed(2));
+          const maxStd = getStdAbw(120);
+          
+          const maxAct = Math.max(0.1, ...daily.map((x) => x.act ?? 0));
+          const yMax = Math.max(maxStd, maxAct) * 1.1;
 
-          // helper posisi: X dalam persentase (5% - 95%), Y (0 - 100)
-          const getX = (doc: number) => 5 + ((doc - 1) / Math.max(chartTotalDays - 1, 1)) * 90;
+          // helper posisi: X dalam persentase (0% - 100%), Y (0 - 100)
+          const getX = (doc: number) => (doc / chartTotalDays) * 100;
           const getY = (val: number) => 100 - (val / yMax) * 100;
 
-          // Segmen garis aktual
+          // Segmen garis aktual (smooth)
           const actualSegments: string[][] = [];
           let current: string[] = [];
           daily.forEach((p) => {
@@ -123,16 +129,32 @@ export default function MonitoringTab({ d }: { d: any }) {
           });
           if (current.length > 1) actualSegments.push(current);
 
-          const stdPoints = daily.map((p) => `${getX(p.doc)},${getY(p.std)}`).join(" ");
+          // Garis SNI target (dari 0 sampai 120)
+          const stdPointsArr: string[] = [];
+          for(let i = 0; i <= 120; i += 5) {
+            stdPointsArr.push(`${getX(i)},${getY(getStdAbw(i))}`);
+          }
+          stdPointsArr.push(`${getX(120)},${getY(getStdAbw(120))}`);
+          const stdPoints = stdPointsArr.join(" ");
 
-          const yRatios = [1, 0.8, 0.6, 0.4, 0.2, 0];
-          const xLabels: number[] = [];
-          for (let d2 = 15; d2 <= chartTotalDays; d2 += 15) xLabels.push(d2);
-          if (!xLabels.includes(chartTotalDays)) xLabels.push(chartTotalDays);
+          const yRatios = [1, 0.75, 0.5, 0.25, 0];
+          const xLabels = [
+            { label: "M1", doc: 30 },
+            { label: "M2", doc: 60 },
+            { label: "M3", doc: 90 },
+            { label: "M4", doc: 120 }
+          ];
 
           return (
-            <div className="relative h-48 w-full">
+            <div className="relative h-48 w-full pl-6 pr-2">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible">
+                <defs>
+                  <linearGradient id="actualGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#4C9AA6" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#4C9AA6" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
                 {/* Grid lines */}
                 {yRatios.map((ratio, i) => (
                   <line
@@ -147,11 +169,27 @@ export default function MonitoringTab({ d }: { d: any }) {
                   />
                 ))}
 
+                {/* Gradient Fill Aktual */}
+                {actualSegments.map((seg, i) => {
+                  if (seg.length < 2) return null;
+                  const startX = seg[0].split(",")[0];
+                  const endX = seg[seg.length - 1].split(",")[0];
+                  const fillPoints = [...seg, `${endX},100`, `${startX},100`].join(" ");
+                  return (
+                    <polygon
+                      key={`fill-${i}`}
+                      points={fillPoints}
+                      fill="url(#actualGradient)"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  );
+                })}
+
                 {/* Garis SNI */}
                 <polyline
                   fill="none"
                   stroke="#94D1D9"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                   strokeDasharray="4,2"
                   vectorEffect="non-scaling-stroke"
                   points={stdPoints}
@@ -163,51 +201,52 @@ export default function MonitoringTab({ d }: { d: any }) {
                     key={i}
                     fill="none"
                     stroke="#4C9AA6"
-                    strokeWidth="1.5"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     vectorEffect="non-scaling-stroke"
                     points={seg.join(" ")}
                   />
                 ))}
               </svg>
 
-              {/* Titik Sampling (HTML Absolute supaya tidak gepeng) */}
+              {/* Titik Sampling */}
               {samplingPoints.map((p, i) => (
                 <div
                   key={i}
-                  className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#4C9AA6] shadow-sm"
+                  className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#4C9AA6] shadow-sm"
                   style={{
-                    left: `${getX(p.doc)}%`,
+                    left: `calc(1.5rem + ${getX(p.doc)}% - (1.5rem + 0.5rem) * ${getX(p.doc) / 100})`, // adjust for pl-6 pr-2 container
                     top: `${getY(p.act)}%`,
                   }}
                 />
               ))}
 
-              {/* X Axis Labels (HTML Absolute Position) */}
-              <div className="relative mt-3 h-4 w-full text-[9px] text-slate-400">
-                {xLabels.map((dv) => (
+              {/* X Axis Labels (Bulan/Minggu) */}
+              <div className="relative mt-3 h-4 w-full text-[9px] font-medium text-slate-400">
+                {xLabels.map((m) => (
                   <span
-                    key={dv}
-                    className="absolute -translate-x-1/2 whitespace-nowrap"
-                    style={{ left: `${getX(dv)}%` }}
+                    key={m.label}
+                    className="absolute -translate-x-1/2"
+                    style={{ left: `${getX(m.doc)}%` }}
                   >
-                    H-{dv}
+                    {m.label}
                   </span>
                 ))}
               </div>
 
-              {/* Y Axis Labels (HTML Absolute Position) */}
-              <div className="absolute -left-6 bottom-5 top-0 flex w-5 flex-col justify-between text-right text-[10px] text-slate-400">
+              {/* Y Axis Labels */}
+              <div className="absolute left-0 bottom-7 top-0 flex w-5 flex-col justify-between text-right text-[9px] text-slate-400">
                 {yRatios.map((r, i) => (
-                  <span key={i}>{fmt1(yMax * r)}</span>
+                  <span key={i} className="leading-none">{Math.round(yMax * r)}</span>
                 ))}
               </div>
             </div>
           );
         })()}
 
-        <p className="mt-5 text-[9px] text-slate-400">
-          Titik bulat = data timbang asli. Garis halus = interpolasi antar sampling.{" "}
-          {d.doc < 30 ? "Jadwal timbang tiap 15 hari." : "Jadwal timbang tiap 7 hari."}
+        <p className="mt-7 text-[9px] text-slate-400 text-center">
+          Titik bulat = data timbang asli. Garis halus = interpolasi antar sampling.
         </p>
       </div>
     </section>

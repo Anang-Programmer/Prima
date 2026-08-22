@@ -168,163 +168,61 @@ export default function LogBookTab({ d }: { d: any }) {
         <div className="space-y-3">
           {displayedLogs.slice(0, limit).map((log: any) => {
             if (log.itemCategory === "pakan") {
-              // Status Cek Anco
-              const isAncoHabis = log.anco_result === "Habis";
-              const isAncoSedikit = log.anco_result === "Sisa Sedikit";
-              const isAncoBanyak = log.anco_result === "Sisa Banyak";
-              const isAncoPending = !log.anco_result || log.anco_result === "Belum Dicek";
-
-              // Extract sub-checks from notes
-              const ancoChecks: { time: string; result: string }[] = [];
-              let cleanNotes = log.notes || "";
-              const regex = /\[ANCO:(\d{2}:\d{2}):([^\]]+)\]/g;
-              let match;
-              while ((match = regex.exec(log.notes)) !== null) {
-                ancoChecks.push({ time: match[1], result: match[2] });
-                cleanNotes = cleanNotes.replace(match[0], "");
-              }
-              cleanNotes = cleanNotes.trim();
+              const ancoLabel = log.anco_result && log.anco_result !== "Belum Dicek" ? log.anco_result : null;
+              const ancoTimeMatch = (log.notes || "").match(/\[ANCO:(\d{2}[:.]\d{2}):[^\]]+\]/);
+              const ancoTime = ancoTimeMatch ? ancoTimeMatch[1].replace(".", ":") : null;
 
               return (
-                <article
-                  key={`feed-${log.id}`}
-                  className="overflow-hidden rounded-2xl bg-white p-4 shadow-sm border border-slate-100/90 transition hover:border-[#4C9AA6]/30"
-                >
-                  {/* Header Card: Icon, Waktu & Badge Status Anco */}
-                  <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                <article key={`feed-${log.id}`} className="rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-100/80">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F08C8C]/15 text-[#E06565]">
-                        <Utensils size={18} />
-                      </div>
+                      <img src="/images/icon/pakan.webp" alt="Pakan" className="h-9 w-9 shrink-0" />
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="text-xs font-extrabold text-slate-800">Sesi Pemberian Pakan</h5>
-                        </div>
-                        <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Calendar size={11} /> {formatDate(log.date)} · {formatTime(log.date)}
-                        </p>
+                        <p className="text-base font-extrabold text-slate-800">{fmtFeedWithHint(Number(log.feed_amount_kg || 0))}</p>
+                        <p className="text-[11px] text-slate-400">{log.feed_type || "Pelet"}</p>
                       </div>
                     </div>
-
-                    {/* Badge Hasil Anco */}
-                    <div>
-                      {isAncoHabis && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 border border-emerald-200/80">
-                          <CheckCircle2 size={11} className="text-emerald-600" /> Anco Habis
-                        </span>
-                      )}
-                      {isAncoSedikit && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 border border-amber-200/80">
-                          <AlertCircle size={11} className="text-amber-600" /> Sisa Sedikit
-                        </span>
-                      )}
-                      {isAncoBanyak && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-700 border border-red-200/80">
-                          <AlertTriangle size={11} className="text-red-600" /> Sisa Banyak
-                        </span>
-                      )}
-                      {isAncoPending && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-500 border border-slate-200/60">
-                          <Clock size={11} /> Menunggu Cek Anco
-                        </span>
-                      )}
+                    <div className="text-right">
+                      <p className="text-xs font-semibold text-slate-700">{formatDate(log.date)}</p>
+                      <p className="text-[11px] text-slate-400">{formatTime(log.date)}</p>
                     </div>
                   </div>
-
-                  {/* Body Card: Pakan Details & Anco Evaluation */}
-                  <div className="mt-3 space-y-2.5">
-                    {/* Ringkasan Pakan */}
-                    <div className="flex items-center justify-between rounded-xl bg-slate-50/70 p-2.5 border border-slate-100">
-                      <div>
-                        <p className="text-[10px] text-slate-500 font-medium">Pakan Ditebar</p>
-                        <p className="text-xs font-bold text-slate-800">
-                          {log.feed_type || "Pelet"}
-                        </p>
+                  {ancoLabel && (
+                    <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-slate-400">Anco</span>
+                        <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          ancoLabel === "Habis"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : ancoLabel === "Sisa Sedikit"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-orange-100 text-orange-700"
+                        }`}>
+                          {ancoLabel === "Habis" ? "Habis" : ancoLabel === "Sisa Sedikit" ? "Sisa sedikit" : "Sisa banyak"}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[10px] text-slate-500 font-medium">Takaran Sesi Ini</p>
-                        <p className="text-xs font-extrabold text-[#4C9AA6]">
-                          {fmtFeedWithHint(Number(log.feed_amount_kg || 0))}
-                        </p>
-                      </div>
+                      {ancoTime && <p className="text-[11px] text-slate-400">{ancoTime} WIB</p>}
                     </div>
-
-                      {/* Riwayat Cek Anco Tiap Jam */}
-                      {ancoChecks.length > 0 && (
-                        <div className="mt-2.5 pt-2.5 border-t border-slate-100/80">
-                          <p className="text-[10px] font-semibold text-slate-500 mb-1.5 px-1">Riwayat Pengecekan per Jam:</p>
-                          <ul className="space-y-1">
-                            {ancoChecks.map((chk, i) => (
-                              <li key={i} className="flex items-center justify-between text-[10px] px-1.5 py-1 rounded bg-slate-50/50">
-                                <span className="text-slate-500">{chk.time} WIB</span>
-                                <span className={`font-bold ${
-                                  chk.result === "Habis" ? "text-emerald-600" :
-                                  chk.result === "Sisa Sedikit" ? "text-amber-600" :
-                                  "text-red-600"
-                                }`}>
-                                  {chk.result}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Catatan / Notes bila ada */}
-                    {cleanNotes && (
-                      <p className="text-[10px] text-slate-400 italic px-1">
-                        Catatan: {cleanNotes}
-                      </p>
-                    )}
-                  </div>
+                  )}
                 </article>
               );
             }
 
-            // Kartu Probiotik
             return (
-              <article
-                key={`prob-${log.id}`}
-                className="overflow-hidden rounded-2xl bg-white p-4 shadow-sm border border-slate-100/90 transition hover:border-[#4C9AA6]/30"
-              >
-                <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+              <article key={`prob-${log.id}`} className="rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-100/80">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4C9AA6]/15 text-[#4C9AA6]">
-                      <Droplets size={18} />
-                    </div>
+                    <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-9 w-9 shrink-0" />
                     <div>
-                      <h5 className="text-xs font-extrabold text-slate-800">Aplikasi Probiotik</h5>
-                      <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                        <Calendar size={11} /> {formatDate(log.date)} · {formatTime(log.date)}
-                      </p>
+                      <p className="text-base font-extrabold text-slate-800">{log.amount_ml}ml</p>
+                      <p className="text-[11px] text-slate-400">{log.probiotic_type || "Merk Probi"}</p>
                     </div>
-                  </div>
-
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#4C9AA6]/10 px-2.5 py-1 text-[10px] font-bold text-[#3E97A5] border border-[#4C9AA6]/20">
-                    {log.method === "Campur Pakan" ? "Campur Pakan" : "Tebar ke Air"}
-                  </span>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50/70 p-2.5 border border-slate-100">
-                  <div>
-                    <p className="text-[10px] text-slate-500 font-medium">Jenis Probiotik</p>
-                    <p className="text-xs font-bold text-slate-800">
-                      {log.probiotic_type || "Probiotik Standar"}
-                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-slate-500 font-medium">Dosis Diberikan</p>
-                    <p className="text-xs font-extrabold text-[#4C9AA6]">
-                      {log.amount_ml} ml
-                    </p>
+                    <p className="text-xs font-semibold text-slate-700">{formatTime(log.date)}</p>
+                    <p className="text-[11px] text-slate-400">{formatDate(log.date)}</p>
                   </div>
                 </div>
-
-                {log.notes && (
-                  <p className="mt-2 text-[10px] text-slate-400 italic px-1">
-                    Catatan: {log.notes}
-                  </p>
-                )}
               </article>
             );
           })}

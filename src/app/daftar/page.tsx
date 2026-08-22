@@ -116,6 +116,7 @@ export default function DaftarPage() {
         options: { 
           data: { 
             full_name: form.username, 
+            username: form.username,
             phone: form.phone,
             first_name: form.firstName,
             last_name: form.lastName,

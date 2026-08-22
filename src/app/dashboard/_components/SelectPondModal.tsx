@@ -8,6 +8,7 @@ interface PondOption {
   pond_id: string;
   pond_name: string;
   cycle_id?: string | null;
+  doc: number;
 }
 
 function formatCountdown(ms: number) {
@@ -46,20 +47,9 @@ export function SelectPondModal({
 
   if (!open || !action) return null;
 
-  const handleToggle = (cycleId: string, disabled: boolean) => {
-    if (disabled) return;
-    const newSet = new Set(selectedCycles);
-    if (newSet.has(cycleId)) {
-      newSet.delete(cycleId);
-    } else {
-      newSet.add(cycleId);
-    }
-    setSelectedCycles(newSet);
-  };
-
-  const handleExecute = () => {
-    if (selectedCycles.size === 0) return;
-    onExecute(Array.from(selectedCycles));
+  const handleExecute = (cycleIds: string[]) => {
+    if (cycleIds.length === 0) return;
+    onExecute(cycleIds);
   };
 
   // Only show active cycles
@@ -82,10 +72,7 @@ export function SelectPondModal({
 
         <div className="px-5 pt-2 pb-4 shrink-0 border-b border-slate-100">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Pilih Kolam</h2>
-              <p className="text-xs text-slate-500">Aksi: <span className="font-semibold text-[#4C9AA6]">{action}</span></p>
-            </div>
+            <h2 className="text-lg font-bold text-slate-800">Pilih Aksi</h2>
             <button 
               onClick={onClose} 
               disabled={isExecuting}
@@ -96,88 +83,78 @@ export function SelectPondModal({
           </div>
         </div>
 
-        <div className="overflow-y-auto p-5 space-y-3">
+        <div className="overflow-y-auto flex-1">
           {activePonds.length === 0 ? (
             <p className="text-center text-sm text-slate-500 py-6">Tidak ada kolam aktif.</p>
           ) : (
-            activePonds.map(pond => {
-              // Find timer for this specific action
-              const timerType = action === "Pakan" ? "Pakan" : action === "Cek Anco" ? "Cek Anco" : "Probiotik";
-              const pondTimer = timers.find(t => t.pond_id === pond.pond_id && t.type === timerType);
-              
-              let msRemaining = 0;
-              let isWaiting = false;
-              let noSession = false;
-              
-              if (pondTimer) {
-                const due = new Date(pondTimer.due_time).getTime();
-                msRemaining = due - now;
-                if (msRemaining > 0) isWaiting = true;
-              } else {
-                if (action === "Cek Anco") {
-                  noSession = true; // Tidak bisa cek anco jika tidak ada sesi pakan
+            <div className="flex flex-col">
+              {/* Semua Kolam */}
+              <button
+                type="button"
+                onClick={() => handleExecute(activePonds.map(p => p.cycle_id!))}
+                disabled={isExecuting}
+                className="flex items-center justify-between p-4 bg-white border-b border-slate-200 border-dashed hover:bg-slate-50 transition-colors text-left"
+              >
+                <span className="text-sm font-semibold text-slate-400">Semua Kolam</span>
+                <span className="text-slate-300 text-lg font-light">{'>'}</span>
+              </button>
+
+              {activePonds.map(pond => {
+                // Find timer for this specific action
+                const timerType = action === "Pakan" ? "Pakan" : action === "Cek Anco" ? "Cek Anco" : "Probiotik";
+                const pondTimer = timers.find(t => t.pond_id === pond.pond_id && t.type === timerType);
+                
+                let msRemaining = 0;
+                let isWaiting = false;
+                let noSession = false;
+                const belumMulai = pond.doc <= 0;
+                
+                if (pondTimer) {
+                  const due = new Date(pondTimer.due_time).getTime();
+                  msRemaining = due - now;
+                  if (msRemaining > 0) isWaiting = true;
+                } else {
+                  if (action === "Cek Anco") {
+                    noSession = true;
+                  }
                 }
-              }
 
-              const isSelected = selectedCycles.has(pond.cycle_id!);
-              const disabled = isWaiting || noSession || isExecuting;
+                const disabled = isWaiting || noSession || belumMulai || isExecuting;
 
-              return (
-                <div 
-                  key={pond.pond_id}
-                  onClick={() => handleToggle(pond.cycle_id!, disabled)}
-                  className={`relative flex items-center justify-between p-3.5 border-2 rounded-xl transition-all cursor-pointer select-none
-                    ${disabled ? 'border-slate-100 bg-slate-50 opacity-70 cursor-not-allowed' : 
-                      isSelected ? 'border-[#4C9AA6] bg-[#4C9AA6]/5' : 'border-slate-200 hover:border-[#4C9AA6]/50'
-                    }
-                  `}
-                >
-                  <div>
-                    <h3 className={`text-sm font-bold ${disabled ? 'text-slate-500' : 'text-slate-800'}`}>
+                return (
+                  <button 
+                    key={pond.pond_id}
+                    onClick={() => {
+                      if (!disabled) handleExecute([pond.cycle_id!]);
+                    }}
+                    disabled={disabled}
+                    className={`flex items-center justify-between p-4 border-b border-slate-300 transition-colors text-left w-full
+                      ${disabled ? 'bg-[#C1C4C7]' : 'bg-white hover:bg-slate-50'}
+                    `}
+                  >
+                    <span className={`text-sm font-semibold ${disabled ? 'text-slate-400' : 'text-slate-600'}`}>
                       {pond.pond_name}
-                    </h3>
-                    <div className="mt-1 flex items-center gap-2">
-                      {isWaiting ? (
-                         <span className="inline-flex text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                           Menunggu {formatCountdown(msRemaining)}
-                         </span>
-                      ) : noSession ? (
-                         <span className="inline-flex text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                           Belum Ada Sesi
-                         </span>
-                      ) : (
-                         <span className="inline-flex text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                           Siap Diberikan
-                         </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors
-                    ${disabled ? 'border-slate-200 bg-slate-100' : 
-                      isSelected ? 'border-[#4C9AA6] bg-[#4C9AA6] text-white' : 'border-slate-300 bg-white'
-                    }
-                  `}>
-                    {isSelected && <Check size={14} strokeWidth={3} />}
-                  </div>
-                </div>
-              );
-            })
+                    </span>
+                    
+                    {belumMulai ? (
+                      <span className="inline-flex text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        Belum Mulai
+                      </span>
+                    ) : !noSession ? (
+                      <div className={`flex overflow-hidden rounded-full ${disabled ? 'opacity-50 grayscale' : ''}`}>
+                        <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">
+                          {action === "Pakan" ? "Beri Pakan" : action}
+                        </div>
+                        <div className="bg-[#F26B4E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">
+                          {formatCountdown(msRemaining)}
+                        </div>
+                      </div>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           )}
-        </div>
-
-        <div className="px-5 pb-5 pt-3 border-t border-slate-100 shrink-0 bg-white">
-          <button
-            onClick={handleExecute}
-            disabled={selectedCycles.size === 0 || isExecuting}
-            className="w-full rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-bold text-white shadow-md shadow-[#4C9AA6]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
-          >
-            {isExecuting ? (
-              <span className="animate-pulse">Memproses...</span>
-            ) : (
-              `Terapkan ke ${selectedCycles.size} Kolam`
-            )}
-          </button>
         </div>
       </div>
     </div>
