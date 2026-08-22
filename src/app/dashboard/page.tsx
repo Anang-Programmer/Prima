@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { LogoutButton } from "@/components/LogoutButton";
 import TambahKolamSheet from "@/components/tambah-kolam-sheet";
 import Link from "next/link";
+import { estimateSr } from "@/lib/feed-calculator";
 /* ============================================================
    KONSTANTA & HELPER
 ============================================================ */
@@ -474,7 +475,7 @@ export default function DashboardPage() {
           rows.forEach((p) => {
             if (p.cycle_id && !(p.cycle_id in srByCycle)) {
               // Fallback: if no sampling sr, estimate based on doc
-              srByCycle[p.cycle_id] = Math.max(0, 100 - (Number(p.doc || 0) * 0.08));
+              srByCycle[p.cycle_id] = estimateSr(Number(p.doc || 0));
             }
           });
         }

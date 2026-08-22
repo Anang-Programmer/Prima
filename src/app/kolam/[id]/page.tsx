@@ -1118,7 +1118,7 @@ export default function DetailKolamPage() {
       </div>
 
       {/* Sticky Mulai Siklus button if !d.cycle */}
-      {!d.cycle && (
+      {!d.cycle && sheet !== "startCycle" && (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none px-4">
           <button className="pointer-events-auto flex w-full max-w-[200px] items-center justify-center gap-2 rounded-xl bg-[#25C4D4] px-6 py-3 text-[15px] font-bold text-white shadow-lg transition active:scale-95" onClick={() => setSheet("startCycle")}>
             Mulai Siklus <span className="text-xl leading-none">→</span>

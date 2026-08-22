@@ -20,15 +20,10 @@ export function calculateDailyFeed(doc: number, population: number, area: number
   const shrimpCount = Math.round(population * (srPct / 100));
   const biomassKg = Number(((shrimpCount * abwGram) / 1000).toFixed(2));
 
-  let feedingRatePct = 1.25;
-  if (doc <= 15) feedingRatePct = 20;
-  else if (doc <= 30) feedingRatePct = 12.5;
-  else if (doc <= 45) feedingRatePct = 8.5;
-  else if (doc <= 60) feedingRatePct = 6.0;
-  else if (doc <= 90) feedingRatePct = 3.5;
-  else feedingRatePct = 1.25;
+  // Use the smooth feeding rate curve (same as feedingRatePct function below)
+  const frPct = feedingRatePct(doc);
 
-  let dailyFeedKg = (biomassKg * feedingRatePct) / 100;
+  let dailyFeedKg = (biomassKg * frPct) / 100;
 
   // Density adjustment
   const density = shrimpCount / area;
@@ -46,7 +41,7 @@ export function calculateDailyFeed(doc: number, population: number, area: number
   else if (doc > 90) ancoIntervalHours = 1.25;
 
   return {
-    doc, abwGram, shrimpCount, biomassKg, feedingRatePct, dailyFeedKg, mealsPerDay,
+    doc, abwGram, shrimpCount, biomassKg, feedingRatePct: frPct, dailyFeedKg, mealsPerDay,
     feedPerMealKg: +(dailyFeedKg / mealsPerDay).toFixed(1),
     ancoIntervalHours,
   };

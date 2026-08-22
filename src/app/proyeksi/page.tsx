@@ -84,7 +84,19 @@ export default function ProyeksiPage() {
               const feedDoc = Math.floor((new Date(f.date).getTime() - cycleStartMs) / 86400000);
               return feedDoc >= weekStartDoc && feedDoc <= weekEndDoc;
             });
-            weeklyFeed = realFeeds.reduce((acc: number, f: any) => acc + Number(f.feed_amount_kg), 0);
+            const realTotal = realFeeds.reduce((acc: number, f: any) => acc + Number(f.feed_amount_kg), 0);
+            
+            if (realTotal > 0) {
+              // Use real data
+              weeklyFeed = realTotal;
+            } else {
+              // No feed logs recorded -- fallback to SNI calculation so it doesn't show 0
+              const endDay = Math.min(weekEndDoc, doc);
+              for (let dayDoc = weekStartDoc; dayDoc <= endDay; dayDoc++) {
+                const calcDay = calculateDailyFeed(dayDoc, Number(r.initial_shrimp_count), Number(r.area_m2), 0, sr);
+                weeklyFeed += (calcDay.dailyFeedKg * feedRatio);
+              }
+            }
             isReal = true;
             
             // If current week is ongoing, add SNI projection for remaining days scaled by AI ratio
