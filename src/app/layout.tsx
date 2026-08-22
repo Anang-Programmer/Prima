@@ -8,7 +8,7 @@ export const metadata = {
   description: "Next Generation Shrimp Farming",
 };
 
-// import { FcmTokenManager } from "@/components/FcmTokenManager";
+import FcmBridge from "@/components/FcmBridge";
 
 export default function RootLayout({
   children,
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        {/* <FcmTokenManager /> */}
+        <FcmBridge />
         {children}
       </body>
     </html>

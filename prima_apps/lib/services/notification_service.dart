@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -124,5 +125,45 @@ class NotificationService {
     if (pondId != null && onNotificationTapped != null) {
       onNotificationTapped!(pondId);
     }
+  }
+
+  /// Supabase config untuk pendaftaran token
+  static const _supabaseUrl = 'https://pexrvyolxkjyhzdxgrst.supabase.co';
+  static const _supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBleHJ2eW9seGtqeWh6ZHhncnN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzY5NDcsImV4cCI6MjEwMjAxMjk0N30.wvAMhnOfXp3IoYTfzmF3304fG9dg04ne1SEsuqR2QDU';
+
+  /// Ambil FCM token device ini
+  Future<String?> getToken() => _fcm.getToken();
+
+  /// Dipanggil dari WebView bridge (JS handler "registerFcm").
+  /// args: List berisi JSON string {userId, accessToken}
+  Future<void> registerFromBridge(dynamic args) async {
+    try {
+      String raw = "";
+      if (args is List && args.isNotEmpty) raw = args.first.toString();
+      else if (args is String) raw = args;
+      if (raw.isEmpty) return;
+      final payload = jsonDecode(raw) as Map<String, dynamic>;
+      final userId = payload['userId']?.toString();
+      final accessToken = payload['accessToken']?.toString();
+      if (userId == null || accessToken == null || userId.isEmpty || accessToken.isEmpty) return;
+
+      final token = await getToken();
+      if (token == null) return;
+
+      // Upsert ke fcm_tokens via REST (RLS: auth.uid() = user_id)
+      final client = HttpClient();
+      final req = await client.postUrl(Uri.parse('$_supabaseUrl/rest/v1/fcm_tokens?on_conflict=token'));
+      req.headers.set(HttpHeaders.authorizationHeader, "Bearer $accessToken");
+      req.headers.set('apikey', _supabaseAnonKey);
+      req.headers.set(HttpHeaders.contentTypeHeader, "application/json");
+      req.headers.set('Prefer', 'resolution=merge-duplicates');
+      req.add(utf8.encode(jsonEncode([
+        {"user_id": userId, "token": token, "platform": "android"},
+      ])));
+      final res = await req.close();
+      await res.drain<void>();
+      client.close();
+    } catch (_) {}
   }
 }
