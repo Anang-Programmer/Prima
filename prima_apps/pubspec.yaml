@@ -63,9 +63,7 @@ flutter_native_splash:
   image: "assets/images/logo_start.png"
   android: true
   ios: true
-  android_12:
-    color: "#4C9AA6"
-    image: "assets/images/logo.png"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
