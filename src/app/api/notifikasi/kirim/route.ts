@@ -176,7 +176,8 @@ async function run(req: NextRequest) {
             body: JSON.stringify({
               message: {
                 token: tk,
-                notification: copy,
+                // DATA-ONLY: tampilan ditangani flutter_local_notifications
+                // (hindari notifikasi dobel: sistem + handler lokal)
                 data: {
                   pond_id: String(timer.pond_id),
                   type: String(timer.type),
