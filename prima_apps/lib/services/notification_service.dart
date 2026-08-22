@@ -9,7 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  await NotificationService.instance._showFromRemote(message);
+  // TIDAK menampilkan notifikasi lokal di sini - pesan bermuatan
+  // 'notification' sudah ditampilkan otomatis oleh sistem saat app
+  // background/tertutup. Menampilkan lagi di sini = notif dobel.
 }
 
 class NotificationService {

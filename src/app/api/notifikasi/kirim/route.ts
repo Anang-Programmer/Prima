@@ -176,15 +176,23 @@ async function run(req: NextRequest) {
             body: JSON.stringify({
               message: {
                 token: tk,
-                // DATA-ONLY: tampilan ditangani flutter_local_notifications
-                // (hindari notifikasi dobel: sistem + handler lokal)
+                // Muatan notification: ditampilkan OLEH SISTEM (Play Services),
+                // tetap masuk walau app tertutup total. Tampilan lokal di
+                // background handler DINONAKTIFKAN agar tidak dobel.
+                notification: copy,
                 data: {
                   pond_id: String(timer.pond_id),
                   type: String(timer.type),
                   title: copy.title,
                   body: copy.body,
                 },
-                android: { priority: "HIGH" },
+                android: {
+                  priority: "HIGH",
+                  notification: {
+                    icon: "@mipmap/ic_launcher",
+                    channel_id: "prima_timers",
+                  },
+                },
               },
             }),
           }
