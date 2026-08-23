@@ -751,6 +751,19 @@ export default function DetailKolamPage() {
   // Konfirmasi "Sudah Diberi Pakan": catat feed_log + selesaikan timer lama + mulai siklus baru.
   async function confirmFeedDone(timerId: string) {
     if (!d?.cycle) return;
+
+    // Hitung jumlah pakan sesi ini
+    const safeMeals = Math.max(d.feed.mealsPerDay || 1, 1);
+    const feedSesiIniKg = d.feed.dailyFeedKg / safeMeals;
+    
+    const feedText = feedSesiIniKg < 1 
+      ? `${Math.round(feedSesiIniKg * 1000)} gram` 
+      : `${+feedSesiIniKg.toFixed(2)} kg`;
+    
+    if (!window.confirm(`Anda akan mencatat pemberian pakan sebesar ${feedText} untuk sesi ini.\n\nLanjutkan?`)) {
+      return;
+    }
+
     setBusy(true);
     setInsertError(null);
     try {
