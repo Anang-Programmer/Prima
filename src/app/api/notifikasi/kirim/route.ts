@@ -142,8 +142,8 @@ async function run(req: NextRequest) {
 
   for (const timer of timers) {
     const pond = pondMap.get(timer.pond_id) as { user_id: string; name: string } | undefined;
-    const rawName = pond?.name ?? "Kolam";
-    const displayPond = rawName.toLowerCase().includes("kolam") ? rawName : `kolam ${rawName}`;
+    const pondName = pond?.name ?? "Kolam";
+    const displayPond = pondName.toLowerCase().includes("kolam") ? pondName : `kolam ${pondName}`;
 
     const copy =
       ({
