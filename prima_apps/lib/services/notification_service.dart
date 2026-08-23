@@ -21,9 +21,7 @@ class NotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _local = FlutterLocalNotificationsPlugin();
 
-  /// Callback yang dipanggil saat user tap notifikasi — menerima pond_id
-  void Function(String pondId)? onNotificationTapped;
-
+  // Old declaration removed
   /// Notification channel untuk Prima
   static const _androidChannel = AndroidNotificationChannel(
     'prima_timers',
@@ -121,11 +119,13 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Navigate ke halaman kolam yang tepat
+  /// Callback yang dipanggil saat user tap notifikasi — menerima data payload
+  void Function(Map<String, dynamic> data)? onNotificationTapped;
+
+  /// Navigate ke halaman yang tepat
   void _handleMessageTap(Map<String, dynamic> data) {
-    final pondId = data['pond_id'] as String?;
-    if (pondId != null && onNotificationTapped != null) {
-      onNotificationTapped!(pondId);
+    if (onNotificationTapped != null) {
+      onNotificationTapped!(data);
     }
   }
 

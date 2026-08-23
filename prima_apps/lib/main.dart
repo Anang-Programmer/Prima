@@ -10,7 +10,7 @@ import 'services/notification_service.dart';
 /// Penampung navigasi yang datang sebelum WebView siap
 /// (mis. app dibuka dari notifikasi saat terminated).
 class PendingNavigation {
-  static String? pondId;
+  static String? urlPath;
 }
 
 void main() async {
@@ -59,9 +59,18 @@ class _PrimaWebViewState extends State<PrimaWebView> {
   void initState() {
     super.initState();
 
-    // Navigasi ke halaman kolam saat notifikasi di-tap
-    NotificationService.instance.onNotificationTapped = (pondId) {
-      _openPond(pondId);
+    // Navigasi ke halaman yang tepat saat notifikasi di-tap
+    NotificationService.instance.onNotificationTapped = (data) {
+      String? path;
+      if (data['type'] == 'SOCIAL' && data['post_id'] != null) {
+        path = "/komunitas/${data['post_id']}";
+      } else if (data['pond_id'] != null) {
+        path = "/kolam/${data['pond_id']}";
+      }
+      
+      if (path != null) {
+        _openPath(path);
+      }
     };
 
     pullToRefreshController = PullToRefreshController(
@@ -76,16 +85,16 @@ class _PrimaWebViewState extends State<PrimaWebView> {
     );
   }
 
-  /// Buka halaman kolam tertentu di WebView.
+  /// Buka path tertentu di WebView.
   /// Jika controller belum siap, simpan dulu dan buka saat onLoadStop.
-  void _openPond(String pondId) {
+  void _openPath(String path) {
     final c = webViewController;
     if (c != null) {
       c.loadUrl(
-        urlRequest: URLRequest(url: WebUri("https://prima-eta.vercel.app/kolam/$pondId")),
+        urlRequest: URLRequest(url: WebUri("https://prima-eta.vercel.app$path")),
       );
     } else {
-      PendingNavigation.pondId = pondId;
+      PendingNavigation.urlPath = path;
     }
   }
 
@@ -128,11 +137,11 @@ class _PrimaWebViewState extends State<PrimaWebView> {
               pullToRefreshController?.endRefreshing();
 
               // Ada pending navigasi dari notifikasi? Buka sekarang.
-              final pending = PendingNavigation.pondId;
+              final pending = PendingNavigation.urlPath;
               if (pending != null) {
-                PendingNavigation.pondId = null;
+                PendingNavigation.urlPath = null;
                 await controller.loadUrl(
-                  urlRequest: URLRequest(url: WebUri("https://prima-eta.vercel.app/kolam/$pending")),
+                  urlRequest: URLRequest(url: WebUri("https://prima-eta.vercel.app$pending")),
                 );
               }
             },
