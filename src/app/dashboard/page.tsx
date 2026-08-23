@@ -66,6 +66,7 @@ type PondDash = {
 type Timer = { id: string; pond_id: string; type: string; due_time: string };
 type DashData = {
   fullName: string;
+  is_premium: boolean;
   stats?: { totalKolam: number; sr: number; fcr: number };
   ponds: PondDash[];
   fcrByCycle: Record<string, number>;
@@ -81,6 +82,7 @@ type DashData = {
 const pastDue = () => new Date(Date.now() - 1000).toISOString();
 const DEMO: DashData = {
   fullName: "Matta Muhammad",
+  is_premium: true,
   stats: { totalKolam: 3, sr: 84, fcr: 0.41 },
   ponds: [
     { pond_id: "d1", pond_name: "Kolam A1", area_m2: 1000, doc: 78, cycle_id: "c1", current_biomass_kg: 300, initial_shrimp_count: 100000, stage: "Benur" },
@@ -214,6 +216,7 @@ export default function DashboardPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [showTambah, setShowTambah] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [communityNotifs, setCommunityNotifs] = useState<any[]>([]);
 
   const unreadNotifsCount = communityNotifs.filter(n => !n.is_read).length;
@@ -435,7 +438,7 @@ export default function DashboardPage() {
         if (!user) throw new Error("not-logged-in");
 
         const [{ data: profile }, { data: ponds }, { data: notifs }] = await Promise.all([
-          supabase.from("profiles").select("full_name, first_name, last_name").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name, first_name, last_name, is_premium").eq("id", user.id).maybeSingle(),
           supabase.from("v_pond_dashboard").select("*").eq("user_id", user.id),
           supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
         ]);
@@ -498,6 +501,7 @@ export default function DashboardPage() {
 
           setData({
             fullName: displayFullName,
+            is_premium: profile?.is_premium || false,
             ponds: rows.map((p) => ({
               pond_id: p.pond_id,
               pond_name: p.pond_name,
@@ -779,7 +783,13 @@ export default function DashboardPage() {
                 {/* TODO: buka modal / halaman tambah kolam */}
                 <button
                   type="button"
-                  onClick={() => setShowTambah(true)}
+                  onClick={() => {
+                    if (data && !data.is_premium && data.ponds.length >= 1) {
+                      setShowUpgradeModal(true);
+                    } else {
+                      setShowTambah(true);
+                    }
+                  }}
                   className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] bg-white px-4 py-1.5 text-xs font-semibold text-[#1FB4B2] transition active:bg-slate-50"
                 >
                   <Plus size={14} /> Tambah
@@ -866,6 +876,37 @@ export default function DashboardPage() {
         }}
         isExecuting={isExecutingAction}
       />
+
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button aria-label="Tutup" onClick={() => setShowUpgradeModal(false)} className="absolute inset-0 bg-black/40" />
+          <div className="relative w-full max-w-sm rounded-[24px] bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E3F1F2]">
+                <AlertTriangle className="text-[#2F6E7B]" size={28} />
+              </div>
+            </div>
+            <h3 className="text-center text-[18px] font-bold text-slate-800">Batas Kolam Tercapai</h3>
+            <p className="mt-2 text-center text-sm text-slate-600 leading-relaxed">
+              Akun <span className="font-bold text-slate-700">Gratis</span> maksimal hanya bisa memiliki 1 kolam. Upgrade ke <span className="font-bold text-[#4C9AA6]">Prime</span> untuk menambah kolam tanpa batas dan fitur premium lainnya!
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <button 
+                onClick={() => router.push("/profil")}
+                className="w-full rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-bold text-white transition active:scale-95"
+              >
+                Lihat Paket Prime
+              </button>
+              <button 
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 active:scale-95"
+              >
+                Nanti Saja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <TambahKolamSheet
         open={showTambah}
