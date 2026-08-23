@@ -189,7 +189,7 @@ async function run(req: NextRequest) {
                 android: {
                   priority: "HIGH",
                   notification: {
-                    icon: "@mipmap/ic_launcher",
+                    icon: "@mipmap/launcher_icon",
                     channel_id: "prima_timers",
                   },
                 },
