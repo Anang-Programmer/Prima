@@ -169,26 +169,33 @@ export default function ProyeksiPage() {
           )}
 
           {/* ============ PEMILIH KOLAM ============ */}
-          {!single && <p className="text-[11px] font-semibold text-slate-700">Pilih Kolam</p>}
-          <button onClick={() => setShowPicker(true)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm text-slate-700 shadow-sm">
-            {single ? single.pond_name : "Semua Kolam"}
-            <ChevronRight size={16} className="text-slate-400" />
-          </button>
+          {!single && <p className="mb-2 text-[11px] font-semibold text-slate-700">Pilih Kolam</p>}
+          <div className="relative">
+            <button onClick={() => setShowPicker(!showPicker)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm text-slate-700 shadow-sm ring-1 ring-slate-100">
+              {single ? single.pond_name : "Semua Kolam"}
+              <ChevronRight size={16} className={`text-slate-400 transition-transform ${showPicker ? 'rotate-90' : ''}`} />
+            </button>
 
-          {/* ============ MODE SEMUA: LIST PER KOLAM ============ */}
-          {!single && (
-            <div className="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-sm">
-              {agg.list.map((p) => (
-                <button key={p.pond_id} onClick={() => setSelected(p.pond_id)} className="flex w-full items-center justify-between px-4 py-3.5 text-left">
-                  <span className="text-xs text-slate-500">{p.pond_name}</span>
-                  <span className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-800">{fmtKg1(p.proj.dailyTodayKg)}</span>
-                  </span>
-                </button>
-              ))}
-              {agg.list.length === 0 && <p className="p-6 text-center text-xs text-slate-400">Belum ada siklus berjalan.</p>}
-            </div>
-          )}
+            {/* Dropdown Menu */}
+            {showPicker && (
+              <>
+                <button aria-label="Tutup" onClick={() => setShowPicker(false)} className="fixed inset-0 z-40 cursor-default" />
+                <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-100 z-50">
+                  <button onClick={() => { setSelected(null); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === null ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                    Semua Kolam {selected === null && <Check size={16} className="text-[#4C9AA6]" />}
+                  </button>
+                  {(ponds ?? []).map((p) => (
+                    <button key={p.pond_id} onClick={() => { setSelected(p.pond_id); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === p.pond_id ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                      <span>{p.pond_name} <span className="text-[10px] text-slate-400 font-normal ml-1">DOC {p.doc}</span></span>
+                      {selected === p.pond_id && <Check size={16} className="text-[#4C9AA6]" />}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+
 
           {/* ============ MODE SATU KOLAM: CHART + RINCIAN ============ */}
           {single && (
@@ -240,25 +247,7 @@ export default function ProyeksiPage() {
       </div>
       </div>
 
-      {/* ============ SHEET PEMILIH KOLAM ============ */}
-      {showPicker && (
-        <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
-          <button aria-label="Tutup" onClick={() => setShowPicker(false)} className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative z-10 md:w-full md:max-w-md md:rounded-[24px]">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-300" />
-            <h3 className="mb-3 text-base font-extrabold">Pilih Kolam</h3>
-            <button onClick={() => { setSelected(null); setShowPicker(false); }} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm hover:bg-slate-50">
-              Semua Kolam {selected === null && <Check size={16} className="text-[#4C9AA6]" />}
-            </button>
-            {(ponds ?? []).map((p) => (
-              <button key={p.pond_id} onClick={() => { setSelected(p.pond_id); setShowPicker(false); }} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm hover:bg-slate-50">
-                {p.pond_name} <span className="text-[10px] text-slate-400">DOC {p.doc}</span>
-                {selected === p.pond_id && <Check size={16} className="text-[#4C9AA6]" />}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
