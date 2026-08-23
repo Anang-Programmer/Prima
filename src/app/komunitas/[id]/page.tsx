@@ -177,6 +177,12 @@ export default function PostDetailPage({
       await supabase
         .from("post_likes")
         .insert({ post_id: post.id, user_id: me!.id });
+      
+      fetch("/api/notifikasi/sosial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: post.id, actor_name: me!.name, type: "LIKE", current_user_id: me!.id })
+      }).catch(() => {});
     }
 
     setBusy(false);
@@ -206,6 +212,12 @@ export default function PostDetailPage({
       avatar_url: me!.avatar,
       content: newComment.trim(),
     });
+
+    fetch("/api/notifikasi/sosial", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ post_id: post.id, actor_name: me!.name, type: "COMMENT", current_user_id: me!.id })
+    }).catch(() => {});
 
     setNewComment("");
     setBusy(false);

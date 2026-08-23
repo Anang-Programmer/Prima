@@ -171,7 +171,7 @@ export default function NotifikasiPage() {
                   
                   <div className="flex-1 pt-1">
                     <p className="text-[15px] leading-[1.25] text-[#536169]">
-                      <span className="font-semibold text-[#10242E]">{notif.actor_name}</span> {notif.type === 'LIKE' ? 'Memberi suka pada postingan anda' : 'Memberi komentar pada postingan anda'}
+                      <span className="font-semibold text-[#10242E]">{notif.actor_name}</span> {notif.type === 'LIKE' ? 'Menyukai postingan anda' : 'Memberi komentar pada postingan anda'}
                     </p>
                     <p className="mt-1 text-[12px] text-[#8A949A]">
                       {Math.max(1, Math.floor((Date.now() - new Date(notif.created_at).getTime()) / 3600000))}j
@@ -245,7 +245,7 @@ export default function NotifikasiPage() {
                   
                   <div className="flex-1 pt-1">
                     <p className="text-[15px] leading-[1.25] text-[#536169]">
-                      <span className="font-semibold text-[#10242E]">{notif.actor_name}</span> {notif.type === 'LIKE' ? 'Memberi suka pada postingan anda' : 'Memberi komentar pada postingan anda'}
+                      <span className="font-semibold text-[#10242E]">{notif.actor_name}</span> {notif.type === 'LIKE' ? 'Menyukai postingan anda' : 'Memberi komentar pada postingan anda'}
                     </p>
                     <p className="mt-1 text-[12px] text-[#8A949A]">
                       {new Date(notif.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}

@@ -76,8 +76,16 @@ export default function KomunitasPage() {
   async function toggleLike(p: Post) {
     if (!(await requireLogin())) return;
     setBusy(true);
-    if (p.liked_by_me) await supabase.from("post_likes").delete().eq("post_id", p.id).eq("user_id", me!.id);
-    else await supabase.from("post_likes").insert({ post_id: p.id, user_id: me!.id });
+    if (p.liked_by_me) {
+      await supabase.from("post_likes").delete().eq("post_id", p.id).eq("user_id", me!.id);
+    } else {
+      await supabase.from("post_likes").insert({ post_id: p.id, user_id: me!.id });
+      fetch("/api/notifikasi/sosial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: p.id, actor_name: me!.name, type: "LIKE", current_user_id: me!.id })
+      }).catch(() => {});
+    }
     setBusy(false); refresh();
   }
 

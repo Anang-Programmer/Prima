@@ -148,19 +148,19 @@ async function run(req: NextRequest) {
     const copy =
       ({
         Pakan: {
-          title: "Waktunya Memberi Pakan!",
-          body: `Sesi pakan ${displayPond} telah jatuh tempo. Buka aplikasi untuk konfirmasi.`,
+          title: "Waktunya Pakan!",
+          body: `${displayPond} waktunya diberi pakan.`,
         },
         "Cek Anco": {
           title: "Waktunya Cek Anco!",
-          body: `Periksa sisa pakan di anco ${displayPond}.`,
+          body: `Cek sisa pakan di anco ${displayPond}.`,
         },
         Probiotik: {
-          title: "Waktunya Beri Probiotik!",
-          body: `Aplikasikan probiotik pada ${displayPond}.`,
+          title: "Waktunya Probiotik!",
+          body: `Saatnya beri probiotik di ${displayPond}.`,
         },
       } as Record<string, { title: string; body: string }>)[timer.type] ?? {
-        title: "Pengingat Prima",
+        title: "Pengingat",
         body: `Ada pengingat untuk ${displayPond}.`,
       };
 
