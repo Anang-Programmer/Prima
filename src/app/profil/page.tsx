@@ -101,6 +101,37 @@ export default function ProfilPage() {
     router.push("/");
   }
 
+  const [confirmAction, setConfirmAction] = useState<"upgrade" | "downgrade" | null>(null);
+
+  async function handleUpgrade() {
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("profiles").update({ is_premium: true }).eq("id", user.id);
+      location.reload();
+    }
+    setBusy(false);
+  }
+
+  async function handleDowngrade() {
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      // 1. Set is_premium = false
+      await supabase.from("profiles").update({ is_premium: false }).eq("id", user.id);
+      
+      // 2. Reduce ponds to 1
+      const { data: ponds } = await supabase.from("ponds").select("id").eq("user_id", user.id).eq("status", "Aktif").order("created_at", { ascending: true });
+      if (ponds && ponds.length > 1) {
+        const pondsToArchive = ponds.slice(1).map(p => p.id);
+        const res = await supabase.from("ponds").update({ status: "Non-aktif" }).in("id", pondsToArchive);
+        console.log("Archive result:", res);
+      }
+      location.reload();
+    }
+    setBusy(false);
+  }
+
   if (!d) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>;
 
   const initial = (d.name || "?")[0]?.toUpperCase();
@@ -157,8 +188,22 @@ export default function ProfilPage() {
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 shadow-md">
                 <div className="relative z-10">
                   <h3 className="text-[17px] font-medium text-white mb-8 tracking-wide">Upgrade Akun ke Prime</h3>
-                  <button className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
+                  <button onClick={() => setConfirmAction("upgrade")} className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
                     Upgrade <ChevronRight size={14} className="stroke-[2.5]" />
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ============ DOWNGRADE CARD ============ */}
+          {d.isPremium && (
+            <section className="px-5 mt-4 md:px-0">
+              <div className="relative overflow-hidden rounded-2xl bg-[#E3F1F2] p-5 shadow-sm border border-[#4C9AA6]/20">
+                <div className="relative z-10">
+                  <h3 className="text-[17px] font-medium text-[#2F6E7B] mb-8 tracking-wide">Akun Prime Aktif</h3>
+                  <button onClick={() => setConfirmAction("downgrade")} className="flex items-center gap-1.5 rounded-lg bg-white border border-[#4C9AA6] px-4 py-2 text-[13px] font-bold text-[#4C9AA6] transition active:scale-95 shadow-sm">
+                    Kembali ke Gratis <ChevronRight size={14} className="stroke-[2.5]" />
                   </button>
                 </div>
               </div>
@@ -189,7 +234,7 @@ export default function ProfilPage() {
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70">
+          <button onClick={() => router.push("/dashboard")} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -207,6 +252,40 @@ export default function ProfilPage() {
           </div>
         </div>
       </nav>
+
+      {/* ============ CONFIRM MODAL ============ */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button aria-label="Tutup" onClick={() => setConfirmAction(null)} className="absolute inset-0 bg-black/40" />
+          <div className="relative w-full max-w-sm rounded-[24px] bg-white p-6 shadow-xl">
+            <h3 className="text-center text-[18px] font-bold text-slate-800">
+              {confirmAction === "upgrade" ? "Upgrade ke Prime?" : "Kembali ke Gratis?"}
+            </h3>
+            <p className="mt-2 text-center text-sm text-slate-600 leading-relaxed">
+              {confirmAction === "upgrade" 
+                ? "Anda akan beralih ke paket Prime. (Ini adalah simulasi MVP)"
+                : "Anda akan beralih ke paket Gratis. Kolam tambahan Anda akan otomatis diarsipkan dan hanya menyisakan 1 kolam aktif. Yakin ingin melanjutkan?"}
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <button 
+                onClick={confirmAction === "upgrade" ? handleUpgrade : handleDowngrade}
+                disabled={busy}
+                className="w-full rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-bold text-white transition active:scale-95 disabled:opacity-60 flex justify-center items-center gap-2"
+              >
+                {busy && <Loader2 size={16} className="animate-spin" />}
+                {confirmAction === "upgrade" ? "Ya, Upgrade" : "Ya, Downgrade"}
+              </button>
+              <button 
+                onClick={() => setConfirmAction(null)}
+                disabled={busy}
+                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 active:scale-95 disabled:opacity-60"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ============ SHEET: DATA TAMBAK ============ */}
       <Sheet open={sheet === "farm"} onClose={() => setSheet(null)} title="Data Tambak">

@@ -439,7 +439,7 @@ export default function DashboardPage() {
 
         const [{ data: profile }, { data: ponds }, { data: notifs }] = await Promise.all([
           supabase.from("profiles").select("full_name, first_name, last_name, is_premium").eq("id", user.id).maybeSingle(),
-          supabase.from("v_pond_dashboard").select("*").eq("user_id", user.id),
+          supabase.from("v_pond_dashboard").select("*").eq("user_id", user.id).eq("pond_status", "Aktif"),
           supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
         ]);
 
@@ -499,18 +499,24 @@ export default function DashboardPage() {
 
           setCommunityNotifs(notifs ?? []);
 
+          let finalPonds = rows.map((p) => ({
+            pond_id: p.pond_id,
+            pond_name: p.pond_name,
+            area_m2: Number(p.area_m2),
+            doc: Number(p.doc),
+            cycle_id: p.cycle_id,
+            current_biomass_kg: Number(p.current_biomass_kg),
+            initial_shrimp_count: p.initial_shrimp_count,
+          }));
+
+          if (!profile?.is_premium && finalPonds.length > 1) {
+            finalPonds = finalPonds.slice(0, 1);
+          }
+
           setData({
             fullName: displayFullName,
             is_premium: profile?.is_premium || false,
-            ponds: rows.map((p) => ({
-              pond_id: p.pond_id,
-              pond_name: p.pond_name,
-              area_m2: Number(p.area_m2),
-              doc: Number(p.doc),
-              cycle_id: p.cycle_id,
-              current_biomass_kg: Number(p.current_biomass_kg),
-              initial_shrimp_count: p.initial_shrimp_count,
-            })),
+            ponds: finalPonds,
             fcrByCycle,
             srByCycle,
             timers: (timers ?? []) as Timer[],
