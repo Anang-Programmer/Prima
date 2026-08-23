@@ -92,6 +92,7 @@ export function buildDetail(data: any) {
     sedikit: feeds.filter((f: any) => f.anco_result === "Sisa Sedikit").length,
     banyak: feeds.filter((f: any) => f.anco_result === "Sisa Banyak").length,
     latestResult: latestAnco,
+    currentSessionResult: feeds.length > 0 ? feeds[0].anco_result : null,
     multiplier: ancoMultiplier,
     rawPerMealKg,
     adjustedPerMealKg,

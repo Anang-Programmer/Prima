@@ -45,7 +45,7 @@ class NotificationService {
     if (settings.authorizationStatus == AuthorizationStatus.denied) return;
 
     // --- 2. Setup local notifications ---
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
     await _local.initialize(
       const InitializationSettings(android: androidInit),
       onDidReceiveNotificationResponse: _onTapNotification,
@@ -105,7 +105,7 @@ class NotificationService {
           channelDescription: _androidChannel.description,
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+          icon: '@mipmap/launcher_icon',
         ),
       ),
       payload: jsonEncode(data),

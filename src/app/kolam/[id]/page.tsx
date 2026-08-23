@@ -1108,7 +1108,7 @@ export default function DetailKolamPage() {
         <EditAbwSheet sheet={sheet} setSheet={setSheet} abwInput={abwInput} setAbwInput={setAbwInput} handleEditAbw={handleEditAbw} busy={busy} />
 
         {/* ============ MODAL: CEK ANCO ============ */}
-        <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} lastAncoResult={d?.anco?.latestResult} />
+        <AncoModal ancoModal={ancoModal} ancoResult={ancoResult} setAncoResult={setAncoResult} setAncoModal={setAncoModal} busy={busy} submitAnco={submitAnco} currentSessionResult={d?.anco?.currentSessionResult} />
 
         {/* ============ SHEET: KONSULTASI AI (bottom) ============ */}
         <ConsultAISheet sheet={sheet} setSheet={setSheet} chat={chat} chatInput={chatInput} setChatInput={setChatInput} sendChat={sendChat} />

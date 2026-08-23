@@ -3,11 +3,11 @@
 import { Droplets, Loader2 } from "lucide-react";
 
 export function AncoModal(props: any) {
-  const { ancoModal, ancoResult, setAncoResult, setAncoModal, busy, submitAnco, lastAncoResult } = props;
+  const { ancoModal, ancoResult, setAncoResult, setAncoModal, busy, submitAnco, currentSessionResult } = props;
   if (!ancoModal) return null;
 
-  // Jika anco sebelumnya "Habis", tidak masuk akal makanan tiba-tiba muncul kembali
-  const prevWasHabis = lastAncoResult === "Habis";
+  // Jika di sesi pakan INI anco sudah pernah dicek dan "Habis", pengecekan berikutnya di sesi yang sama harus tetap "Habis"
+  const prevWasHabis = currentSessionResult === "Habis";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
