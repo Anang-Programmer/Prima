@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Loader2, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { estimateHarvestYield } from "@/lib/feed-calculator";
@@ -34,6 +34,20 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
     if (Number(benur) > 0 && Number(area) > 0) return estimateHarvestYield(Number(benur), Number(area));
     return null;
   }, [benur, area]);
+
+  useEffect(() => {
+    if (open) {
+      setName("");
+      setShape("");
+      setArea("");
+      setLocation("");
+      setIsCycleActive(false);
+      setBenur("");
+      setTebar("");
+      setError("");
+      setDepth("");
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -196,12 +210,6 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
                   <span className="text-slate-500">Target yield</span>
                   <span className={`font-bold ${est.yieldKgPerM2 >= 2 && est.yieldKgPerM2 <= 4 ? "text-[#2F8E4E]" : est.yieldKgPerM2 < 2 ? "text-[#D4830B]" : "text-[#C0392B]"}`}>{est.yieldKgPerM2} kg/m²</span>
                 </div>
-                {est.yieldKgPerM2 < 2 && (
-                  <p className="text-[10px] text-[#D4830B]">Di bawah standar SNI (2-4 kg/m²). Pertimbangkan tambah benur.</p>
-                )}
-                {est.yieldKgPerM2 > 4 && (
-                  <p className="text-[10px] text-[#C0392B]">Di atas standar - kepadatan tinggi, monitoring ketat diperlukan.</p>
-                )}
               </div>
             )}
 
