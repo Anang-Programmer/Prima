@@ -616,9 +616,9 @@ export default function DashboardPage() {
     <div className="min-h-screen md:h-screen md:flex bg-[#F2F5F7] text-slate-800 md:overflow-hidden">
       {/* ================= DESKTOP SIDEBAR ================= */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:bg-white md:shadow-xl md:z-20 md:border-r md:border-slate-100">
-        <div className="px-8 py-8 flex items-center justify-center border-b border-slate-50">
+        {/* <div className="px-8 py-8 flex items-center justify-center border-b border-slate-50">
           <Image src="/logo.png" alt="PRIMA Logo" width={140} height={48} className="h-10 w-auto object-contain" priority />
-        </div>
+        </div> */}
         <nav className="flex-1 px-4 py-8 space-y-2">
           {NAV.map(({ label, icon: Icon, href, active }) => (
             <a
@@ -642,11 +642,11 @@ export default function DashboardPage() {
           {/* ================= HEADER TEAL ================= */}
           <header className="bg-[#74B6BE] px-4 pb-6 pt-5 md:rounded-b-3xl md:px-10 md:pt-10 md:pb-12">
             {/* Logo khusus mobile */}
-            <div className="flex items-center justify-between md:hidden">
+            {/* <div className="flex items-center justify-between md:hidden">
               <div className="flex items-center text-white">
                 <Image src="/logo.png" alt="PRIMA Logo" width={120} height={40} className="h-10 w-auto object-contain" priority />
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-5 md:mt-0 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="flex items-start justify-between md:block">

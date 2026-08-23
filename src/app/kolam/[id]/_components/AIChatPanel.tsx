@@ -29,7 +29,7 @@ export function AIChatPanel(props: any) {
         {messages.map((msg: any, i: number) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#4C9AA6] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
-              {msg.content.replace(/\[?DEAL_DATA:\s*\{.*?\}\]?/g, "").trim()}
+              {msg.content.replace(/\[?DEAL_DATA:\s*\{[\s\S]*?\}\]?/g, "").trim()}
             </div>
           </div>
         ))}

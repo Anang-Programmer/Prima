@@ -101,7 +101,17 @@ export function buildDetail(data: any) {
     isHabis1Week,
   };
 
+  // 1. Jangkar rahasia AI (pure SNI + Anco) - mengabaikan plan manual user
+  // Ini memastikan AI tidak menggunakan angka markup user berulang-ulang sebagai baseline baru.
+  const trueRawPerMealKg = calc.dailyFeedKg / calc.mealsPerDay;
+  const trueAdjustedPerMealKg = trueRawPerMealKg * ancoMultiplier;
+  
   const hasAncoHistory = anco.consecutiveHabis > 0 || anco.latestResult !== null;
+  const trueRecommendedFeedKg = hasAncoHistory 
+    ? +(trueAdjustedPerMealKg * calc.mealsPerDay).toFixed(2)
+    : calc.dailyFeedKg;
+
+  // 2. Rekomendasi aktual UI (Plan user + Anco) - untuk ditampilkan di Card Pakan
   const recommendedFeedKg = hasAncoHistory 
     ? +(anco.adjustedPerMealKg * feed.mealsPerDay).toFixed(2)
     : feed.dailyFeedKg;
@@ -305,5 +315,5 @@ export function buildDetail(data: any) {
   // berdasarkan hasil Anco terakhir, tanpa user harus menekan tombol Edit.
   feed.dailyFeedKg = recommendedFeedKg;
 
-  return { ...data, doc, sr, abw, calc, biomass, totalFeed, fcr, plan, feed, prob, anco, sched, proyeksiMingguan, abwChart, abwDaily, abwSamplingAlert, recommendedFeedKg, custom: !!plan };
+  return { ...data, doc, sr, abw, calc, biomass, totalFeed, fcr, plan, feed, prob, anco, sched, proyeksiMingguan, abwChart, abwDaily, abwSamplingAlert, recommendedFeedKg, trueRecommendedFeedKg, custom: !!plan };
 }

@@ -300,9 +300,9 @@ export default function DetailKolamPage() {
     let openingMsg = "";
     if (editMode === "pakan") {
       const devText: string[] = [];
-      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (catatan: rekomendasi lapangan saat ini ${fmt1(d.recommendedFeedKg)}kg, sedangkan SNI murni ${fmt1(d.calc.dailyFeedKg)}kg)`);
-      if (deviations.freq) devText.push(`frekuensi menjadi ${editFeedValues.mealsPerDay}x/hari (standar SNI: ${d.calc.mealsPerDay}x)`);
-      if (deviations.anco) devText.push(`cek anco menjadi ${editFeedValues.ancoHours} jam (standar SNI: ${d.calc.ancoIntervalHours} jam)`);
+      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (catatan: rekomendasi lapangan saat ini ${d.trueRecommendedFeedKg}kg, sedangkan SNI murni ${d.calc.dailyFeedKg}kg)`);
+      if (deviations.freq) devText.push(`frekuensi pakan menjadi ${editFeedValues.mealsPerDay}x/hari (standar SNI: ${d.calc.mealsPerDay}x)`);
+      if (deviations.anco) devText.push(`cek anco tiap ${editFeedValues.ancoHours} jam (standar SNI: ${d.calc.ancoIntervalHours} jam)`);
       openingMsg = `Halo Pak. Saya perhatikan Bapak ingin mengubah ${devText.join(", ")}. Ada pertimbangan atau keluhan khusus di kolam yang mendasari keputusan ini?`;
     } else {
       const devText: string[] = [];
@@ -343,7 +343,7 @@ export default function DetailKolamPage() {
             latestResult: d.anco?.latestResult ?? null,
             multiplier: d.anco?.multiplier ?? 1,
             consecutiveHabis: d.anco?.consecutiveHabis ?? 0,
-            adjustedDailyFeedKg: d.recommendedFeedKg,
+            adjustedDailyFeedKg: d.trueRecommendedFeedKg,
             last5Results: (d.feeds || [])
               .filter((f: any) => f.anco_result && f.anco_result !== "Belum Dicek")
               .slice(0, 5)

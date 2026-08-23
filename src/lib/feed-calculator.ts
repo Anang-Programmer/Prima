@@ -47,9 +47,14 @@ export function calculateDailyFeed(doc: number, population: number, area: number
   };
 }
 
-// Feeding rate (% biomassa) per DOC - kurva halus untuk proyeksi harian.
+// Feeding rate (% biomassa) per DOC - Berdasarkan Standar SNI 8008:2014
 export function feedingRatePct(doc: number): number {
-  return doc <= 10 ? 9 : doc <= 20 ? 7.5 : doc <= 30 ? 6 : doc <= 45 ? 5 : doc <= 60 ? 4.2 : doc <= 75 ? 3.6 : doc <= 90 ? 3 : doc <= 105 ? 2.6 : 2.2;
+  if (doc <= 15) return 20;    // SNI 15-25%, rata-rata 20%
+  if (doc <= 30) return 12.5;  // SNI 10-15%, rata-rata 12.5%
+  if (doc <= 45) return 8.5;   // SNI 7-10%, rata-rata 8.5%
+  if (doc <= 60) return 6;     // SNI 5-7%, rata-rata 6%
+  if (doc <= 90) return 3.5;   // SNI 2-5%, rata-rata 3.5%
+  return 1.25;                 // SNI 1-1.5%, rata-rata 1.25%
 }
 
 // Jenis pelet berdasarkan umur udang (DOC).
