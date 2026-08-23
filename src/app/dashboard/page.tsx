@@ -724,14 +724,24 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/kolam/${alarm.pond.pond_id}`)}
-                      className="flex items-center justify-between bg-[#A5E3E8] px-4 py-3 text-xs font-bold text-[#2A7B88] transition active:bg-[#91D0D5]"
-                    >
-                      Menuju Kolam
-                      <span className="text-base leading-none">→</span>
-                    </button>
+                    {(() => {
+                      const isLocked = (alarm.earliest - now) > 30 * 60 * 1000;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => { if (!isLocked) router.push(`/kolam/${alarm.pond.pond_id}`) }}
+                          disabled={isLocked}
+                          className={`flex items-center justify-between px-4 py-3 text-xs font-bold transition ${
+                            isLocked 
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                              : 'bg-[#A5E3E8] text-[#2A7B88] active:bg-[#91D0D5]'
+                          }`}
+                        >
+                          {isLocked ? "Belum Waktunya" : "Menuju Kolam"}
+                          {!isLocked && <span className="text-base leading-none">→</span>}
+                        </button>
+                      );
+                    })()}
                   </section>
                 ))}
               </div>
