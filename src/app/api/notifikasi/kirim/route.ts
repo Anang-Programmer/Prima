@@ -142,24 +142,26 @@ async function run(req: NextRequest) {
 
   for (const timer of timers) {
     const pond = pondMap.get(timer.pond_id) as { user_id: string; name: string } | undefined;
-    const pondName = pond?.name ?? "Kolam";
+    const rawName = pond?.name ?? "Kolam";
+    const displayPond = rawName.toLowerCase().includes("kolam") ? rawName : `kolam ${rawName}`;
+
     const copy =
       ({
         Pakan: {
           title: "Waktunya Memberi Pakan!",
-          body: `Sesi pakan kolam ${pondName} telah jatuh tempo. Buka aplikasi untuk konfirmasi.`,
+          body: `Sesi pakan ${displayPond} telah jatuh tempo. Buka aplikasi untuk konfirmasi.`,
         },
         "Cek Anco": {
           title: "Waktunya Cek Anco!",
-          body: `Periksa sisa pakan di anco kolam ${pondName}.`,
+          body: `Periksa sisa pakan di anco ${displayPond}.`,
         },
         Probiotik: {
           title: "Waktunya Beri Probiotik!",
-          body: `Aplikasikan probiotik pada kolam ${pondName}.`,
+          body: `Aplikasikan probiotik pada ${displayPond}.`,
         },
       } as Record<string, { title: string; body: string }>)[timer.type] ?? {
         title: "Pengingat Prima",
-        body: `Ada pengingat untuk kolam ${pondName}.`,
+        body: `Ada pengingat untuk ${displayPond}.`,
       };
 
     const deviceTokens = pond ? tokensByUser.get(pond.user_id) ?? [] : [];
