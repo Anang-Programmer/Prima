@@ -206,7 +206,7 @@ export default function ProyeksiPage() {
                   <div className="flex flex-col justify-between pb-6 pr-2 text-right text-[9px] text-slate-400">
                     {[1, 0.75, 0.5, 0.25, 0].map((t) => <span key={t} className="leading-none">{Math.round(niceMax * t)}</span>)}
                   </div>
-                  <div className="relative flex-1 overflow-x-auto border-b border-slate-300 touch-pan-y">
+                  <div className="relative flex-1 overflow-x-auto border-b border-slate-300">
                     <div className="absolute inset-x-0 bottom-6 top-0">
                       {[0, 25, 50, 75, 100].map((p) => (
                         <div key={p} className="absolute inset-x-0 border-t border-dashed border-slate-200" style={{ top: `${p}%` }} />
