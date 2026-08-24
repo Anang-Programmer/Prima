@@ -1003,7 +1003,7 @@ export default function DetailKolamPage() {
   if (!d)
     return (
       <div suppressHydrationWarning className="flex min-h-screen items-center justify-center bg-[#F2F5F7]">
-        <div suppressHydrationWarning className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" />
+        <div suppressHydrationWarning className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
       </div>
     );
 

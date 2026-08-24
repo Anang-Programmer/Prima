@@ -54,7 +54,7 @@ export function DebugTimePanel(props: any) {
       </div>
 
       {debugMsg && (
-        <div className="mt-2 rounded-lg border border-[#4C9AA6]/30 bg-[#E3F1F2] p-2.5 text-[10px] leading-relaxed text-[#2F6E7B]">
+        <div className="mt-2 rounded-lg border border-[#2ABFC8]/30 bg-[#E3F1F2] p-2.5 text-[10px] leading-relaxed text-[#2F6E7B]">
           {debugMsg}
         </div>
       )}

@@ -32,7 +32,14 @@ export function buildDetail(data: any) {
   }
 
   const samp = samps.length > 0 ? samps[samps.length - 1] : null;
-  const doc = cycle?.start_date ? Math.floor((Date.now() - new Date(cycle.start_date).getTime()) / 86400000) : 0;
+  const doc = (() => {
+    if (!cycle?.start_date) return 0;
+    const s = new Date(cycle.start_date);
+    s.setHours(0, 0, 0, 0);
+    const n = new Date();
+    n.setHours(0, 0, 0, 0);
+    return Math.round((n.getTime() - s.getTime()) / 86400000);
+  })();
   const sr = samp?.estimated_sr_pct ? Number(samp.estimated_sr_pct) : 90;
   const abw = cycle?.current_abw_gram > 0 ? Number(cycle.current_abw_gram) : samp?.abw_gram ? Number(samp.abw_gram) : estimateAbw(doc);
   const calc = calculateDailyFeed(doc, cycle?.initial_shrimp_count ?? 0, Number(pond.area_m2), abw, sr);

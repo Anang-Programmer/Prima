@@ -121,7 +121,7 @@ export default function KomunitasPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCreate(true)}
-              className="hidden items-center gap-1.5 rounded-full bg-[#4C9AA6] px-4 py-2 text-xs font-semibold text-white transition active:scale-95 md:flex"
+              className="hidden items-center gap-1.5 rounded-full bg-[#2ABFC8] px-4 py-2 text-xs font-semibold text-white transition active:scale-95 md:flex"
             >
               <Plus size={14} /> Buat Post
             </button>
@@ -137,7 +137,7 @@ export default function KomunitasPage() {
 
         {/* ============ FEED ============ */}
         <main className="space-y-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:space-y-0">
-          {!posts && <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>}
+          {!posts && <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>}
           {posts?.map((p) => (
             <article 
               key={p.id} 
@@ -184,7 +184,7 @@ export default function KomunitasPage() {
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
           <button onClick={() => setShowCreate(true)}
-            className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95">
+            className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -194,8 +194,8 @@ export default function KomunitasPage() {
               { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: true },
               { label: "Profil", icon: User, href: "/profil", active: false },
             ].map(({ label, icon: Icon, href, active }) => (
-              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#3E97A5]" : "text-slate-400"}`}>
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#3E97A5]/20" : ""} />
+              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#1C9098]/20" : ""} />
                 {label}
               </a>
             ))}
@@ -212,9 +212,9 @@ export default function KomunitasPage() {
             <h3 className="mb-4 text-base font-extrabold">Bagikan Pengalaman</h3>
             <textarea rows={4} value={newPost} onChange={(e) => setNewPost(e.target.value)}
               placeholder="cth. Panen kemarin 4.2 ton dari 600m2. ABW 18gr, FCR 1.35..."
-              className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50" />
+              className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50" />
             <button onClick={createPost} disabled={busy || !newPost.trim()}
-              className="mt-4 w-full rounded-[10px] bg-[#4C9AA6] py-3 text-sm font-semibold text-white disabled:opacity-60">
+              className="mt-4 w-full rounded-[10px] bg-[#2ABFC8] py-3 text-sm font-semibold text-white disabled:opacity-60">
               {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Posting"}
             </button>
           </div>

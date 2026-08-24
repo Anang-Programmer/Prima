@@ -134,7 +134,7 @@ export default function ProyeksiPage() {
     return { list, act, totalKg };
   }, [ponds, selected]);
 
-  if (!ponds) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" /></div>;
+  if (!ponds) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>;
 
   const single = selected ? agg.act[0] : null;
   const weeks = single?.proj.weeks ?? [];
@@ -182,12 +182,12 @@ export default function ProyeksiPage() {
                 <button aria-label="Tutup" onClick={() => setShowPicker(false)} className="fixed inset-0 z-40 cursor-default" />
                 <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-100 z-50">
                   <button onClick={() => { setSelected(null); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === null ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
-                    Semua Kolam {selected === null && <Check size={16} className="text-[#4C9AA6]" />}
+                    Semua Kolam {selected === null && <Check size={16} className="text-[#2ABFC8]" />}
                   </button>
                   {(ponds ?? []).map((p) => (
                     <button key={p.pond_id} onClick={() => { setSelected(p.pond_id); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === p.pond_id ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
                       <span>{p.pond_name} <span className="text-[10px] text-slate-400 font-normal ml-1">DOC {p.doc}</span></span>
-                      {selected === p.pond_id && <Check size={16} className="text-[#4C9AA6]" />}
+                      {selected === p.pond_id && <Check size={16} className="text-[#2ABFC8]" />}
                     </button>
                   ))}
                 </div>
@@ -215,7 +215,7 @@ export default function ProyeksiPage() {
                     <div className="relative flex h-full items-end gap-3 px-1 pb-0 min-w-max">
                       {weeks.map((w: any) => (
                         <div key={w.week} className="flex h-full flex-col items-center justify-end w-7 shrink-0">
-                          <div className={`w-full rounded-t-sm mb-1 ${w.isReal ? 'bg-[#4C9AA6]' : 'bg-[#4C9AA6]/60'}`} style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={`${fmtKg1(w.kg)} ${w.isReal ? '(Historis)' : '(Proyeksi)'}`} />
+                          <div className={`w-full rounded-t-sm mb-1 ${w.isReal ? 'bg-[#2ABFC8]' : 'bg-[#2ABFC8]/60'}`} style={{ height: `${Math.max(2, (w.kg / niceMax) * 100)}%` }} title={`${fmtKg1(w.kg)} ${w.isReal ? '(Historis)' : '(Proyeksi)'}`} />
                           <span className="text-center text-[9px] text-slate-500 whitespace-nowrap h-5 flex items-center">Mgg {w.week}</span>
                         </div>
                       ))}
@@ -234,7 +234,7 @@ export default function ProyeksiPage() {
                         {w.isReal && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Aktual</span>}
                       </div>
                       <span className="text-right">
-                        <p className="text-xs font-bold text-[#3E97A5]">{fmtKg1(w.kg)}</p>
+                        <p className="text-xs font-bold text-[#1C9098]">{fmtKg1(w.kg)}</p>
                         <p className="text-[10px] text-slate-400">{pelletType(w.docStart + 3)}</p>
                       </span>
                     </div>
@@ -252,7 +252,7 @@ export default function ProyeksiPage() {
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70">
+          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -262,8 +262,8 @@ export default function ProyeksiPage() {
               { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: false },
               { label: "Profil", icon: User, href: "/profil", active: false },
             ].map(({ label, icon: Icon, href, active }) => (
-              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#3E97A5]" : "text-slate-400"}`}>
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#3E97A5]" : ""} />
+              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#1C9098]" : ""} />
                 {label}
               </a>
             ))}

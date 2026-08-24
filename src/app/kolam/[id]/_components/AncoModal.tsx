@@ -14,7 +14,7 @@ export function AncoModal(props: any) {
       <button aria-label="Tutup" onClick={() => setAncoModal(null)} className="absolute inset-0 bg-black/40" />
       <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-1 flex items-center gap-2">
-          <Droplets size={18} className="text-[#4C9AA6]" />
+          <Droplets size={18} className="text-[#2ABFC8]" />
           <h3 className="text-base font-extrabold text-slate-800">Laporan Cek Anco</h3>
         </div>
         <p className="mb-5 text-xs text-slate-500">Bagaimana kondisi pakan di dalam anco saat ini?</p>
@@ -32,17 +32,17 @@ export function AncoModal(props: any) {
               className={`flex w-full items-start gap-3 rounded-xl border-[1.5px] px-4 py-3 text-left transition ${
                 disabled
                   ? "border-slate-100 bg-slate-50 opacity-40 cursor-not-allowed"
-                  : ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]/10" : "border-slate-200 hover:bg-slate-50"
+                  : ancoResult === value ? "border-[#2ABFC8] bg-[#2ABFC8]/10" : "border-slate-200 hover:bg-slate-50"
               }`}
             >
               <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${
                 disabled ? "border-slate-200" :
-                ancoResult === value ? "border-[#4C9AA6] bg-[#4C9AA6]" : "border-slate-300"
+                ancoResult === value ? "border-[#2ABFC8] bg-[#2ABFC8]" : "border-slate-300"
               }`} />
               <span>
                 <span className={`text-sm font-semibold ${
                   disabled ? "text-slate-400" :
-                  ancoResult === value ? "text-[#3E97A5]" : "text-slate-600"
+                  ancoResult === value ? "text-[#1C9098]" : "text-slate-600"
                 }`}>{value}</span>
                 <span className="block text-[10px] text-slate-400 mt-0.5">{desc}</span>
               </span>
@@ -66,7 +66,7 @@ export function AncoModal(props: any) {
           <button
             onClick={submitAnco}
             disabled={busy}
-            className="flex-1 rounded-xl bg-[#4C9AA6] py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+            className="flex-1 rounded-xl bg-[#2ABFC8] py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
           >
             {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan Log"}
           </button>

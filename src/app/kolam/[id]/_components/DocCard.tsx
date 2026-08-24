@@ -15,8 +15,8 @@ export function DocCard({ d, stage, popLabel, tab, setTab, onEditAbw, onEndCycle
           <div className="text-right">
             {d.cycle ? (
               <>
-                <span className="inline-block rounded-full bg-[#E5F5F7] px-2.5 py-1 text-[10px] font-bold text-[#4C9AA6]">{stage}</span>
-                <p className="mt-1 text-sm font-extrabold text-[#3E97A5]">FCR {d.fcr.toFixed(2)}</p>
+                <span className="inline-block rounded-full bg-[#E5F5F7] px-2.5 py-1 text-[10px] font-bold text-[#2ABFC8]">{stage}</span>
+                <p className="mt-1 text-sm font-extrabold text-[#1C9098]">FCR {d.fcr.toFixed(2)}</p>
               </>
             ) : (
               <span className="inline-block rounded-md bg-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500">Non Aktif</span>
@@ -27,7 +27,7 @@ export function DocCard({ d, stage, popLabel, tab, setTab, onEditAbw, onEndCycle
         {/* ============ PROGRESS BAR ============ */}
         <div className="px-4 py-3">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-[#4C9AA6] transition-all duration-1000" style={{ width: `${Math.min((d.doc / TARGET_HARI) * 100, 100)}%` }} />
+            <div className="h-full rounded-full bg-[#2ABFC8] transition-all duration-1000" style={{ width: `${Math.min((d.doc / TARGET_HARI) * 100, 100)}%` }} />
           </div>
           <div className="mt-1 flex justify-between text-[10px] font-bold text-slate-400">
             <span>Hari ke-{d.doc}</span>
@@ -81,7 +81,7 @@ export function DocCard({ d, stage, popLabel, tab, setTab, onEditAbw, onEndCycle
       {d.doc >= TARGET_HARI && (
         <div className="mx-0 mt-0 mb-4 bg-[#CFE8EB] flex items-center justify-between px-4 py-4 rounded-b-none border-t-0 shadow-sm">
           <span className="text-sm font-semibold text-slate-800">Sudah panen</span>
-          <button onClick={onEndCycle} className="bg-[#4C9AA6] hover:bg-[#3E97A5] text-white px-5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors">
+          <button onClick={onEndCycle} className="bg-[#2ABFC8] hover:bg-[#1C9098] text-white px-5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors">
             Akhiri Siklus
           </button>
         </div>
@@ -93,7 +93,7 @@ export function DocCard({ d, stage, popLabel, tab, setTab, onEditAbw, onEndCycle
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`-mb-px flex-1 border-b-2 pb-2 text-center text-xs font-semibold transition ${tab === t ? "border-[#3E97A5] text-[#3E97A5]" : "border-transparent text-slate-400"}`}
+            className={`-mb-px flex-1 border-b-2 pb-2 text-center text-xs font-semibold transition ${tab === t ? "border-[#1C9098] text-[#1C9098]" : "border-transparent text-slate-400"}`}
           >
             {t}
           </button>

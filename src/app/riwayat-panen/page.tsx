@@ -82,7 +82,7 @@ export default function RiwayatPanenPage() {
           <main className="flex-1 overflow-y-auto bg-[#F2F5F7] p-4 md:rounded-b-2xl md:bg-white md:px-8 md:pb-8">
             {!harvests ? (
               <div className="flex justify-center py-16">
-                <Loader2 className="animate-spin text-[#4C9AA6]" size={32} />
+                <Loader2 className="animate-spin text-[#2ABFC8]" size={32} />
               </div>
             ) : harvests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">

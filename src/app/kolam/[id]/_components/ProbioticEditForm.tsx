@@ -18,7 +18,7 @@ export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, 
             value={editProbValues.doseMl || ""}
             onChange={(e) => setEditProbValues({ ...editProbValues, doseMl: parseInt(e.target.value) || 0 })}
           />
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#3E97A5]">
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#1C9098]">
             <CheckCircle2 size={11} /> Standar Anjuran: {d.sched.doseMl} ml
           </p>
         </div>
@@ -32,7 +32,7 @@ export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, 
             value={editProbValues.frequencyPerWeek || ""}
             onChange={(e) => setEditProbValues({ ...editProbValues, frequencyPerWeek: parseInt(e.target.value) || 0 })}
           />
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#3E97A5]">
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#1C9098]">
             <CheckCircle2 size={11} /> Standar Anjuran: {d.sched.frequencyPerWeek}x
           </p>
         </div>
@@ -43,13 +43,13 @@ export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, 
               <button
                 key={m}
                 onClick={() => setEditProbValues({ ...editProbValues, method: m })}
-                className={`rounded-[10px] border-[1.5px] border-[#4C9AA6] py-2.5 text-xs font-semibold ${editProbValues.method === m ? "bg-[#4C9AA6] text-white" : "bg-white text-[#4C9AA6]"}`}
+                className={`rounded-[10px] border-[1.5px] border-[#2ABFC8] py-2.5 text-xs font-semibold ${editProbValues.method === m ? "bg-[#2ABFC8] text-white" : "bg-white text-[#2ABFC8]"}`}
               >
                 {m}
               </button>
             ))}
           </div>
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#3E97A5]">
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#1C9098]">
             <CheckCircle2 size={11} /> Standar Anjuran: Ke Air
           </p>
         </div>
@@ -64,7 +64,7 @@ export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, 
         <button
           onClick={handleConfirmEdit}
           disabled={busy}
-          className="flex-1 rounded-[10px] bg-[#4C9AA6] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+          className="flex-1 rounded-[10px] bg-[#2ABFC8] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
         >
           Konfirmasi Perubahan
         </button>

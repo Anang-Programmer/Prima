@@ -11,7 +11,7 @@ export function AIChatPanel(props: any) {
 
   return (
     <section className="rounded-2xl bg-white shadow-sm overflow-hidden">
-      <div className="bg-[#4C9AA6] px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#2ABFC8] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => setShowAIChat(false)} className="text-white/80 hover:text-white transition">
             <ArrowLeft size={16} />
@@ -28,7 +28,7 @@ export function AIChatPanel(props: any) {
       <div className="max-h-[300px] overflow-y-auto p-4 space-y-3 bg-slate-50">
         {messages.map((msg: any, i: number) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#4C9AA6] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
+            <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#2ABFC8] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
               {msg.content.replace(/\[?DEAL_DATA:\s*\{[\s\S]*?\}\]?/g, "").trim()}
             </div>
           </div>
@@ -54,14 +54,14 @@ export function AIChatPanel(props: any) {
             placeholder="Ketik alasan perubahan..."
             className={inputCls}
           />
-          <button type="submit" disabled={isAiTyping || !inputMsg.trim()} className="shrink-0 rounded-[10px] bg-[#4C9AA6] px-4 text-white disabled:opacity-50">
+          <button type="submit" disabled={isAiTyping || !inputMsg.trim()} className="shrink-0 rounded-[10px] bg-[#2ABFC8] px-4 text-white disabled:opacity-50">
             <Send size={16} />
           </button>
         </form>
         <button
           onClick={() => saveChanges(true)}
           disabled={busy || !hasDeal}
-          className="w-full flex items-center justify-center gap-2 rounded-[10px] bg-[#4C9AA6] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 mt-2"
+          className="w-full flex items-center justify-center gap-2 rounded-[10px] bg-[#2ABFC8] py-3 text-xs font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 mt-2"
         >
           <CheckCircle2 size={14} /> {busy ? "Menyimpan..." : "Simpan Kesepakatan Ini"}
         </button>

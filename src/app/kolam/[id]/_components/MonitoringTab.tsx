@@ -18,7 +18,7 @@ export default function MonitoringTab({ d }: { d: any }) {
         <div className="mt-2 flex items-center gap-3">
           <span className="text-2xl font-bold text-[#0A4D58]">FCR {d.fcr}</span>
           {d.fcr <= 1.4 ? (
-            <span className="flex items-center gap-1 rounded-full bg-[#4C9AA6] px-2.5 py-1 text-[10px] font-semibold text-white">
+            <span className="flex items-center gap-1 rounded-full bg-[#2ABFC8] px-2.5 py-1 text-[10px] font-semibold text-white">
               Efisien <CheckCircle2 size={10} />
             </span>
           ) : (
@@ -80,7 +80,7 @@ export default function MonitoringTab({ d }: { d: any }) {
           <h4 className="text-xs font-bold text-slate-800">Pertumbuhan ABW (gram)</h4>
           <div className="flex items-center gap-3 text-[9px] text-slate-500">
             <span className="flex items-center gap-1">
-              <span className="inline-block h-0.5 w-4 bg-[#4C9AA6]" /> Aktual
+              <span className="inline-block h-0.5 w-4 bg-[#2ABFC8]" /> Aktual
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block h-0.5 w-4 border-t border-dashed border-[#94D1D9]" /> Target SNI
@@ -150,8 +150,8 @@ export default function MonitoringTab({ d }: { d: any }) {
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible">
                 <defs>
                   <linearGradient id="actualGradient" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#4C9AA6" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#4C9AA6" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#2ABFC8" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#2ABFC8" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
@@ -200,7 +200,7 @@ export default function MonitoringTab({ d }: { d: any }) {
                   <polyline
                     key={i}
                     fill="none"
-                    stroke="#4C9AA6"
+                    stroke="#2ABFC8"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -214,7 +214,7 @@ export default function MonitoringTab({ d }: { d: any }) {
               {samplingPoints.map((p, i) => (
                 <div
                   key={i}
-                  className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#4C9AA6] shadow-sm"
+                  className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#2ABFC8] shadow-sm"
                   style={{
                     left: `calc(1.5rem + ${getX(p.doc)}% - (1.5rem + 0.5rem) * ${getX(p.doc) / 100})`, // adjust for pl-6 pr-2 container
                     top: `${getY(p.act)}%`,

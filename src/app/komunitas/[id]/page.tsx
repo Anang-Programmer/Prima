@@ -249,7 +249,7 @@ export default function PostDetailPage({
 
             {!post ? (
               <div className="flex justify-center py-16">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
               </div>
             ) : (
               <div className="flex flex-1 flex-col md:rounded-2xl md:border md:border-slate-100 md:bg-white md:shadow-sm">
@@ -366,7 +366,7 @@ export default function PostDetailPage({
                               const el = document.getElementById("comment-input");
                               if (el) el.focus();
                             }}
-                            className="mt-1 text-[10px] text-[#4C9AA6] font-medium hover:underline transition"
+                            className="mt-1 text-[10px] text-[#2ABFC8] font-medium hover:underline transition"
                           >
                             Balas
                           </button>
@@ -399,7 +399,7 @@ export default function PostDetailPage({
                       }
                     }}
                     placeholder="Tulis komentar"
-                    className="w-full resize-none rounded-xl bg-[#EEF1F3] px-4 py-2.5 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#4C9AA6]/30 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    className="w-full resize-none rounded-xl bg-[#EEF1F3] px-4 py-2.5 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2ABFC8]/30 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                   />
 
                   <button

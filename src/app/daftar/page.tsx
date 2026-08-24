@@ -56,7 +56,7 @@ function Field({ label, icon, ...rest }: FieldProps) {
       <div className="relative">
         <input
           {...rest}
-          className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all`}
+          className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all`}
         />
         {icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">{icon}</span>}
       </div>
@@ -159,14 +159,14 @@ export default function DaftarPage() {
                     value={form.firstName}
                     onChange={set("firstName")}
                     required
-                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all"
+                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
                   />
                   <input
                     type="text"
                     placeholder="Nama Belakang"
                     value={form.lastName}
                     onChange={set("lastName")}
-                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50 focus:bg-white transition-all"
+                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function DaftarPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-8 shrink-0 w-full rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+              className="mt-8 shrink-0 w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Daftar"}
             </button>
@@ -216,10 +216,10 @@ export default function DaftarPage() {
 
   // Langkah 1
   return (
-    <div className="min-h-screen bg-[#4C9AA6] md:bg-white md:flex md:items-center md:justify-center">
+    <div className="min-h-screen bg-[#2ABFC8] md:bg-white md:flex md:items-center md:justify-center">
       <div className="flex h-dvh flex-col overflow-hidden md:h-screen md:w-full md:max-w-none md:flex-row md:rounded-none md:bg-white">
         {/* ============ HEADER TEAL (Mobile) / KIRI (Desktop) ============ */}
-        <header className="relative shrink-0 bg-[#4C9AA6] pb-10 pt-6 md:w-1/2 md:pb-0 md:pt-0 md:flex md:flex-col md:items-center md:justify-center md:bg-gradient-to-br md:from-[#4C9AA6] md:to-[#20606D]">
+        <header className="relative shrink-0 bg-[#2ABFC8] pb-10 pt-6 md:w-1/2 md:pb-0 md:pt-0 md:flex md:flex-col md:items-center md:justify-center md:bg-gradient-to-br md:from-[#2ABFC8] md:to-[#20606D]">
           <LogoOnTeal />
           <div className="hidden md:block mt-8 text-center px-12 z-10">
             <h2 className="text-3xl font-bold text-white mb-4 leading-tight">Mulai Budidaya Udang Pintar</h2>
@@ -307,7 +307,7 @@ export default function DaftarPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
               >
                 {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Selanjutnya"}
               </button>

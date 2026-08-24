@@ -42,7 +42,7 @@ export default function StartCycleSheet({ pond, open, onClose, onSaved }: { pond
     }
   }
 
-  const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50";
+  const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
   return (
     <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">

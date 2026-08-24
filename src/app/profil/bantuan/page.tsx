@@ -100,7 +100,7 @@ export default function BantuanPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowPopup(false)} />
           <div className="relative z-10 w-full max-w-[280px] rounded-2xl bg-white p-6 text-center shadow-xl">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E5F5F7]">
-              <Clock size={24} className="text-[#4C9AA6]" />
+              <Clock size={24} className="text-[#2ABFC8]" />
             </div>
             <h3 className="mb-2 text-base font-bold text-slate-800">Coming Soon!</h3>
             <p className="mb-6 text-xs text-slate-500">
@@ -108,7 +108,7 @@ export default function BantuanPage() {
             </p>
             <button 
               onClick={() => setShowPopup(false)}
-              className="w-full rounded-xl bg-[#4C9AA6] py-3 text-sm font-bold text-white transition active:scale-95"
+              className="w-full rounded-xl bg-[#2ABFC8] py-3 text-sm font-bold text-white transition active:scale-95"
             >
               Oke, Mengerti
             </button>

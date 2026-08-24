@@ -16,7 +16,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             const newVal = Math.max(0, +(editFeedValues.dailyFeedKg - 0.1).toFixed(2));
             setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white shadow-sm transition active:scale-90"
         >
           <Minus size={16} />
         </button>
@@ -24,7 +24,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
           type="number"
           min={0}
           step={0.1}
-          className="min-w-0 flex-1 rounded-xl bg-[#EAEAEA] px-3 py-3 text-center text-xl font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#4C9AA6]/50"
+          className="min-w-0 flex-1 rounded-xl bg-[#EAEAEA] px-3 py-3 text-center text-xl font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#2ABFC8]/50"
           value={editFeedValues._rawDailyFeedKg ?? editFeedValues.dailyFeedKg}
           onChange={(e) => {
             const val = e.target.value;
@@ -40,7 +40,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             const newVal = +(editFeedValues.dailyFeedKg + 0.1).toFixed(2);
             setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4C9AA6] text-white shadow-sm transition active:scale-90"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white shadow-sm transition active:scale-90"
         >
           <Plus size={16} />
         </button>
@@ -52,7 +52,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
         const devPct = Math.abs(editFeedValues.dailyFeedKg - d.recommendedFeedKg) / ref;
         const isOff = devPct > 0.15; // toleransi 15%
         return (
-          <p className={`mb-5 text-center text-[11px] font-semibold ${isOff ? "text-orange-500" : "text-[#3E97A5]"}`}>
+          <p className={`mb-5 text-center text-[11px] font-semibold ${isOff ? "text-orange-500" : "text-[#1C9098]"}`}>
             {isOff
               ? `⚠ Berbeda dari rekomendasi PRIMA (${fmtFeed(d.recommendedFeedKg)})`
               : "Pakan sudah sesuai dengan rekomendasi PRIMA"}
@@ -83,7 +83,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             value={editFeedValues.mealsPerDay || ""}
             onChange={(e) => setEditFeedValues({ ...editFeedValues, mealsPerDay: parseInt(e.target.value) || 0 })}
           />
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#3E97A5]">
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#1C9098]">
             <CheckCircle2 size={11} /> Standar SNI: {d.calc.mealsPerDay}x
           </p>
         </div>
@@ -99,7 +99,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             value={editFeedValues.ancoHours || ""}
             onChange={(e) => setEditFeedValues({ ...editFeedValues, ancoHours: parseFloat(e.target.value) || 0 })}
           />
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#3E97A5]">
+          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-[#1C9098]">
             <CheckCircle2 size={11} /> Standar SNI: {d.calc.ancoIntervalHours} jam
           </p>
         </div>
@@ -117,7 +117,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
         <button
           onClick={handleConfirmEdit}
           disabled={busy}
-          className="flex-1 rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+          className="flex-1 rounded-xl bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
         >
           Konfirmasi
         </button>

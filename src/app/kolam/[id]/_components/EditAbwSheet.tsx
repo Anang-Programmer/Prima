@@ -22,7 +22,7 @@ export default function EditAbwSheet({ sheet, setSheet, abwInput, setAbwInput, h
         </div>
         <button
           disabled={busy}
-          className="mt-4 w-full rounded-xl bg-[#3E97A5] py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-50"
+          className="mt-4 w-full rounded-xl bg-[#1C9098] py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-50"
         >
           {busy ? "Menyimpan..." : "Simpan ABW"}
         </button>

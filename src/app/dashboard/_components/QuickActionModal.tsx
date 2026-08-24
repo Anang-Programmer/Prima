@@ -49,12 +49,12 @@ export function QuickActionModal({
               <button
                 key={action.type}
                 onClick={() => onSelectAction(action.type)}
-                className="flex flex-col items-center justify-center p-3 gap-3 border-2 border-slate-100 rounded-xl hover:border-[#4C9AA6] hover:bg-[#4C9AA6]/5 transition-all group active:scale-95"
+                className="flex flex-col items-center justify-center p-3 gap-3 border-2 border-slate-100 rounded-xl hover:border-[#2ABFC8] hover:bg-[#2ABFC8]/5 transition-all group active:scale-95"
               >
                 <div className="relative w-16 h-16 transition-transform group-hover:scale-110">
                   <Image src={action.img} alt={action.label} fill sizes="(max-width: 768px) 64px, 64px" className="object-contain" />
                 </div>
-                <span className="text-xs font-semibold text-slate-700 text-center leading-tight group-hover:text-[#4C9AA6]">
+                <span className="text-xs font-semibold text-slate-700 text-center leading-tight group-hover:text-[#2ABFC8]">
                   {action.label}
                 </span>
               </button>

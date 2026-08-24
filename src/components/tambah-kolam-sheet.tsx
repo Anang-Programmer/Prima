@@ -11,7 +11,7 @@ import { estimateHarvestYield } from "@/lib/feed-calculator";
 ============================================================ */
 
 const inputCls =
-  "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50";
+  "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{children}</p>;
@@ -133,8 +133,8 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
                     key={s}
                     type="button"
                     onClick={() => setShape(s)}
-                    className={`rounded-[10px] border-[1.5px] border-[#4C9AA6] py-2.5 text-xs font-semibold transition ${
-                      shape === s ? "bg-[#4C9AA6] text-white" : "bg-white text-[#4C9AA6]"
+                    className={`rounded-[10px] border-[1.5px] border-[#2ABFC8] py-2.5 text-xs font-semibold transition ${
+                      shape === s ? "bg-[#2ABFC8] text-white" : "bg-white text-[#2ABFC8]"
                     }`}
                   >
                     {s}
@@ -166,7 +166,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
               <button
                 type="button"
                 onClick={() => setIsCycleActive(!isCycleActive)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#4C9AA6]/50 ${isCycleActive ? "bg-[#4C9AA6]" : "bg-slate-300"}`}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#2ABFC8]/50 ${isCycleActive ? "bg-[#2ABFC8]" : "bg-slate-300"}`}
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isCycleActive ? "translate-x-5" : "translate-x-0"}`}
@@ -218,7 +218,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               Tambah

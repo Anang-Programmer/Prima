@@ -17,7 +17,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
         <button
           onClick={startEditProb}
           disabled={d.doc < 0}
-          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#4C9AA6] px-4 py-1.5 text-xs font-semibold text-[#4C9AA6] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1 rounded-full border-[1.5px] border-[#2ABFC8] px-4 py-1.5 text-xs font-semibold text-[#2ABFC8] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Pencil size={11} /> Modifikasi
         </button>
@@ -32,8 +32,8 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
           if (d.doc >= 120) {
             return (
               <div className="mt-3 pt-3 border-t border-slate-100">
-                <div className="rounded-xl border border-[#4C9AA6]/20 bg-[#F2FAFB] p-4 text-center">
-                  <p className="text-sm font-bold text-[#4C9AA6]">Waktunya Panen!</p>
+                <div className="rounded-xl border border-[#2ABFC8]/20 bg-[#F2FAFB] p-4 text-center">
+                  <p className="text-sm font-bold text-[#2ABFC8]">Waktunya Panen!</p>
                   <p className="mt-1 text-xs text-slate-500">Hentikan pemberian probiotik karena siklus sudah selesai.</p>
                 </div>
               </div>
@@ -45,7 +45,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
               <button
                 onClick={() => handleCatatProbiotik()}
                 disabled={busy || d.doc < 0}
-                className="mt-3 w-full rounded-[10px] bg-[#4C9AA6] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-3 w-full rounded-[10px] bg-[#2ABFC8] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Konfirmasi & Aktifkan Peringatan
               </button>
@@ -54,13 +54,13 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
           const isDue = new Date(probTimer.due_time).getTime() - now <= 0;
           return (
             <div className="mt-3 pt-3 border-t border-slate-100">
-              <div className={`rounded-xl border p-3 ${isDue ? "border-red-200 bg-red-50" : "border-[#4C9AA6]/20 bg-[#F2FAFB]"}`}>
+              <div className={`rounded-xl border p-3 ${isDue ? "border-red-200 bg-red-50" : "border-[#2ABFC8]/20 bg-[#F2FAFB]"}`}>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
-                    <AlertCircle size={13} className={isDue ? "text-red-500" : "text-[#4C9AA6]"} />
+                    <AlertCircle size={13} className={isDue ? "text-red-500" : "text-[#2ABFC8]"} />
                     {isDue ? "Waktunya Beri Probiotik!" : "Probiotik Berikutnya"}
                   </span>
-                  <span className={`font-mono text-sm font-bold ${isDue ? "animate-pulse text-red-600" : "text-[#3E97A5]"}`}>
+                  <span className={`font-mono text-sm font-bold ${isDue ? "animate-pulse text-red-600" : "text-[#1C9098]"}`}>
                     {formatTimeLeft(probTimer.due_time)}
                   </span>
                 </div>
@@ -71,7 +71,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
                   <button
                     onClick={() => confirmProbioticDone(probTimer.id)}
                     disabled={busy || d.doc < 0}
-                    className="mt-2 w-full rounded-lg bg-[#4C9AA6] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="mt-2 w-full rounded-lg bg-[#2ABFC8] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Sudah Diberi Probiotik
                   </button>

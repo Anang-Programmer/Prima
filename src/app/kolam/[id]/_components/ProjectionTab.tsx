@@ -36,7 +36,7 @@ export default function ProjectionTab({ d }: { d: any }) {
               {d.proyeksiMingguan.map((w: any, i: number) => (
                 <div key={i} className="group relative z-10 flex h-full flex-col items-center justify-end px-0.5" style={{ width: `${100 / d.proyeksiMingguan.length}%` }}>
                   <div
-                    className={`w-full max-w-[24px] rounded-t-sm transition-all ${w.isReal ? "bg-[#4C9AA6]" : "bg-[#4C9AA6]/40 border-t border-[#4C9AA6]"}`}
+                    className={`w-full max-w-[24px] rounded-t-sm transition-all ${w.isReal ? "bg-[#2ABFC8]" : "bg-[#2ABFC8]/40 border-t border-[#2ABFC8]"}`}
                     style={{ height: `${(w.amount / yMax) * 100}%`, minHeight: "2px" }}
                   />
                   {(d.proyeksiMingguan.length <= 8 || i % 2 === 0) && (

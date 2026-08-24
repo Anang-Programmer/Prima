@@ -110,7 +110,7 @@ export default function LogBookTab({ d }: { d: any }) {
 
         <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100/80">
           <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
-            <Droplets size={11} className="text-[#4C9AA6]" /> Probiotik
+            <Droplets size={11} className="text-[#2ABFC8]" /> Probiotik
           </p>
           <p className="mt-1 text-sm font-extrabold text-slate-800">
             {fmt1((d.probs || []).reduce((acc: number, p: any) => acc + Number(p.amount_ml || 0), 0))} ml
@@ -125,7 +125,7 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("all"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "all"
-              ? "bg-[#4C9AA6] text-white shadow-sm"
+              ? "bg-[#2ABFC8] text-white shadow-sm"
               : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
           }`}
         >
@@ -135,7 +135,7 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("feed"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "feed"
-              ? "bg-[#4C9AA6] text-white shadow-sm"
+              ? "bg-[#2ABFC8] text-white shadow-sm"
               : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
           }`}
         >
@@ -145,7 +145,7 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("prob"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "prob"
-              ? "bg-[#4C9AA6] text-white shadow-sm"
+              ? "bg-[#2ABFC8] text-white shadow-sm"
               : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
           }`}
         >

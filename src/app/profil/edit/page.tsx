@@ -5,7 +5,7 @@ import { ChevronLeft, Loader2, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50";
+const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 function Label({ children }: any) {
   return <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{children}</p>;
@@ -111,7 +111,7 @@ export default function EditProfilePage() {
               <div><Label>Provinsi</Label><input className={inputCls} placeholder="Ketik Nama" value={profileForm.provinsi ?? ""} onChange={(e) => setProfileForm({ ...profileForm, provinsi: e.target.value })} /></div>
               
               <div className="pt-8 pb-4">
-                <button onClick={saveProfile} disabled={busy} className="w-full rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition active:scale-[0.98]">
+                <button onClick={saveProfile} disabled={busy} className="w-full rounded-xl bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition active:scale-[0.98]">
                   {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan"}
                 </button>
               </div>

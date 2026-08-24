@@ -31,14 +31,14 @@ export default function PrivasiPage() {
           <main className="flex-1 overflow-y-auto bg-white px-5 py-6 md:px-8 md:py-8">
             <div className="mb-8 flex justify-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#E5F5F7]">
-                <ShieldCheck size={40} className="text-[#4C9AA6]" />
+                <ShieldCheck size={40} className="text-[#2ABFC8]" />
               </div>
             </div>
 
             <div className="space-y-6">
               <section>
                 <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-800">
-                  {/* <Lock size={18} className="text-[#4C9AA6]" /> */}
+                  {/* <Lock size={18} className="text-[#2ABFC8]" /> */}
                   Keamanan Data Berlapis
                 </h2>
                 <p className="text-sm leading-relaxed text-slate-600">
@@ -48,7 +48,7 @@ export default function PrivasiPage() {
 
               <section>
                 <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-800">
-                  {/* <EyeOff size={18} className="text-[#4C9AA6]" /> */}
+                  {/* <EyeOff size={18} className="text-[#2ABFC8]" /> */}
                   Privasi Komunitas
                 </h2>
                 <p className="text-sm leading-relaxed text-slate-600">
@@ -79,7 +79,7 @@ export default function PrivasiPage() {
             </p>
             <button 
               onClick={() => router.back()}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4C9AA6] py-3.5 text-sm font-bold text-white transition active:scale-95"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2ABFC8] py-3.5 text-sm font-bold text-white transition active:scale-95"
             >
               {/* <CheckCircle2 size={18} /> */}
               Saya Setuju & Mengerti

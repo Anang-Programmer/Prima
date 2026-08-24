@@ -22,14 +22,14 @@ export default function AddFeedSheet({ sheet, setSheet, logForm, setLogForm, add
                 <button
                   key={a}
                   onClick={() => setLogForm({ ...logForm, anco: a })}
-                  className={`rounded-[10px] border-[1.5px] border-[#4C9AA6] py-2.5 text-xs font-semibold ${logForm.anco === a ? "bg-[#4C9AA6] text-white" : "bg-white text-[#4C9AA6]"}`}
+                  className={`rounded-[10px] border-[1.5px] border-[#2ABFC8] py-2.5 text-xs font-semibold ${logForm.anco === a ? "bg-[#2ABFC8] text-white" : "bg-white text-[#2ABFC8]"}`}
                 >
                   {a}
                 </button>
               ))}
             </div>
           </div>
-          <button onClick={addFeedLog} disabled={busy} className="w-full rounded-[10px] bg-[#4C9AA6] py-3 text-sm font-semibold text-white disabled:opacity-60">
+          <button onClick={addFeedLog} disabled={busy} className="w-full rounded-[10px] bg-[#2ABFC8] py-3 text-sm font-semibold text-white disabled:opacity-60">
             {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan"}
           </button>
         </div>

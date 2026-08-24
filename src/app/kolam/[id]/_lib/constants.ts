@@ -4,7 +4,7 @@
 export const TARGET_HARI = 120;
 
 export const inputCls =
-  "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#4C9AA6]/50";
+  "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 export const fmt1 = (n: number) => n.toLocaleString("id-ID", { maximumFractionDigits: 1 });
 

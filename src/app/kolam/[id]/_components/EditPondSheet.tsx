@@ -23,7 +23,7 @@ export default function EditPondSheet({ sheet, setSheet, pondForm, setPondForm, 
             <Label>Lokasi</Label>
             <input className={inputCls} value={pondForm.location ?? ""} onChange={(e) => setPondForm({ ...pondForm, location: e.target.value })} />
           </div>
-          <button onClick={savePond} disabled={busy} className="w-full rounded-[10px] bg-[#4C9AA6] py-3 text-sm font-semibold text-white disabled:opacity-60">
+          <button onClick={savePond} disabled={busy} className="w-full rounded-[10px] bg-[#2ABFC8] py-3 text-sm font-semibold text-white disabled:opacity-60">
             {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Simpan"}
           </button>
         </div>

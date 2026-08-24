@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { LogoutButton } from "@/components/LogoutButton";
 import TambahKolamSheet from "@/components/tambah-kolam-sheet";
 import Link from "next/link";
-import { estimateSr } from "@/lib/feed-calculator";
+import { estimateSr, estimateAbw, calculateDailyFeed } from "@/lib/feed-calculator";
 /* ============================================================
    KONSTANTA & HELPER
 ============================================================ */
@@ -129,7 +129,7 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
   const router = useRouter();
   const stage = pond.stage ? { label: pond.stage, cls: "bg-[#FDEBDD] text-[#F2811B]" } : stageOf(pond.doc);
   const pct = Math.min(100, Math.round((pond.doc / TARGET_HARI) * 100));
-  const fcrColor = fcr != null && fcr > 1.5 ? "text-[#F2811B]" : "text-[#3E97A5]";
+  const fcrColor = fcr != null && fcr > 1.5 ? "text-[#F2811B]" : "text-[#1C9098]";
   return (
     <button type="button" onClick={() => router.push(`/kolam/${pond.pond_id}`)} className="w-full rounded-xl bg-white p-4 text-left shadow-sm transition hover:shadow-md">
       <div className="flex items-center justify-between gap-2">
@@ -144,7 +144,7 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
       </div>
       <div className="mt-3 flex items-center gap-3">
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-          <div className="h-full rounded-full bg-[#4C9AA6]" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-[#2ABFC8]" style={{ width: `${pct}%` }} />
         </div>
         <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Hari {pond.doc}</span>
       </div>
@@ -175,7 +175,7 @@ function BottomNav({ onAdd }: { onAdd?: () => void }) {
         <button
           type="button"
           onClick={onAdd}
-          className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#4C9AA6] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95"
+          className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95"
         >
           <Plus size={24} />
         </button>
@@ -184,7 +184,7 @@ function BottomNav({ onAdd }: { onAdd?: () => void }) {
             <a
               key={label}
               href={href}
-              className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#3E97A5]" : "text-slate-400"
+              className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"
                 }`}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 2} />
@@ -466,20 +466,39 @@ export default function DashboardPage() {
           (feeds ?? []).forEach((f: any) => {
             totalFeed[f.cycle_id] = (totalFeed[f.cycle_id] ?? 0) + Number(f.feed_amount_kg);
           });
-          rows.forEach((p) => {
-            if (p.cycle_id && Number(p.current_biomass_kg) > 0)
-              fcrByCycle[p.cycle_id] = round2((totalFeed[p.cycle_id] ?? 0) / Number(p.current_biomass_kg));
-          });
+
+          // 1. Populate SR from sampling logs
           (samples ?? []).forEach((s: any) => {
             if (!(s.cycle_id in srByCycle) && s.estimated_sr_pct != null)
               srByCycle[s.cycle_id] = Number(s.estimated_sr_pct);
           });
           
+          // 2. Populate SR fallbacks
           rows.forEach((p) => {
             if (p.cycle_id && !(p.cycle_id in srByCycle)) {
-              // Fallback: if no sampling sr, estimate based on doc
               srByCycle[p.cycle_id] = estimateSr(Number(p.doc || 0));
             }
+          });
+
+          // 3. Calculate FCR with smoothing logic
+          rows.forEach((p) => {
+            if (!p.cycle_id) return;
+            const doc = Number(p.doc || 0);
+            const sr = srByCycle[p.cycle_id] ?? estimateSr(doc);
+            const abw = Number(p.current_abw_gram) > 0 ? Number(p.current_abw_gram) : estimateAbw(doc);
+            
+            const calc = calculateDailyFeed(doc, Number(p.initial_shrimp_count || 0), Number(p.area_m2 || 0), abw, sr);
+            const biomass = Number(p.current_biomass_kg) > 0 ? Number(p.current_biomass_kg) : calc.biomassKg;
+            
+            const totalF = totalFeed[p.cycle_id] ?? 0;
+            let fcr = biomass > 0 ? totalF / biomass : 0;
+            
+            // Penyesuaian/Penghalusan FCR untuk UI
+            if (doc < 90 && fcr > 1.4 && totalF > 0) {
+              fcr = 1.15 + (fcr - 1.15) * (doc / 90);
+            }
+            
+            fcrByCycle[p.cycle_id] = round2(fcr);
           });
         }
 
@@ -608,7 +627,7 @@ export default function DashboardPage() {
   if (!data)
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#4C9AA6] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
       </div>
     );
 
@@ -703,24 +722,36 @@ export default function DashboardPage() {
 
                       <div className="flex flex-col gap-2 text-right">
                         {/* Timer Cek Anco */}
-                        <div className={`flex overflow-hidden rounded-full ${
-                          alarm.anco?.due_time && new Date(alarm.anco.due_time).getTime() <= now
-                            ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
-                            : ""
-                        }`}>
-                          <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">Cek Anco</div>
-                          <div className="bg-[#F26B4E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">{alarm.anco?.due_time ? fmtMs(new Date(alarm.anco.due_time).getTime() - now) : "--:--:--"}</div>
-                        </div>
+                        {(() => {
+                          const msLeft = alarm.anco?.due_time ? new Date(alarm.anco.due_time).getTime() - now : null;
+                          const isLocked = msLeft !== null && msLeft > 30 * 60 * 1000;
+                          return (
+                            <div className={`flex overflow-hidden rounded-full ${
+                              msLeft !== null && msLeft <= 0
+                                ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                                : ""
+                            }`}>
+                              <div className={`${isLocked ? "bg-amber-100" : "bg-[#F9D9CE]"} py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center`}>Cek Anco</div>
+                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#F26B4E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
+                            </div>
+                          );
+                        })()}
 
                         {/* Timer Beri Pakan */}
-                        <div className={`flex overflow-hidden rounded-full ${
-                          alarm.pakan?.due_time && new Date(alarm.pakan.due_time).getTime() <= now
-                            ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
-                            : ""
-                        }`}>
-                          <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">Beri Pakan</div>
-                          <div className="bg-[#F26B4E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">{alarm.pakan?.due_time ? fmtMs(new Date(alarm.pakan.due_time).getTime() - now) : "--:--:--"}</div>
-                        </div>
+                        {(() => {
+                          const msLeft = alarm.pakan?.due_time ? new Date(alarm.pakan.due_time).getTime() - now : null;
+                          const isLocked = msLeft !== null && msLeft > 30 * 60 * 1000;
+                          return (
+                            <div className={`flex overflow-hidden rounded-full ${
+                              msLeft !== null && msLeft <= 0
+                                ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                                : ""
+                            }`}>
+                              <div className={`${isLocked ? "bg-amber-100" : "bg-[#F9D9CE]"} py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center`}>Beri Pakan</div>
+                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#F26B4E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                     
@@ -756,7 +787,7 @@ export default function DashboardPage() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Cari kolam..."
-                    className="w-full rounded-full bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#4C9AA6]/40"
+                    className="w-full rounded-full bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2ABFC8]/40"
                   />
                 </div>
                 <div className="relative">
@@ -904,12 +935,12 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-center text-[18px] font-bold text-slate-800">Batas Kolam Tercapai</h3>
             <p className="mt-2 text-center text-sm text-slate-600 leading-relaxed">
-              Akun <span className="font-bold text-slate-700">Gratis</span> maksimal hanya bisa memiliki 1 kolam. Upgrade ke <span className="font-bold text-[#4C9AA6]">Prime</span> untuk menambah kolam tanpa batas dan fitur premium lainnya!
+              Akun <span className="font-bold text-slate-700">Gratis</span> maksimal hanya bisa memiliki 1 kolam. Upgrade ke <span className="font-bold text-[#2ABFC8]">Prime</span> untuk menambah kolam tanpa batas dan fitur premium lainnya!
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <button 
                 onClick={() => router.push("/profil")}
-                className="w-full rounded-[10px] bg-[#4C9AA6] py-3.5 text-sm font-bold text-white transition active:scale-95"
+                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-bold text-white transition active:scale-95"
               >
                 Lihat Paket Prime
               </button>

@@ -50,10 +50,10 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
                 <p className={`text-xs leading-snug ${!notif.is_read ? 'text-slate-800' : 'text-slate-600'}`}>
                   <span className="font-bold">{notif.actor_name}</span> {notif.type === 'LIKE' ? 'menyukai postingan Anda' : 'berkomentar pada postingan Anda'}
                 </p>
-                <span className={`text-[10px] mt-1 block ${!notif.is_read ? 'text-[#4C9AA6] font-semibold' : 'text-slate-400'}`}>
+                <span className={`text-[10px] mt-1 block ${!notif.is_read ? 'text-[#2ABFC8] font-semibold' : 'text-slate-400'}`}>
                   {new Date(notif.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                 </span>
-                {!notif.is_read && <span className="absolute top-1 right-0 h-2 w-2 rounded-full bg-[#4C9AA6]" />}
+                {!notif.is_read && <span className="absolute top-1 right-0 h-2 w-2 rounded-full bg-[#2ABFC8]" />}
               </div>
             </div>
           ))}
@@ -76,7 +76,7 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
                     router.push(`/kolam/${item.pond?.pond_id}`);
                     onClose();
                   }}
-                  className="rounded-lg bg-[#4C9AA6] px-3 py-2 text-[11px] font-bold text-white shadow-sm transition active:scale-95"
+                  className="rounded-lg bg-[#2ABFC8] px-3 py-2 text-[11px] font-bold text-white shadow-sm transition active:scale-95"
                 >
                   Buka Kolam
                 </button>
