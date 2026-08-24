@@ -53,8 +53,8 @@ export function feedingRatePct(doc: number): number {
   if (doc <= 30) return 12.5;  // SNI 10-15%, rata-rata 12.5%
   if (doc <= 45) return 8.5;   // SNI 7-10%, rata-rata 8.5%
   if (doc <= 60) return 6;     // SNI 5-7%, rata-rata 6%
-  if (doc <= 90) return 3.5;   // SNI 2-5%, rata-rata 3.5%
-  return 1.25;                 // SNI 1-1.5%, rata-rata 1.25%
+  if (doc <= 105) return 3.5;  // SNI 2-5% (Untuk DOC 61-75, 76-90, 91-105), rata-rata 3.5%
+  return 2.5;                  // SNI 2-3% (Untuk DOC 106-120), rata-rata 2.5%
 }
 
 // Jenis pelet berdasarkan umur udang (DOC).

@@ -48,8 +48,8 @@ Daily Feed (kg) = Biomass × Feeding Rate (%)
 | 46 - 60         | 5 - 7%                    | 4x/hari   | 2,0 - 2,5 jam        |
 | 61 - 75         | 2 - 5%                    | 4x/hari   | 1,5 - 2,0 jam        |
 | 76 - 90         | 2 - 5%                    | 4x/hari   | 1,5 - 2,0 jam        |
-| 91 - 105        | 1 - 1.5%                  | 4-5x/hari | 1,0 - 1,5 jam        |
-| 106 - 120       | 1 - 1.5%                  | 4-5x/hari | 1,0 - 1,5 jam        |
+| 91 - 105        | 2 - 5%                    | 4-5x/hari | 1,0 - 1,5 jam        |
+| 106 - 120       | 2 - 3%                    | 4-5x/hari | 1,0 - 1,5 jam        |
 *(Sumber: SNI 8008:2014 & Penyesuaian Lapangan)*
 
 ### 2.3 Average Body Weight (ABW) Estimation
@@ -106,10 +106,10 @@ def calculate_daily_feed(shrimp_count, doc, pond_area_m2):
         feeding_rate = 0.085 # 8.5% (avg of 7-10%)
     elif doc <= 60:
         feeding_rate = 0.06  # 6% (avg of 5-7%)
-    elif doc <= 90:
+    elif doc <= 105:
         feeding_rate = 0.035 # 3.5% (avg of 2-5%)
     else:
-        feeding_rate = 0.0125 # 1.25% (avg of 1-1.5%)
+        feeding_rate = 0.025 # 2.5% (avg of 2-3%)
     
     # Calculate daily feed
     daily_feed_kg = biomass_kg * feeding_rate

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             --text-main: #334155;
             --text-light: #64748B;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
@@ -20,6 +22,7 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -28,6 +31,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             padding: 40px;
         }
+
         h1 {
             color: var(--primary-dark);
             text-align: center;
@@ -35,6 +39,7 @@
             padding-bottom: 15px;
             margin-bottom: 40px;
         }
+
         h2 {
             color: var(--primary);
             margin-top: 40px;
@@ -42,6 +47,7 @@
             align-items: center;
             gap: 10px;
         }
+
         h2::before {
             content: '';
             display: inline-block;
@@ -50,25 +56,31 @@
             background: var(--primary);
             border-radius: 4px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             background: white;
         }
-        th, td {
+
+        th,
+        td {
             padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid #E2E8F0;
         }
+
         th {
             background-color: #F8FAFC;
             color: var(--primary-dark);
             font-weight: 600;
         }
+
         tr:hover {
             background-color: #F1F5F9;
         }
+
         .note {
             background-color: #FFFBEB;
             border-left: 4px solid #F59E0B;
@@ -77,29 +89,34 @@
             border-radius: 0 8px 8px 0;
             font-size: 0.9em;
         }
+
         .cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
+
         .card {
             background: #F8FAFC;
             padding: 20px;
             border-radius: 12px;
             border: 1px solid #E2E8F0;
         }
+
         .card h3 {
             color: var(--primary-dark);
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 1.1em;
         }
+
         .value {
             font-size: 24px;
             font-weight: bold;
             color: var(--primary);
         }
+
         .subtitle {
             text-align: center;
             color: var(--text-light);
@@ -109,143 +126,167 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Standar Operasional (SNI) Budidaya Udang Vaname</h1>
-    <p class="subtitle">Acuan Dasar AI PRIMA (Berdasarkan SNI 8008:2014 & Literatur)</p>
+    <div class="container">
+        <h1>Standar Operasional (SNI) Budidaya Udang Vaname</h1>
+        <p class="subtitle">Acuan Dasar AI PRIMA (Berdasarkan SNI 8008:2014 & Literatur)</p>
 
-    <div class="note">
-        <strong>PENTING:</strong> Angka-angka di bawah ini adalah panduan ideal (baseline). Pada praktiknya, aplikasi Prima akan menyesuaikan (adjust) rekomendasi ini berdasarkan kondisi nyata di lapangan seperti <strong>hasil Cek Anco</strong>.
-    </div>
+        <div class="note">
+            <strong>PENTING:</strong> Angka-angka di bawah ini adalah panduan ideal (baseline). Pada praktiknya,
+            aplikasi Prima akan menyesuaikan (adjust) rekomendasi ini berdasarkan kondisi nyata di lapangan seperti
+            <strong>hasil Cek Anco</strong>.
+        </div>
 
-    <!-- 1. STANDAR PAKAN -->
-    <h2>1. Manajemen Pakan (Feeding Rate & Anco)</h2>
-    <p>Tabel kebutuhan pakan harian berdasarkan persentase dari biomassa udang yang ada di kolam (Feeding Rate/FR), beserta waktu ideal mengangkat anco.</p>
-    <table>
+        <!-- 1. STANDAR PAKAN -->
+        <h2>1. Manajemen Pakan (Feeding Rate & Anco)</h2>
+        <p>Tabel kebutuhan pakan harian berdasarkan persentase dari biomassa udang yang ada di kolam (Feeding Rate/FR),
+            beserta waktu ideal mengangkat anco.</p>
+        <table>
         <thead>
             <tr>
-                <th>Umur (DOC)</th>
-                <th>Feeding Rate (% Biomassa)</th>
-                <th>Frekuensi Harian</th>
-                <th>Waktu Cek Anco (Jam)</th>
+                <th>Umur udang (hari)</th>
+                <th>Berat udang (g/ekor)</th>
+                <th>Dosis pakan (% biomassa/hari)</th>
+                <th>Frekuensi (kali/hari)</th>
+                <th>Waktu kontrol anco (jam)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>1 - 15 Hari</td>
-                <td>15% - 25%</td>
-                <td>4x / hari</td>
-                <td>- (Blind feeding)</td>
-            </tr>
-            <tr>
-                <td>16 - 30 Hari</td>
-                <td>10% - 15%</td>
-                <td>4x / hari</td>
-                <td>- (Mulai perkenalan anco)</td>
-            </tr>
-            <tr>
-                <td>31 - 45 Hari</td>
-                <td>7% - 10%</td>
-                <td>4x / hari</td>
-                <td>2.0 - 3.0 Jam</td>
-            </tr>
-            <tr>
-                <td>46 - 60 Hari</td>
-                <td>5% - 7%</td>
-                <td>4x / hari</td>
-                <td>2.0 - 2.5 Jam</td>
-            </tr>
-            <tr>
-                <td>61 - 75 Hari</td>
-                <td>2% - 5%</td>
-                <td>4x / hari</td>
-                <td>1.5 - 2.0 Jam</td>
-            </tr>
-            <tr>
-                <td>76 - 90 Hari</td>
-                <td>2% - 5%</td>
-                <td>4x / hari</td>
-                <td>1.5 - 2.0 Jam</td>
-            </tr>
-            <tr>
-                <td>> 90 Hari (Pra-panen)</td>
-                <td>1% - 1.5%</td>
-                <td>4x - 5x / hari</td>
-                <td>1.0 - 1.5 Jam</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- 2. STANDAR PROBIOTIK -->
-    <h2>2. Manajemen Probiotik</h2>
-    <p>Penggunaan probiotik dibedakan berdasarkan fase umur udang (Nursery vs Pembesaran).</p>
-    <table>
-        <thead>
-            <tr>
-                <th>Fase / Umur</th>
-                <th>Acuan Dosis</th>
-                <th>Frekuensi</th>
-                <th>Metode Aplikasi</th>
-                <th>Target Bakteri</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Nursery (DOC &lt; 30)</strong></td>
-                <td>2 – 4 mL / kg pakan<br><small>atau 2.5 ml / m³ air</small></td>
-                <td>2x / minggu</td>
-                <td>Dicampur ke Pakan</td>
-                <td><em>Bacillus spp.</em> (Growth promotion)</td>
-            </tr>
-            <tr>
-                <td><strong>Pembesaran Reguler (DOC 30-60)</strong></td>
-                <td>1 – 5 mg / Liter air<br><small>atau 2.0 ml / m³ air</small></td>
-                <td>2x / minggu</td>
-                <td>Ditebar ke Air</td>
-                <td><em>Lactobacillus</em> (Water treatment)</td>
-            </tr>
-            <tr>
-                <td><strong>Pembesaran Lanjut (DOC > 60)</strong></td>
-                <td>1.5 ml / m³ air</td>
-                <td>1x / minggu</td>
-                <td>Ditebar ke Air</td>
-                <td>Mix <em>Bacillus</em> + <em>Lactobacillus</em></td>
-            </tr>
-            <tr>
-                <td><strong>Pembesaran Intensif</strong></td>
-                <td>20 – 40 Liter / petak</td>
-                <td>Setiap 3 hari</td>
-                <td>Ditebar ke Air</td>
+                <td>1–15</td>
+                <td>0,05–1,0</td>
+                <td>15–25%</td>
+                <td>4</td>
                 <td>-</td>
             </tr>
+            <tr>
+                <td>16–30</td>
+                <td>1,1–2,5</td>
+                <td>10–15%</td>
+                <td>4</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>31–45</td>
+                <td>2,6–5,0</td>
+                <td>7–10%</td>
+                <td>4</td>
+                <td>2,0–3,0</td>
+            </tr>
+            <tr>
+                <td>46–60</td>
+                <td>5,1–8,0</td>
+                <td>5–7%</td>
+                <td>4</td>
+                <td>2,0–2,5</td>
+            </tr>
+            <tr>
+                <td>61–75</td>
+                <td>8,1–11,0</td>
+                <td>2–5%</td>
+                <td>4</td>
+                <td>1,5–2,0</td>
+            </tr>
+            <tr>
+                <td>76–90</td>
+                <td>11,1–14,5</td>
+                <td>2–5%</td>
+                <td>4</td>
+                <td>1,5–2,0</td>
+            </tr>
+            <tr>
+                <td>91–105</td>
+                <td>14,6–18,0</td>
+                <td>2–5%</td>
+                <td>4-5</td>
+                <td>1,0–1,5</td>
+            </tr>
+            <tr>
+                <td>106–120</td>
+                <td>18,1–22,0</td>
+                <td>2–3%</td>
+                <td>4-5</td>
+                <td>1,0–1,5</td>
+            </tr>
         </tbody>
     </table>
 
-    <!-- 3. PARAMETER LAINNYA -->
-    <h2>3. Parameter Kelangsungan Hidup & Target Panen</h2>
-    <div class="cards">
-        <div class="card">
-            <h3>Standar Kelulusan Hidup (SR)</h3>
-            <ul>
-                <li>DOC 1 - 30: <strong>95%</strong></li>
-                <li>DOC 31 - 60: <strong>90%</strong></li>
-                <li>DOC 61 - 90: <strong>85%</strong></li>
-                <li>DOC > 90: <strong>80%</strong></li>
-            </ul>
-        </div>
-        <div class="card">
-            <h3>Target Produktivitas (Yield)</h3>
-            <div class="value" style="margin-top: 15px;">2 - 4 kg / m²</div>
-            <p style="font-size: 0.9em; color: var(--text-light); margin-top: 5px;">Standar aman menurut SNI. Di bawah 2kg/m² dianggap kurang padat tebar (rugi ruang), di atas 4kg/m² membutuhkan kontrol oksigen dan kualitas air yang sangat ketat.</p>
-        </div>
-        <div class="card">
-            <h3>Feed Conversion Ratio (FCR)</h3>
-            <div class="value" style="margin-top: 15px;">1.2 - 1.5</div>
-            <p style="font-size: 0.9em; color: var(--text-light); margin-top: 5px;">Rasio ideal. Artinya untuk menghasilkan 1 kg daging udang, dibutuhkan maksimal 1.2 hingga 1.5 kg pakan. FCR > 1.5 perlu evaluasi manajemen pakan.</p>
+        <!-- 2. STANDAR PROBIOTIK -->
+        <h2>2. Manajemen Probiotik</h2>
+        <p>Penggunaan probiotik dibedakan berdasarkan fase umur udang (Nursery vs Pembesaran).</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fase / Umur</th>
+                    <th>Acuan Dosis</th>
+                    <th>Frekuensi</th>
+                    <th>Metode Aplikasi</th>
+                    <th>Target Bakteri</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Nursery (DOC &lt; 30)</strong></td>
+                    <td>2 – 4 mL / kg pakan<br><small>atau 2.5 ml / m³ air</small></td>
+                    <td>2x / minggu</td>
+                    <td>Dicampur ke Pakan</td>
+                    <td><em>Bacillus spp.</em> (Growth promotion)</td>
+                </tr>
+                <tr>
+                    <td><strong>Pembesaran Reguler (DOC 30-60)</strong></td>
+                    <td>1 – 5 mg / Liter air<br><small>atau 2.0 ml / m³ air</small></td>
+                    <td>2x / minggu</td>
+                    <td>Ditebar ke Air</td>
+                    <td><em>Lactobacillus</em> (Water treatment)</td>
+                </tr>
+                <tr>
+                    <td><strong>Pembesaran Lanjut (DOC > 60)</strong></td>
+                    <td>1.5 ml / m³ air</td>
+                    <td>1x / minggu</td>
+                    <td>Ditebar ke Air</td>
+                    <td>Mix <em>Bacillus</em> + <em>Lactobacillus</em></td>
+                </tr>
+                <tr>
+                    <td><strong>Pembesaran Intensif</strong></td>
+                    <td>20 – 40 Liter / petak</td>
+                    <td>Setiap 3 hari</td>
+                    <td>Ditebar ke Air</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 3. PARAMETER LAINNYA -->
+        <h2>3. Parameter Kelangsungan Hidup & Target Panen</h2>
+        <div class="cards">
+            <div class="card">
+                <h3>Standar Kelulusan Hidup (SR)</h3>
+                <ul>
+                    <li>DOC 1 - 30: <strong>95%</strong></li>
+                    <li>DOC 31 - 60: <strong>90%</strong></li>
+                    <li>DOC 61 - 90: <strong>85%</strong></li>
+                    <li>DOC > 90: <strong>80%</strong></li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Target Produktivitas (Yield)</h3>
+                <div class="value" style="margin-top: 15px;">2 - 4 kg / m²</div>
+                <p style="font-size: 0.9em; color: var(--text-light); margin-top: 5px;">Standar aman menurut SNI. Di
+                    bawah 2kg/m² dianggap kurang padat tebar (rugi ruang), di atas 4kg/m² membutuhkan kontrol oksigen
+                    dan kualitas air yang sangat ketat.</p>
+            </div>
+            <div class="card">
+                <h3>Feed Conversion Ratio (FCR)</h3>
+                <div class="value" style="margin-top: 15px;">1.2 - 1.5</div>
+                <p style="font-size: 0.9em; color: var(--text-light); margin-top: 5px;">Rasio ideal. Artinya untuk
+                    menghasilkan 1 kg daging udang, dibutuhkan maksimal 1.2 hingga 1.5 kg pakan. FCR > 1.5 perlu
+                    evaluasi manajemen pakan.</p>
+            </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>
