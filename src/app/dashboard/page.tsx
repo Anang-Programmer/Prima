@@ -707,7 +707,7 @@ export default function DashboardPage() {
           <main className="space-y-4 px-4 pb-40 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-8">
             {/* --- Kartu Alarm --- */}
             {alarms.length > 0 && (
-              <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-4 snap-x md:mx-0 md:px-0 md:flex md:flex-row md:flex-wrap md:gap-4 md:overflow-visible">
+              <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-4 snap-x md:mx-0 md:px-0 md:flex md:flex-row md:flex-wrap md:gap-4 md:overflow-visible touch-pan-y">
                 {alarms.map((alarm) => (
                   <section key={alarm.pond.pond_id} className="min-w-[85vw] snap-center rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col justify-between border border-slate-100 md:min-w-0 md:flex-none md:w-[350px]">
                     <div className="p-4 flex items-start justify-between">

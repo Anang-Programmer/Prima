@@ -79,7 +79,8 @@ class _PrimaWebViewState extends State<PrimaWebView> {
       ),
       onRefresh: () async {
         if (webViewController != null) {
-          webViewController?.reload();
+          // Gunakan JS reload agar SPA (Next.js) tidak ter-reset ke halaman root
+          await webViewController?.evaluateJavascript(source: "window.location.reload()");
         }
       },
     );
@@ -147,13 +148,6 @@ class _PrimaWebViewState extends State<PrimaWebView> {
             },
             onReceivedError: (controller, request, error) {
               pullToRefreshController?.endRefreshing();
-            },
-            onScrollChanged: (controller, x, y) {
-              if (y <= 0) {
-                pullToRefreshController?.setEnabled(true);
-              } else {
-                pullToRefreshController?.setEnabled(false);
-              }
             },
             initialSettings: InAppWebViewSettings(
               transparentBackground: true,
