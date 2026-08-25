@@ -34,7 +34,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
         </button>
       </div>
       <div className="mt-3">
-        <Row l="Jumlah per sesi" v={`${fmtFeedWithHint(d.anco?.adjustedPerMealKg || (d.feed.dailyFeedKg / d.feed.mealsPerDay))}`} />
+        <Row l="Jumlah per sesi" v={`${fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))}`} />
         {d.anco?.multiplier && d.anco.multiplier !== 1 && (
           <div className="mt-1 mb-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-semibold text-amber-700 border border-amber-200/60 flex items-center justify-between">
             <span>Evaluasi Anco: {d.anco.latestResult}</span>
@@ -98,7 +98,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                       </span>
                     </div>
                     {isDue && t.type === "Pakan" && (
-                      <p className="text-[10px] text-red-600/70 mt-0.5">Berikan {fmtFeedWithHint(d.anco?.adjustedPerMealKg || (d.feed.dailyFeedKg / d.feed.mealsPerDay))} lalu tekan tombol di bawah</p>
+                      <p className="text-[10px] text-red-600/70 mt-0.5">Berikan {fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))} lalu tekan tombol di bawah</p>
                     )}
                     {isDue && t.type === "Cek Anco" && (
                       <p className="text-[10px] text-red-600/70 mt-0.5">Periksa sisa pakan di anco lalu isi hasilnya</p>

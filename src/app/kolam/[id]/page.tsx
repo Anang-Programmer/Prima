@@ -117,14 +117,22 @@ export default function DetailKolamPage() {
                 supabase.from("probiotic_logs").select("amount_ml").eq("cycle_id", matched.id),
               ]);
               const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? []);
-              verdict = {
-                source: "historis",
-                label: rec.label,
-                feedKg: rec.feedKg,
-                probMl: rec.probMl,
-                gagalDi: [],
-                matchedCycleId: matched.id,
-              };
+              if (rec.feedKg == null) {
+                // Lolos syarat tapi tak punya log pakan -> data historis tak lengkap -> SNI total
+                verdict = makeSniVerdict([
+                  ...(gagalDi.length ? gagalDi : []),
+                  "Siklus lama lolos syarat tapi tidak punya log pakan. Rekomendasi kembali ke SNI.",
+                ]);
+              } else {
+                verdict = {
+                  source: "historis",
+                  label: rec.label,
+                  feedKg: rec.feedKg,
+                  probMl: rec.probMl,
+                  gagalDi: [],
+                  matchedCycleId: matched.id,
+                };
+              }
             } else {
               verdict = makeSniVerdict(gagalDi);
             }
@@ -184,9 +192,12 @@ export default function DetailKolamPage() {
       ? +(d.anco.adjustedPerMealKg * d.feed.mealsPerDay).toFixed(2)
       : d.feed.dailyFeedKg;
 
+    // Historis aktif -> form memuat angka historis (baseline yang sama dgn pengecekan deviasi)
+    const histKg = historicalData?.source === "historis" && (historicalData?.feedKg ?? 0) > 0 ? (historicalData!.feedKg as number) : null;
+
     setEditFeedValues({
-      dailyFeedKg: ancoCalibratedKg,
-      _rawDailyFeedKg: ancoCalibratedKg.toString(),
+      dailyFeedKg: histKg ?? ancoCalibratedKg,
+      _rawDailyFeedKg: (histKg ?? ancoCalibratedKg).toString(),
       mealsPerDay: d.feed.mealsPerDay,
       ancoHours: d.feed.ancoIntervalHours,
       feedBrand: d.feed.brand === "Pelet" ? "" : d.feed.brand,
@@ -200,8 +211,10 @@ export default function DetailKolamPage() {
   // Mulai edit probiotik ' muat nilai yang sedang berlaku
   function startEditProb() {
     if (!d) return;
+    // Historis aktif -> form memuat dosis historis
+    const histMl = historicalData?.source === "historis" && (historicalData?.probMl ?? 0) > 0 ? (historicalData!.probMl as number) : null;
     setEditProbValues({
-      doseMl: d.prob.doseMl,
+      doseMl: histMl ?? d.prob.doseMl,
       frequencyPerWeek: d.prob.frequencyPerWeek,
       method: d.prob.method,
     });

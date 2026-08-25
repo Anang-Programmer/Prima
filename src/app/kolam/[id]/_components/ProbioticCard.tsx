@@ -75,7 +75,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
                   </span>
                 </div>
                 {isDue && (
-                  <p className="text-[10px] text-red-600/70 mt-0.5">Berikan {d.prob.doseMl}ml {d.prob.brand} lalu tekan tombol di bawah</p>
+                  <p className="text-[10px] text-red-600/70 mt-0.5">Berikan {displayProb}ml {d.prob.brand} lalu tekan tombol di bawah</p>
                 )}
                 {isDue && (
                   <button
