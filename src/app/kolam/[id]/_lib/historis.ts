@@ -8,12 +8,12 @@
 // Syarat mutlak:
 //   1. Siklus lama SELESAI & data panen lengkap (biomass & FCR > 0)
 //   2. Padat tebar identik (ekor/m2, dibulat 1 desimal, lintas kolam boleh)
-//   3. Bulan tebar identik (bulan dari start_date kedua siklus)
-//   4. FCR siklus lama dalam standar: 0 < FCR < 1.5
+//   3. FCR siklus lama dalam standar: 0 < FCR < 1.5
 //   5. Jika beberapa lolos -> pilih FCR TERRENDAH (paling sukses)
 // ============================================================
 
-export const FCR_MAX_HISTORIS = 1.5;
+// UJI COBA sementara: 3. Standar final = 1.5. JANGAN lupa kembalikan sebelum rilis!
+export const FCR_MAX_HISTORIS = 3;
 export const DOC_WINDOW_DAYS = 3;
 
 export type HistorisVerdict = {
@@ -37,14 +37,6 @@ export function densityOf(initialCount: any, areaM2: any): number {
   return Math.round((c / a) * 10) / 10;
 }
 
-// Bulan (0-11) dari start_date 'YYYY-MM-DD' - diambil langsung dari string
-// agar tidak tergeser zona waktu (new Date('YYYY-MM-DD') = UTC midnight).
-function monthOfStartDate(startDate: any): number {
-  if (!startDate) return NaN;
-  const s = String(startDate).slice(0, 10);
-  const m = Number(s.slice(5, 7));
-  return Number.isFinite(m) && m >= 1 && m <= 12 ? m - 1 : NaN;
-}
 
 function selesaiDanLengkap(c: any): boolean {
   return (
@@ -65,7 +57,6 @@ export function evaluateHistoris(
   pondAreaById: Map<string, number>
 ): { matched: any | null; gagalDi: string[] } {
   const curDensity = densityOf(currentCycle?.initial_shrimp_count, currentPond?.area_m2);
-  const curMonth = monthOfStartDate(currentCycle?.start_date);
 
   const candidates = (pastCycles || []).filter((c: any) => c?.id !== currentCycle?.id);
 
@@ -83,7 +74,6 @@ export function evaluateHistoris(
     const ok =
       selesaiDanLengkap(c) &&
       density === curDensity &&
-      monthOfStartDate(c.start_date) === curMonth &&
       fcr > 0 &&
       fcr < FCR_MAX_HISTORIS;
     if (ok && (!best || fcr < Number(best.harvest_fcr))) best = c;
@@ -94,7 +84,6 @@ export function evaluateHistoris(
     const c = candidates[candidates.length - 1];
     const density = densityOf(c.initial_shrimp_count, pondAreaById.get(c.pond_id));
     const fcr = Number(c.harvest_fcr) || 0;
-    const m = monthOfStartDate(c.start_date);
     const gagalDi: string[] = [];
     if (!selesaiDanLengkap(c)) {
       gagalDi.push("Siklus lama belum lengkap: harus diakhiri lewat 'Akhiri Siklus' agar data panen terisi.");
@@ -102,11 +91,6 @@ export function evaluateHistoris(
     if (!(density === curDensity)) {
       gagalDi.push(
         `Padat tebar beda: siklus lama ${Number.isFinite(density) ? density : "?"} ekor/m² vs sekarang ${Number.isFinite(curDensity) ? curDensity : "?"} ekor/m².`
-      );
-    }
-    if (!(m === curMonth)) {
-      gagalDi.push(
-        `Bulan tebar beda: siklus lama bulan ${Number.isFinite(m) ? m + 1 : "?"} vs sekarang bulan ${Number.isFinite(curMonth) ? curMonth + 1 : "?"}.`
       );
     }
     if (!(fcr > 0 && fcr < FCR_MAX_HISTORIS)) {
