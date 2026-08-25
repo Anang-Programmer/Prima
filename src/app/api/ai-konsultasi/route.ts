@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { type, messages, pondContext, ancoContext, sniValues, userValues } = await req.json();
+    const { type, messages, pondContext, ancoContext, sniValues, userValues, baselineSource } = await req.json();
+    const src = baselineSource === 'historis' ? 'historis' : 'sni';
     const isProb = type === 'probiotik';
 
     // --- Hitung batas toleransi berdasarkan angka lapangan (anco-adjusted) ---
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     let bounds: { lower: number; upper: number; floor?: number } = { lower: 0, upper: 0 };
 
     if (!isProb) {
-      const baselineKg = ancoContext?.adjustedDailyFeedKg ?? sniValues.dailyFeedKg;
+      const baselineKg = src === 'historis' ? sniValues.dailyFeedKg : (ancoContext?.adjustedDailyFeedKg ?? sniValues.dailyFeedKg);
       const sniKg = sniValues.dailyFeedKg;
       
       // FIX BUG: Jangan sampai lower > upper. 
@@ -114,13 +115,13 @@ KONTEKS KOLAM PETAMBAK:
 - ABW (berat rata-rata): ${pondContext.abw ?? '-'} gram
 - Biomassa estimasi: ${pondContext.biomass ?? '-'} kg
 
-BASE 1 - REKOMENDASI SNI (angka dari rumus standar nasional):
+    BASE 1 - ${src === 'historis' ? 'REKOMENDASI HISTORIS (angka nyata dari siklus sukses milik petambak sendiri, sudah terbukti di lapangan)' : 'REKOMENDASI SNI (angka dari rumus standar nasional)'}:
 ${
   isProb
     ? `- Dosis: ${sniValues.dosis}
 - Frekuensi: ${sniValues.frekuensi}
 - Metode: ${sniValues.metode}`
-    : `- Pakan harian (SNI murni): ${sniValues.dailyFeedKg} kg
+    : `- Pakan harian (${src === 'historis' ? 'historis' : 'SNI murni'}): ${sniValues.dailyFeedKg} kg
 - Frekuensi: ${sniValues.mealsPerDay}× per hari
 - Feeding rate: ${sniValues.feedingRate}%
 - Cek anco: ${sniValues.ancoHours} jam`
@@ -143,7 +144,7 @@ ${toleranceBlock}
 
 ATURAN:
 1. Jawab dalam Bahasa Indonesia yang ramah, empatik, dan profesional layaknya konsultan budidaya. Panggil "Pak" atau "Bapak".
-2. Kamu punya 2 BASIS DATA: Base 1 (SNI rumus standar) dan Base 2 (data lapangan dari anco). Gunakan KEDUANYA saat menilai permintaan petambak. Jika Base 2 tersedia, itu adalah acuan utamamu karena lebih dekat dengan kondisi nyata.
+2. Sumber rekomendasi dasar saat ini: ${src === 'historis' ? 'HISTORIS - data siklus sukses milik petambak sendiri. Ini acuan UTAMA karena terbukti berhasil di tambaknya' : 'SNI 8008:2014 (rumus standar nasional)'}. Kamu punya 2 BASIS DATA: Base 1 dan Base 2 (data lapangan dari anco). Gunakan KEDUANYA saat menilai permintaan petambak.
 3. Jangan langsung menutup percakapan atau memaksa "kesepakatan final" di awal. Gali dulu masalahnya jika petambak curhat (misal: krisis keuangan, udang sakit, air keruh).
 4. JIKA angka permintaan petambak MASIH DALAM BATAS AMAN, langsung SETUJUI dan berikan angka yang SAMA PERSIS dengan yang diminta petambak (misal petambak minta 2.48, setujui 2.48). DILARANG KERAS menawar/mengubah angkanya menjadi sedikit berbeda (seperti 2.45) karena akan terlihat tidak sinkron.
 5. Diskusikan sampai petambak benar-benar setuju dengan suatu angka yang spesifik.

@@ -4,7 +4,7 @@ import { AlarmClock, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export function DebugTimePanel(props: any) {
-  const { busy, insertError, debugMsg, debugAdvance, debugJumpDoc, currentDoc } = props;
+  const { busy, insertError, debugMsg, debugAdvance, debugJumpDoc, currentDoc, historisCheck } = props;
   const [targetDoc, setTargetDoc] = useState<number | "">(120);
 
   return (
@@ -52,6 +52,24 @@ export function DebugTimePanel(props: any) {
           {busy ? <Loader2 className="mx-auto animate-spin" size={12} /> : "Lompat Waktu"}
         </button>
       </div>
+
+      {/* Checklist Rekomendasi Historis */}
+      {historisCheck && (
+        <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2.5">
+          <p className="text-[10px] font-bold text-slate-600 mb-1">
+            Cek Rekomendasi Historis: {historisCheck.source === "historis" ? "AKTIF (ikut siklus sukses)" : "FALLBACK ke SNI"}
+          </p>
+          {historisCheck.source === "historis" ? (
+            <p className="text-[10px] text-emerald-600">Semua syarat mutlak terpenuhi - rekomendasi mengikuti siklus sukses Bapak.</p>
+          ) : (
+            <ul className="list-disc pl-4 space-y-0.5">
+              {(historisCheck.gagalDi || []).map((g: string, i: number) => (
+                <li key={i} className="text-[10px] text-amber-700">{g}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {debugMsg && (
         <div className="mt-2 rounded-lg border border-[#2ABFC8]/30 bg-[#E3F1F2] p-2.5 text-[10px] leading-relaxed text-[#2F6E7B]">

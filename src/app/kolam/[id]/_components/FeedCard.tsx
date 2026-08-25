@@ -5,8 +5,9 @@ import { Row } from "./Sheet";
 import { fmt1, fmtFeed, fmtFeedWithHint } from "../_lib/constants";
 
 export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCatatPakan, confirmFeedDone, setAncoResult, setAncoModal, formatTimeLeft, historicalData }: any) {
-  const displayFeed = historicalData ? historicalData.feedKg : d.feed.dailyFeedKg;
-  const badgeText = historicalData ? historicalData.cycleName : "SNI 8008:2014";
+  const hist = historicalData?.source === "historis" && (historicalData?.feedKg ?? 0) > 0;
+  const displayFeed = hist ? historicalData.feedKg : d.feed.dailyFeedKg;
+  const badgeText = hist ? historicalData.label : "SNI 8008:2014";
   const badgeColor = historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200";
 
   return (

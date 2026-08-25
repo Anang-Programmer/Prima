@@ -4,8 +4,9 @@ import { Pencil, AlertCircle } from "lucide-react";
 import { Row } from "./Sheet";
 
 export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbiotik, confirmProbioticDone, formatTimeLeft, historicalData }: any) {
-  const displayProb = historicalData ? historicalData.probMl : d.prob.doseMl;
-  const badgeText = historicalData ? historicalData.cycleName : "SNI 8008:2014";
+  const hist = historicalData?.source === "historis" && (historicalData?.probMl ?? 0) > 0;
+  const displayProb = hist ? historicalData.probMl : d.prob.doseMl;
+  const badgeText = hist ? historicalData.label : "SNI 8008:2014";
   const badgeColor = historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200";
 
   return (

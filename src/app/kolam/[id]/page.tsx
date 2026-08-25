@@ -7,6 +7,7 @@ import { getProbioticSchedule, nextFeedTime, calculateDailyFeed, estimateAbw } f
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 import { fmt1 } from "./_lib/constants";
 import { buildDetail } from "./_lib/derive";
+import { evaluateHistoris, buildHistorisRecommendation, makeSniVerdict, type HistorisVerdict } from "./_lib/historis";
 import { DetailHeader } from "./_components/DetailHeader";
 import { DocCard } from "./_components/DocCard";
 import { FeedCard } from "./_components/FeedCard";
@@ -90,45 +91,47 @@ export default function DetailKolamPage() {
         feeds = f.data ?? []; samps = s.data ?? []; probs = p.data ?? []; timers = t.data ?? [];
         logbook = (lb.data ?? []).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-        // (Safety First) Fetch Historical Data for overriding UI conditionally
+        // === REKOMENDASI HISTORIS (aturan tunggal di _lib/historis.ts) ===
+        // Lolos SEMUA syarat mutlak -> ikut data siklus sukses.
+        // Gagal SATU SAJA -> fallback total ke SNI.
         try {
-          const currentMonth = new Date(cycle.start_date).getMonth();
-          // Cari semua kolam milik user ini agar historis bisa dipakai lintas kolam
-          const { data: userPonds } = await supabase.from("ponds").select("id").eq("user_id", pond.user_id);
-          const pondIds = userPonds ? userPonds.map((p: any) => p.id) : [id];
+          const docNow = Math.floor((Date.now() - new Date(cycle.start_date).getTime()) / 86400000);
+          const { data: userPonds } = await supabase.from("ponds").select("id, area_m2").eq("user_id", pond.user_id);
+          const pondIds = (userPonds ?? []).map((p: any) => p.id);
+          const pondAreaById = new Map<string, number>((userPonds ?? []).map((p: any) => [p.id, Number(p.area_m2)]));
 
-          const { data: pastCycles } = await supabase
-            .from("cycles")
-            .select("*")
-            .in("pond_id", pondIds)
-            .eq("initial_shrimp_count", cycle.initial_shrimp_count)
-            .not("harvest_biomass_kg", "is", null);
+          let verdict: HistorisVerdict = makeSniVerdict(["Belum ada data untuk dinilai."]);
 
-          if (pastCycles && pastCycles.length > 0) {
-            let foundCycle = null;
-            for (const c of pastCycles) {
-              const fcr = c.harvest_fcr || 0;
-              if (fcr > 0 && fcr < 3 && new Date(c.start_date).getMonth() === currentMonth) {
-                foundCycle = c;
-                break;
-              }
-            }
-            if (foundCycle) {
-              // To guarantee it doesn't break presentation, we safely map a historical snapshot.
-              // In full production, this would query exactly by DOC on feed_logs.
-              setHistoricalData({
-                feedKg: 10.5,
-                probMl: 500,
-                cycleName: "Siklus Sukses Masa Lalu"
-              });
+          if (pondIds.length > 0) {
+            const { data: pastCycles } = await supabase
+              .from("cycles")
+              .select("*")
+              .in("pond_id", pondIds)
+              .eq("status", "Selesai");
+
+            const { matched, gagalDi } = evaluateHistoris(cycle, pond, pastCycles ?? [], pondAreaById);
+
+            if (matched) {
+              const [mf, mp] = await Promise.all([
+                supabase.from("feed_logs").select("date, feed_amount_kg").eq("cycle_id", matched.id),
+                supabase.from("probiotic_logs").select("amount_ml").eq("cycle_id", matched.id),
+              ]);
+              const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? []);
+              verdict = {
+                source: "historis",
+                label: rec.label,
+                feedKg: rec.feedKg,
+                probMl: rec.probMl,
+                gagalDi: [],
+                matchedCycleId: matched.id,
+              };
             } else {
-              setHistoricalData(null);
+              verdict = makeSniVerdict(gagalDi);
             }
-          } else {
-            setHistoricalData(null);
           }
+          setHistoricalData(verdict);
         } catch (e) {
-          console.error(e);
+          console.warn("Cek historis gagal, fallback SNI:", e);
           setHistoricalData(null);
         }
       }
@@ -212,8 +215,9 @@ export default function DetailKolamPage() {
   function handleConfirmEdit() {
     if (!d) return;
     if (editMode === "pakan") {
-      const refKg = Math.max(d.recommendedFeedKg, 0.01);
-      const pakanDev = Math.abs(editFeedValues.dailyFeedKg - d.recommendedFeedKg) / refKg > 0.15;
+      const baselineKg = historicalData?.source === "historis" && (historicalData.feedKg ?? 0) > 0 ? (historicalData.feedKg as number) : d.recommendedFeedKg;
+      const refKg = Math.max(baselineKg, 0.01);
+      const pakanDev = Math.abs(editFeedValues.dailyFeedKg - baselineKg) / refKg > 0.15;
       const freqDev = editFeedValues.mealsPerDay !== d.calc.mealsPerDay;
       const ancoDev = Math.abs(editFeedValues.ancoHours - d.calc.ancoIntervalHours) > 0.3;
 
@@ -224,7 +228,8 @@ export default function DetailKolamPage() {
         saveChanges(false);
       }
     } else if (editMode === "prob") {
-      const dosisDev = Math.abs(editProbValues.doseMl - d.sched.doseMl) > 50;
+      const baselineMl = historicalData?.source === "historis" && (historicalData.probMl ?? 0) > 0 ? (historicalData.probMl as number) : d.sched.doseMl;
+      const dosisDev = Math.abs(editProbValues.doseMl - baselineMl) > 50;
       const freqDev = editProbValues.frequencyPerWeek !== d.sched.frequencyPerWeek;
       const metodeDev = editProbValues.method !== "Ke Air";
 
@@ -369,11 +374,17 @@ export default function DetailKolamPage() {
     setIsAiTyping(true);
 
     try {
+      const histActive = historicalData?.source === "historis";
+      const baselineFeedKg = histActive && (historicalData?.feedKg ?? 0) > 0 ? (historicalData!.feedKg as number) : d.calc.dailyFeedKg;
+      const baselineDoseMl = histActive && (historicalData?.probMl ?? 0) > 0 ? (historicalData!.probMl as number) : d.sched.doseMl;
+      const baselineSource: "historis" | "sni" = histActive ? "historis" : "sni";
+
       const res = await fetch("/api/ai-konsultasi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: editMode === "prob" ? "probiotik" : "pakan",
+          baselineSource,
           messages: newMessages,
           pondContext: {
             doc: d.doc,
@@ -395,13 +406,13 @@ export default function DetailKolamPage() {
           sniValues:
             editMode === "pakan"
               ? {
-                dailyFeedKg: d.calc.dailyFeedKg,
+                  dailyFeedKg: baselineFeedKg,
                 mealsPerDay: d.calc.mealsPerDay,
                 feedingRate: d.calc.feedingRatePct,
                 ancoHours: d.calc.ancoIntervalHours,
               }
               : {
-                dosis: `${d.sched.doseMl}ml`,
+                  dosis: `${baselineDoseMl}ml`,
                 frekuensi: `${d.sched.frequencyPerWeek}x per minggu`,
                 metode: "Ke Air",
               },
@@ -1134,7 +1145,7 @@ export default function DetailKolamPage() {
 
                     {/* ======== PANEL DEBUG: SIMULASI WAKTU ======== */}
                     {!showAIChat && !editMode && (
-                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} />
+                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} historisCheck={historicalData} />
                     )}
 
 
