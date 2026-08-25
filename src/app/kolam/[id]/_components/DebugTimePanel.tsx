@@ -53,6 +53,19 @@ export function DebugTimePanel(props: any) {
         </button>
       </div>
 
+      {/* Debug FCR Historis */}
+      <div className="mt-3 flex items-center gap-2 border-t border-amber-200/50 pt-3">
+        <span className="text-[10px] font-semibold text-amber-700">Maks FCR Historis:</span>
+        <input 
+          type="number" 
+          step="0.1"
+          className="w-16 rounded-lg bg-white px-2 py-1.5 text-xs text-center font-bold text-slate-700 outline-none focus:ring-1 focus:ring-amber-400" 
+          value={props.debugFcrLimit}
+          onChange={(e) => props.setDebugFcrLimit(Number(e.target.value))}
+        />
+        <span className="text-[9px] text-amber-700/80 leading-tight">Ubah ini untuk melonggarkan pengecekan FCR Historis (standar: 1.5)</span>
+      </div>
+
       {/* Checklist Rekomendasi Historis */}
       {historisCheck && (
         <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2.5">

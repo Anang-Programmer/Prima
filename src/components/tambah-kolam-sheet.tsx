@@ -80,6 +80,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
           name,
           shape,
           area_m2: Number(area),
+          depth_m: Number(depth) || 1.5,
           location,
           status: "Aktif",
         })

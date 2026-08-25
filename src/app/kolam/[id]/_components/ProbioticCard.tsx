@@ -15,12 +15,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
         <div className="flex items-center gap-3">
           <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-11 w-11 shrink-0" />
           <div>
-            <div className="flex items-center gap-1.5">
-              <p className="text-[11px] text-slate-500">Probiotik</p>
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeColor}`}>
-                {badgeText}
-              </span>
-            </div>
+            <p className="text-[11px] text-slate-500">Probiotik</p>
             <p className="text-lg font-extrabold">{displayProb} ml</p>
           </div>
         </div>

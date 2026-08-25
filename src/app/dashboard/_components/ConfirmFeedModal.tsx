@@ -2,6 +2,7 @@
 
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { fmtFeed } from "@/app/kolam/[id]/_lib/constants";
 
 export function ConfirmFeedModal({
   open,
@@ -55,7 +56,7 @@ export function ConfirmFeedModal({
 
         {/* Big Gray Box */}
         <div className="rounded-xl bg-[#EBEFEF] py-8 text-center mb-3">
-          <span className="text-2xl font-bold text-slate-600">{feedAmount} Kg</span>
+          <span className="text-2xl font-bold text-slate-600">{fmtFeed(feedAmount)}</span>
         </div>
 
         <p className="text-xs text-slate-500 font-medium mb-8 px-1">

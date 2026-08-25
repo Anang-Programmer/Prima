@@ -54,7 +54,8 @@ export function evaluateHistoris(
   currentCycle: any,
   currentPond: any,
   pastCycles: any[],
-  pondAreaById: Map<string, number>
+  pondAreaById: Map<string, number>,
+  fcrMax: number = FCR_MAX_HISTORIS
 ): { matched: any | null; gagalDi: string[] } {
   const curDensity = densityOf(currentCycle?.initial_shrimp_count, currentPond?.area_m2);
 
@@ -75,7 +76,7 @@ export function evaluateHistoris(
       selesaiDanLengkap(c) &&
       density === curDensity &&
       fcr > 0 &&
-      fcr < FCR_MAX_HISTORIS;
+      fcr < fcrMax;
     if (ok && (!best || fcr < Number(best.harvest_fcr))) best = c;
   }
 
@@ -93,8 +94,8 @@ export function evaluateHistoris(
         `Padat tebar beda: siklus lama ${Number.isFinite(density) ? density : "?"} ekor/m² vs sekarang ${Number.isFinite(curDensity) ? curDensity : "?"} ekor/m².`
       );
     }
-    if (!(fcr > 0 && fcr < FCR_MAX_HISTORIS)) {
-      gagalDi.push(`FCR siklus lama ${fcr > 0 ? fcr : "-"} di luar standar historis (< ${FCR_MAX_HISTORIS}).`);
+    if (!(fcr > 0 && fcr < fcrMax)) {
+      gagalDi.push(`FCR siklus lama ${fcr > 0 ? fcr : "-"} di luar standar historis (< ${fcrMax}).`);
     }
     return { matched: null, gagalDi };
   }

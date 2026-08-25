@@ -4,7 +4,7 @@ import { Minus, Plus, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react"
 import { Label } from "./Sheet";
 import { inputCls, fmt1, fmtFeed } from "../_lib/constants";
 
-export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation, setEditMode }: any) {
+export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation, setEditMode, historicalData }: any) {
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm">
       <h4 className="text-sm font-bold text-slate-800 mb-5">Edit Pakan</h4>
@@ -47,15 +47,17 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
       </div>
       <p className="mb-2 text-center text-[10px] text-slate-400">kg / hari</p>
       {/* Status SNI pakan */}
+      {/* Status SNI pakan */}
       {(() => {
-        const ref = Math.max(d.recommendedFeedKg, 0.01);
-        const devPct = Math.abs(editFeedValues.dailyFeedKg - d.recommendedFeedKg) / ref;
+        const baseline = historicalData ? historicalData.feedKg : d.recommendedFeedKg;
+        const ref = Math.max(baseline, 0.01);
+        const devPct = Math.abs(editFeedValues.dailyFeedKg - baseline) / ref;
         const isOff = devPct > 0.15; // toleransi 15%
         return (
           <p className={`mb-5 text-center text-[11px] font-semibold ${isOff ? "text-orange-500" : "text-[#1C9098]"}`}>
             {isOff
-              ? `⚠ Berbeda dari rekomendasi PRIMA (${fmtFeed(d.recommendedFeedKg)})`
-              : "Pakan sudah sesuai dengan rekomendasi PRIMA"}
+              ? `Berbeda dari rekomendasi ${historicalData ? "Prima" : "PRIMA"} (${fmtFeed(baseline)})`
+              : `Pakan sudah sesuai dengan rekomendasi ${historicalData ? "Prima" : "PRIMA"}`}
           </p>
         );
       })()}

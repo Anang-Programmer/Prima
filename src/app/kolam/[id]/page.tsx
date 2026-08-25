@@ -39,6 +39,7 @@ export default function DetailKolamPage() {
   const [busy, setBusy] = useState(false);
   const [insertError, setInsertError] = useState<string | null>(null);
   const [debugMsg, setDebugMsg] = useState<string | null>(null);
+  const [debugFcrLimit, setDebugFcrLimit] = useState(3); // FCR threshold for debugging
 
   // form states
   const [pondForm, setPondForm] = useState<any>({});
@@ -109,7 +110,7 @@ export default function DetailKolamPage() {
               .in("pond_id", pondIds)
               .eq("status", "Selesai");
 
-            const { matched, gagalDi } = evaluateHistoris(cycle, pond, pastCycles ?? [], pondAreaById);
+            const { matched, gagalDi } = evaluateHistoris(cycle, pond, pastCycles ?? [], pondAreaById, debugFcrLimit);
 
             if (matched) {
               const [mf, mp] = await Promise.all([
@@ -145,7 +146,7 @@ export default function DetailKolamPage() {
       }
       setData({ pond, cycle, feeds, probs, timers, samps, logbook });
     })();
-  }, [id, reload]);
+  }, [id, reload, debugFcrLimit]);
 
   const d = useMemo(() => buildDetail(data), [data]);
 
@@ -1128,15 +1129,22 @@ export default function DetailKolamPage() {
                 {tab === "Pakan" && (
                   <>
                     {/* Status banner */}
-                    <div className={`rounded-xl px-4 py-3 text-xs font-bold ${d.custom ? "bg-[#FDEBDD] text-[#B25E09]" : "bg-[#CFE8EB] text-[#1F6470]"}`}>
-                      {d.custom ? "Rekomendasi telah disesuaikan manual" : "Sesuai rekomendasi standar SNI 8008:2014"}
+                    <div className={`rounded-xl px-4 py-3 text-xs font-bold ${
+                      historicalData?.source === "historis" ? "bg-green-100 text-green-700" :
+                      d.custom ? "bg-[#FDEBDD] text-[#B25E09]" : "bg-[#CFE8EB] text-[#1F6470]"
+                    }`}>
+                      {historicalData?.source === "historis" 
+                        ? `Berdasarkan data ${historicalData.label}`
+                        : d.custom 
+                          ? "Rekomendasi telah disesuaikan manual" 
+                          : "Rekomendasi berdasarkan standar SNI 8008:2014"}
                     </div>
 
                     {/* ======== KARTU PAKAN (tampilan normal / edit mode) ======== */}
                     {editMode !== "pakan" && !showAIChat ? (
                       <FeedCard d={d} now={now} busy={busy} insertError={insertError} startEditPakan={startEditPakan} handleCatatPakan={handleCatatPakan} confirmFeedDone={confirmFeedDone} setAncoResult={setAncoResult} setAncoModal={setAncoModal} formatTimeLeft={formatTimeLeft} historicalData={historicalData} />
                     ) : editMode === "pakan" && !showAIChat ? (
-                      <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} setEditMode={setEditMode} />
+                      <FeedEditForm d={d} busy={busy} editFeedValues={editFeedValues} setEditFeedValues={setEditFeedValues} handleConfirmEdit={handleConfirmEdit} showSNIAlert={showSNIAlert} deviations={deviations} saveChanges={saveChanges} startAIConsultation={startAIConsultation} setEditMode={setEditMode} historicalData={historicalData} />
                     ) : null}
 
                     {/* ======== PANEL CHAT AI (muncul setelah klik "Konsultasi AI") ======== */}
@@ -1158,7 +1166,7 @@ export default function DetailKolamPage() {
 
                     {/* ======== PANEL DEBUG: SIMULASI WAKTU ======== */}
                     {!showAIChat && !editMode && (
-                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} historisCheck={historicalData} />
+                      <DebugTimePanel busy={busy} insertError={insertError} debugMsg={debugMsg} debugAdvance={debugAdvance} debugJumpDoc={debugJumpDoc} currentDoc={d?.doc || 0} historisCheck={historicalData} debugFcrLimit={debugFcrLimit} setDebugFcrLimit={setDebugFcrLimit} />
                     )}
 
 

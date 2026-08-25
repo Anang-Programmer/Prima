@@ -16,12 +16,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
         <div className="flex items-center gap-3">
           <img src="/images/icon/pakan.webp" alt="Pakan" className="h-11 w-11 shrink-0" />
           <div>
-            <div className="flex items-center gap-1.5">
-              <p className="text-[11px] text-slate-500">Total Pakan per hari</p>
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeColor}`}>
-                {badgeText}
-              </span>
-            </div>
+            <p className="text-[11px] text-slate-500">Total Pakan per hari</p>
             <p className="text-lg font-extrabold">{fmtFeed(displayFeed)}</p>
           </div>
         </div>

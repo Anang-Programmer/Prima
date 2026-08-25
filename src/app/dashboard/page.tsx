@@ -202,6 +202,66 @@ import { SelectPondModal } from "./_components/SelectPondModal";
 import { ConfirmFeedModal } from "./_components/ConfirmFeedModal";
 import { ConfirmAncoModal } from "./_components/ConfirmAncoModal";
 import { buildDetail } from "@/app/kolam/[id]/_lib/derive";
+import { evaluateHistoris, buildHistorisRecommendation } from "@/app/kolam/[id]/_lib/historis";
+
+/* =========================================================
+   HELPER HISTORIS QUICK ACTION
+============================================================ */
+async function resolveFeedAmount(cycleId: string, pondId: string) {
+  const [f, s, p, c] = await Promise.all([
+    supabase.from("feed_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: false }),
+    supabase.from("sampling_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: true }),
+    supabase.from("ponds").select("*").eq("id", pondId).single(),
+    supabase.from("cycles").select("*").eq("id", cycleId).single()
+  ]);
+  
+  if (!c.data || !p.data) return { amount: 0, brand: "Pelet", meals: 1, ancoHours: 2.25 };
+
+  const d = buildDetail({
+    pond: p.data,
+    cycle: c.data,
+    feeds: f.data || [],
+    samps: s.data || [],
+    probs: [],
+    timers: [],
+    logbook: []
+  });
+  
+  const meals = Math.max(d.feed.mealsPerDay || 1, 1);
+  let dailyKg = d.feed.dailyFeedKg;
+
+  // Cek Historis
+  const { data: userPonds } = await supabase.from("ponds").select("id, area_m2").eq("user_id", p.data.user_id);
+  const pondIds = (userPonds ?? []).map((x: any) => x.id);
+  const pondAreaById = new Map<string, number>((userPonds ?? []).map((x: any) => [x.id, Number(x.area_m2)]));
+  
+  let probMl = d.prob.doseMl;
+  if (pondIds.length > 0) {
+    const { data: pastCycles } = await supabase.from("cycles").select("*").in("pond_id", pondIds).eq("status", "Selesai");
+    // FCR Max kita set default 3 untuk sinkronisasi dengan halaman detail kolam saat ini
+    const { matched } = evaluateHistoris(c.data, p.data, pastCycles ?? [], pondAreaById, 3);
+    if (matched) {
+      const docNow = Math.floor((Date.now() - new Date(c.data.start_date).getTime()) / 86400000);
+      const [mf, mp] = await Promise.all([
+        supabase.from("feed_logs").select("date, feed_amount_kg").eq("cycle_id", matched.id),
+        supabase.from("probiotic_logs").select("amount_ml").eq("cycle_id", matched.id)
+      ]);
+      const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? []);
+      if (rec.feedKg != null) dailyKg = rec.feedKg;
+      if (rec.probMl != null) probMl = rec.probMl;
+    }
+  }
+
+  return { 
+    amount: dailyKg / meals,
+    brand: d.feed.brand || "Pelet",
+    meals,
+    ancoHours: d.feed.ancoIntervalHours || 2.25,
+    probMl,
+    probMethod: d.prob.method,
+    probFreq: d.prob.frequencyPerWeek
+  };
+}
 
 /* =========================================================
    HALAMAN DASHBOARD
@@ -239,26 +299,8 @@ export default function DashboardPage() {
   const fetchConfirmFeedAmount = async (cycleId: string, pondId: string) => {
     setIsLoadingConfirm(true);
     try {
-      const [f, s, p, c] = await Promise.all([
-        supabase.from("feed_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: false }),
-        supabase.from("sampling_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: true }),
-        supabase.from("ponds").select("*").eq("id", pondId).single(),
-        supabase.from("cycles").select("*").eq("id", cycleId).single()
-      ]);
-      if (c.data && p.data) {
-        const d = buildDetail({
-          pond: p.data,
-          cycle: c.data,
-          feeds: f.data || [],
-          samps: s.data || [],
-          probs: [],
-          timers: [],
-          logbook: []
-        });
-        const meals = Math.max(d.feed.mealsPerDay || 1, 1);
-        const amount = +(d.feed.dailyFeedKg / meals).toFixed(2);
-        setConfirmFeedAmount(amount);
-      }
+      const res = await resolveFeedAmount(cycleId, pondId);
+      setConfirmFeedAmount(res.amount);
     } catch(e) {
       console.error(e);
       setConfirmFeedAmount(0);
@@ -304,32 +346,14 @@ export default function DashboardPage() {
             .eq("type", "Cek Anco")
             .eq("is_completed", false);
 
-          // Fetch full data needed to calculate exact feed
-          const [f, s, p, c] = await Promise.all([
-            supabase.from("feed_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: false }),
-            supabase.from("sampling_logs").select("*").eq("cycle_id", cycleId).order("date", { ascending: true }),
-            supabase.from("ponds").select("*").eq("id", pondOpt.pond_id).single(),
-            supabase.from("cycles").select("*").eq("id", cycleId).single()
-          ]);
+          // Fetch full data needed to calculate exact feed via helper
+          const res = await resolveFeedAmount(cycleId, pondOpt.pond_id);
+          const { amount, brand, meals, ancoHours } = res;
 
-          if (c.data && p.data) {
-            const d = buildDetail({
-              pond: p.data,
-              cycle: c.data,
-              feeds: f.data || [],
-              samps: s.data || [],
-              probs: [],
-              timers: [],
-              logbook: []
-            });
-            const meals = Math.max(d.feed.mealsPerDay || 1, 1);
-            const amount = +(d.feed.dailyFeedKg / meals).toFixed(2);
-            const brand = d.feed.brand || "Pelet";
+          const feedIntervalMs = (24 / meals) * 60 * 60 * 1000;
+          const ancoIntervalMs = (ancoHours || 2.25) * 60 * 60 * 1000;
 
-            const feedIntervalMs = (24 / meals) * 60 * 60 * 1000;
-            const ancoIntervalMs = (d.feed.ancoIntervalHours || 2.25) * 60 * 60 * 1000;
-
-            await supabase.from("feed_logs").insert({
+          await supabase.from("feed_logs").insert({
               cycle_id: cycleId,
               date: new Date(actionTime).toISOString(),
               feed_amount_kg: amount,
@@ -346,15 +370,15 @@ export default function DashboardPage() {
               pond_id: pondOpt.pond_id, type: "Cek Anco",
               due_time: new Date(actionTime + ancoIntervalMs).toISOString(),
             });
-          }
         } else if (selectedAction === "Probiotik") {
-          // Interval probiotik default misal 2 kali seminggu -> ~3.5 hari
-          const probIntervalMs = (7 / 2) * 24 * 60 * 60 * 1000;
+          const res = await resolveFeedAmount(cycleId, pondOpt.pond_id);
+          const { probMl, probMethod, probFreq } = res;
+          const probIntervalMs = (7 / Math.max(probFreq || 2, 1)) * 24 * 60 * 60 * 1000;
           await supabase.from("probiotic_logs").insert({
             cycle_id: cycleId,
             date: new Date(actionTime).toISOString(),
-            dose_ml: 0, // Fallback
-            method: "Ke Air",
+            dose_ml: probMl || 0,
+            method: probMethod || "Ke Air",
             notes: "Aksi Cepat Probiotik (Dashboard)"
           });
           await supabase.from("active_timers").insert({
