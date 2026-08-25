@@ -3,15 +3,24 @@
 import { Pencil, AlertCircle } from "lucide-react";
 import { Row } from "./Sheet";
 
-export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbiotik, confirmProbioticDone, formatTimeLeft }: any) {
+export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbiotik, confirmProbioticDone, formatTimeLeft, historicalData }: any) {
+  const displayProb = historicalData ? historicalData.probMl : d.prob.doseMl;
+  const badgeText = historicalData ? historicalData.cycleName : "SNI 8008:2014";
+  const badgeColor = historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200";
+
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-11 w-11 shrink-0" />
           <div>
-            <p className="text-[11px] text-slate-500">Probiotik</p>
-            <p className="text-lg font-extrabold">{d.prob.doseMl} ml</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[11px] text-slate-500">Probiotik</p>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeColor}`}>
+                {badgeText}
+              </span>
+            </div>
+            <p className="text-lg font-extrabold">{displayProb} ml</p>
           </div>
         </div>
         <button

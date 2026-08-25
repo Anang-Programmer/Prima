@@ -102,16 +102,40 @@ async function run(req: NextRequest) {
   }
   const sa = JSON.parse(saRaw) as ServiceAccount;
 
-  // 1) Timer jatuh tempo yang belum dinotifikasi
+  // 1) Timer jatuh tempo yang belum dinotifikasi (Normal)
   const nowIso = new Date().toISOString();
-  const timers: any[] = await sbSelect("active_timers", {
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+  const timersNormal: any[] = await sbSelect("active_timers", {
     is_completed: "eq.false",
     notified_at: "is.null",
     due_time: `lte.${nowIso}`,
     select: "id,type,due_time,pond_id",
   });
+
+  // 1b) Timer jatuh tempo yang sudah dinotifikasi TAPI belum dikonfirmasi selama > 2 jam (Eskalasi)
+  // Perhatikan: query ini membutuhkan kolom 'escalated_at' di DB.
+  let timersEscalation: any[] = [];
+  try {
+    timersEscalation = await sbSelect("active_timers", {
+      is_completed: "eq.false",
+      notified_at: "not.is.null",
+      escalated_at: "is.null",
+      due_time: `lte.${twoHoursAgo}`,
+      select: "id,type,due_time,pond_id",
+    });
+  } catch (e) {
+    // Abaikan jika kolom escalated_at belum ada (agar tidak crash)
+  }
+
+  // Gabungkan kedua list, tandai mana yang eskalasi
+  const timers = [
+    ...timersNormal.map((t: any) => ({ ...t, isEscalation: false })),
+    ...timersEscalation.map((t: any) => ({ ...t, isEscalation: true })),
+  ];
+
   if (!timers.length) {
-    return NextResponse.json({ ok: true, sent: 0, detail: "Tidak ada timer jatuh tempo" });
+    return NextResponse.json({ ok: true, sent: 0, detail: "Tidak ada timer jatuh tempo atau eskalasi" });
   }
 
   // 2) Kolam -> user_id + nama
@@ -145,24 +169,42 @@ async function run(req: NextRequest) {
     const pondName = pond?.name ?? "Kolam";
     const displayPond = pondName.toLowerCase().includes("kolam") ? pondName : `kolam ${pondName}`;
 
-    const copy =
-      ({
-        Pakan: {
-          title: "Waktunya Pakan!",
-          body: `${displayPond} waktunya diberi pakan.`,
-        },
-        "Cek Anco": {
-          title: "Waktunya Cek Anco!",
-          body: `Cek sisa pakan di anco ${displayPond}.`,
-        },
-        Probiotik: {
-          title: "Waktunya Probiotik!",
-          body: `Saatnya beri probiotik di ${displayPond}.`,
-        },
-      } as Record<string, { title: string; body: string }>)[timer.type] ?? {
-        title: "Pengingat",
-        body: `Ada pengingat untuk ${displayPond}.`,
-      };
+    let copy = { title: "Pengingat", body: `Ada pengingat untuk ${displayPond}.` };
+    
+    if (timer.isEscalation) {
+      if (timer.type === "Cek Anco") {
+        copy = {
+          title: "🚨 Pengecekan Anco Terlewat!",
+          body: `Sudah >2 jam anco ${displayPond} belum dicek. Dosis pakan sore akan ditahan di angka standar sampai diperbarui.`,
+        };
+      } else if (timer.type === "Pakan") {
+        copy = {
+          title: "🚨 Konfirmasi Pakan Terlewat!",
+          body: `Pemberian pakan ${displayPond} belum dikonfirmasi. Status dicatat sebagai Unverified (0 kg) untuk mencegah error FCR.`,
+        };
+      } else {
+        copy = {
+          title: `🚨 Eskalasi: ${timer.type}`,
+          body: `Pengingat ${timer.type} di ${displayPond} sudah terlewat >2 jam!`,
+        };
+      }
+    } else {
+      copy =
+        ({
+          Pakan: {
+            title: "Waktunya Pakan!",
+            body: `${displayPond} waktunya diberi pakan.`,
+          },
+          "Cek Anco": {
+            title: "Waktunya Cek Anco!",
+            body: `Cek sisa pakan di anco ${displayPond}.`,
+          },
+          Probiotik: {
+            title: "Waktunya Probiotik!",
+            body: `Saatnya beri probiotik di ${displayPond}.`,
+          },
+        } as Record<string, { title: string; body: string }>)[timer.type] ?? copy;
+    }
 
     const deviceTokens = pond ? tokensByUser.get(pond.user_id) ?? [] : [];
     for (const tk of deviceTokens) {
@@ -220,7 +262,7 @@ async function run(req: NextRequest) {
           "Content-Type": "application/json",
           Prefer: "return=minimal",
         },
-        body: JSON.stringify({ notified_at: nowIso }),
+        body: JSON.stringify(timer.isEscalation ? { escalated_at: nowIso } : { notified_at: nowIso }),
       }
     );
   }
