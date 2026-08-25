@@ -115,7 +115,12 @@ export function buildHistorisRecommendation(
   probs: any[]
 ): { feedKg: number | null; probMl: number | null; label: string } {
   const fcr = Number(matchedCycle.harvest_fcr) || 0;
-  const label = `Historis (FCR ${fcr})`;
+
+  // Tanggal panen siklus lama -> format singkat dd/mm/yy untuk badge
+  const endStr = matchedCycle.end_date ? String(matchedCycle.end_date).slice(0, 10) : "";
+  const parts = endStr.split("-");
+  const tgl = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0].slice(2)}` : "";
+  const label = `Historis Panen${tgl ? ` (${tgl})` : ` (FCR ${fcr})`}`;
 
   const startMs = matchedCycle.start_date
     ? new Date(String(matchedCycle.start_date).slice(0, 10) + "T00:00:00").getTime()
