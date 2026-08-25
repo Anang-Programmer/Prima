@@ -13,8 +13,8 @@
 -- ============================================================
 
 ALTER TABLE public.cycles
-  ADD COLUMN IF NOT EXISTS plan JSONB,
-  ADD COLUMN IF NOT EXISTS feed_brand TEXT DEFAULT 'Pelet';
+  ADD COLUMN IF NOT EXISTS plan JSONB DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS feed_brand TEXT DEFAULT '';
 
 COMMENT ON COLUMN public.cycles.plan IS 'Rencana pakan/probiotik hasil modifikasi manual atau kesepakatan AI. NULL = ikut rekomendasi SNI.';
 COMMENT ON COLUMN public.cycles.feed_brand IS 'Merk pakan default untuk siklus ini.';

@@ -18,7 +18,13 @@ CREATE TABLE public.profiles (
   is_premium BOOLEAN NOT NULL DEFAULT FALSE,  -- Status langganan premium
   premium_expires_at TIMESTAMPTZ,             -- Kapan premium berakhir (NULL = belum pernah)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  first_name TEXT DEFAULT '',
+  last_name TEXT DEFAULT '',
+  kecamatan TEXT DEFAULT '',
+  kota TEXT DEFAULT '',
+  provinsi TEXT DEFAULT '',
+  username TEXT
 );
 
 -- Komentar Tabel

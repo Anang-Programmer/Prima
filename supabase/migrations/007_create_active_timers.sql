@@ -15,6 +15,7 @@ CREATE TABLE public.active_timers (
   trigger_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),       -- Kapan timer dibuat
   due_time TIMESTAMPTZ NOT NULL,                          -- Kapan timer berbunyi
   is_completed BOOLEAN NOT NULL DEFAULT FALSE,            -- Sudah selesai?
+  notified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -14,6 +14,8 @@ CREATE TABLE public.ponds (
   area_m2 NUMERIC(10,2) NOT NULL DEFAULT 0,   -- Luas kolam (m²)
   depth_m NUMERIC(5,2) NOT NULL DEFAULT 1.5,  -- Kedalaman kolam (meter)
   location TEXT DEFAULT '',                    -- "Blok A Utara"
+  shape TEXT NOT NULL DEFAULT 'Persegi'        -- 'Persegi' | 'Lingkaran'
+    CHECK (shape IN ('Persegi', 'Lingkaran')),
   status TEXT NOT NULL DEFAULT 'Aktif'         -- 'Aktif' | 'Non-aktif'
     CHECK (status IN ('Aktif', 'Non-aktif')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
