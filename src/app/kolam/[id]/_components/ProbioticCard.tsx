@@ -4,10 +4,10 @@ import { Pencil, AlertCircle } from "lucide-react";
 import { Row } from "./Sheet";
 
 export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbiotik, confirmProbioticDone, formatTimeLeft, historicalData }: any) {
-  const hist = historicalData?.source === "historis" && (historicalData?.probMl ?? 0) > 0;
+  const hist = historicalData?.source === "historis" && (historicalData?.probMl ?? 0) > 0 && !d.prob.isCustom;
   const displayProb = hist ? historicalData.probMl : d.prob.doseMl;
-  const badgeText = hist ? historicalData.label : "SNI 8008:2014";
-  const badgeColor = historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200";
+  const badgeText = d.prob.isCustom ? "Penyesuaian AI/Manual" : (hist ? historicalData.label : "SNI 8008:2014");
+  const badgeColor = d.prob.isCustom ? "bg-blue-100 text-blue-700 border-blue-200" : (historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200");
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm">

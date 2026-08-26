@@ -163,6 +163,24 @@ ${dealFormatInstruction}
     // Daftar AI Provider & Model untuk Fallback (Prioritas dari yang paling cerdas berdasarkan tes logika)
     const AI_PROVIDERS = [
       {
+        name: 'Open Router (Minimax M3)',
+        url: 'https://openrouter.ai/api/v1/chat/completions',
+        key: process.env.OPENROUTER_API_KEY,
+        model: 'minimax/minimax-m3:free',
+      },
+      {
+        name: 'Open Router (Nemotron-3-Ultra-550b-a55b)',
+        url: 'https://openrouter.ai/api/v1/chat/completions',
+        key: process.env.OPENROUTER_API_KEY,
+        model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
+      },
+      {
+        name: 'Open Router (GLM 5.2)',
+        url: 'https://openrouter.ai/api/v1/chat/completions',
+        key: process.env.OPENROUTER_API_KEY,
+        model: 'z-ai/glm-5.2:free',
+      },
+      {
         name: 'Groq (GPT-OSS 120b)',
         url: 'https://api.groq.com/openai/v1/chat/completions',
         key: process.env.GROQ_API_KEY,
@@ -248,14 +266,20 @@ ${dealFormatInstruction}
 
         const data = await res.json();
 
-        if (res.ok && data.choices?.[0]?.message?.content) {
-          reply = data.choices[0].message.content;
+        // FIX: Beberapa model free mengembalikan content berupa spasi/newline saja.
+        // Tanpa .trim() check, reply kosong lolos dan chat jadi blank di layar.
+        const rawContent = data.choices?.[0]?.message?.content;
+        if (res.ok && typeof rawContent === 'string' && rawContent.trim().length > 0) {
+          reply = rawContent;
           usedProvider = provider.name;
           console.log(`✅ Berhasil menggunakan: ${provider.name}`);
           break;
         } else {
-          console.warn(`⚠️ Gagal di ${provider.name}:`, data.error?.message || res.statusText);
-          lastError = data.error?.message || res.statusText;
+          const reason = !res.ok
+            ? (data.error?.message || res.statusText)
+            : 'Reply kosong/whitespace-only, skip ke provider berikutnya';
+          console.warn(`⚠️ Gagal di ${provider.name}:`, reason);
+          lastError = data.error?.message || res.statusText || 'Reply kosong';
         }
       } catch (err: any) {
         console.warn(`⚠️ Koneksi putus ke ${provider.name}:`, err.message);
@@ -267,8 +291,13 @@ ${dealFormatInstruction}
       return NextResponse.json({ error: lastError || 'Gagal terhubung ke layanan AI.' }, { status: 500 });
     }
 
-    // Pembersihan karakter markdown khas AI agar terlihat lebih natural (menghapus ** dan *)
-    reply = reply.replace(/\*\*/g, '').replace(/\*/g, '');
+    // Pembersihan karakter markdown khas AI agar terlihat lebih natural
+    // FIX: Bersihkan code blocks (```json...```) SEBELUM sanitize DEAL_DATA,
+    // karena beberapa model membungkus DEAL_DATA di dalam code block.
+    reply = reply
+      .replace(/```(?:json)?\s*([\s\S]*?)```/g, '$1')  // Strip code blocks, pertahankan isinya
+      .replace(/\*\*/g, '')                              // Hapus bold markdown
+      .replace(/\*/g, '');                               // Hapus italic markdown
 
     // FIX (bug utama #2 & #3): jaring pengaman server-side.
     // Apapun yang dijawab AI (provider manapun yang kepakai), kalau ada baris
@@ -297,8 +326,11 @@ function sanitizeDealData(
   isProb: boolean,
   bounds: { lower: number; upper: number; floor?: number }
 ): string {
-  // Toleran: bracket opsional — cocokkan [DEAL_DATA: {...}] atau DEAL_DATA: {...}
-  const match = rawReply.match(/\[?DEAL_DATA:\s*(\{[\s\S]*?\})\]?/);
+  // Toleran: bracket opsional, case-insensitive.
+  // FIX: Gunakan greedy match (.*) per BARIS (tanpa [\s\S]) agar tidak menelan
+  // teks di bawah JSON. Fallback ke multiline lazy jika single-line tidak match.
+  const match = rawReply.match(/\[?DEAL_DATA:\s*(\{[^}]*\})\]?/i)
+    || rawReply.match(/\[?DEAL_DATA:\s*(\{[\s\S]*?\})\]?/i);
   if (!match) return rawReply;
 
   let deal: any;
@@ -307,16 +339,18 @@ function sanitizeDealData(
     // 1. Ganti koma desimal Indonesia (0,45 -> 0.45)
     // 2. Hapus placeholder <...> yang lupa diganti AI -> ganti dengan 0
     // 3. Hapus trailing comma sebelum }
+    // 4. Single quotes -> double quotes (beberapa model pakai single quotes)
     let raw = match[1]
       .replace(/(\d),(\d)/g, '$1.$2')
       .replace(/<[^>]*>/g, '0')
-      .replace(/,\s*}/g, '}');
+      .replace(/,\s*}/g, '}')
+      .replace(/'/g, '\"');
+    console.log('sanitizeDealData: raw JSON setelah sanitasi:', raw);
     deal = JSON.parse(raw);
-  } catch {
+    console.log('sanitizeDealData: parsed deal:', deal);
+  } catch (e) {
     // JSON benar-benar tidak valid setelah sanitasi.
-    // Jangan strip — biarkan frontend melihat DEAL_DATA (walau rusak),
-    // supaya tombol "Simpan" tetap disabled tapi user tahu AI sudah coba deal.
-    console.warn('sanitizeDealData: JSON tidak bisa diparsing, biarkan reply apa adanya.');
+    console.warn('sanitizeDealData: JSON tidak bisa diparsing:', e, 'raw match:', match[1]);
     return rawReply;
   }
 

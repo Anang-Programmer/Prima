@@ -271,15 +271,29 @@ export default function DetailKolamPage() {
     // Ini mengatasi kasus user lanjut chat setelah AI output deal.
     for (const m of [...messages].reverse()) {
       if (m.role !== "assistant") continue;
-      const match = m.content.match(/DEAL_DATA:\s*(\{[\s\S]*?\})/);
+
+      // Sanitasi content sebelum regex: hapus code blocks, markdown, unicode aneh
+      const cleaned = m.content
+        .replace(/```(?:json)?\s*([\s\S]*?)```/g, '$1')  // Strip code blocks
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')           // Zero-width chars
+        .replace(/\*\*/g, '').replace(/\*/g, '');          // Bold/italic
+
+      // Coba beberapa pattern — case-insensitive, dengan/tanpa bracket
+      const match = cleaned.match(/\[?DEAL_DATA:\s*(\{[^}]*\})\]?/i)
+        || cleaned.match(/\[?DEAL_DATA:\s*(\{[\s\S]*?\})\]?/i)
+        || cleaned.match(/DEAL.DATA[:\s]+(\{[^}]*\})/i);
       if (!match) continue;
       try {
-        // AI sering mengembalikan angka desimal dengan koma (format Indonesia), mis. 0,30.
-        // Ini menyebabkan JSON.parse gagal. Kita sanitasi dulu:
+        // Sanitasi JSON:
+        // 1. Koma desimal Indonesia (0,45 -> 0.45)
+        // 2. Placeholder <...> yang lupa diganti AI -> ganti 0
+        // 3. Trailing comma sebelum }
+        // 4. Single quotes -> double quotes
         let raw = match[1]
           .replace(/(\d),(\d)/g, "$1.$2")
           .replace(/<[^>]*>/g, "0")
-          .replace(/,\s*}/g, "}");
+          .replace(/,\s*}/g, "}")
+          .replace(/'/g, '"');
         const parsed = JSON.parse(raw);
         // AI kadang juga mengembalikan nilai sebagai string ("0.30"), konversi ke number.
         const result: any = {};
@@ -295,6 +309,7 @@ export default function DetailKolamPage() {
         continue;
       }
     }
+    console.warn("⚠️ extractDeal: Tidak ditemukan DEAL_DATA di semua pesan assistant.");
     return null;
   }
 
@@ -305,6 +320,7 @@ export default function DetailKolamPage() {
     setInsertError(null);
 
     const deal = withAi ? extractDeal() : null;
+    console.log("🔍 saveChanges - withAi:", withAi, "deal:", deal, "messages count:", messages.length);
 
     let update: Record<string, any>;
     if (editMode === "pakan") {

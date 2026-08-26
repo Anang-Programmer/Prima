@@ -62,6 +62,7 @@ export function buildDetail(data: any) {
     mealsPerDay: pos(plan?.feed?.mealsPerDay, calc.mealsPerDay),
     ancoIntervalHours: pos(plan?.feed?.ancoIntervalHours, calc.ancoIntervalHours),
     brand: plan?.feed?.brand ?? cycle?.feed_brand ?? "Pelet",
+    isCustom: !!plan?.feed,
   };
   const sched = getProbioticSchedule(doc, Number(pond.area_m2));
   const prob = {
@@ -69,6 +70,7 @@ export function buildDetail(data: any) {
     frequencyPerWeek: pos(plan?.prob?.frequencyPerWeek, sched.frequencyPerWeek),
     method: plan?.prob?.method ?? sched.method,
     brand: plan?.prob?.brand ?? sched.jenis,
+    isCustom: !!plan?.prob,
   };
   const latestAncoLog = feeds.find((f: any) => f.anco_result && f.anco_result !== "Belum Dicek");
   const latestAnco = latestAncoLog?.anco_result || null;

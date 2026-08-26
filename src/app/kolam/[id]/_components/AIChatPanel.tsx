@@ -6,8 +6,8 @@ import { inputCls } from "../_lib/constants";
 export function AIChatPanel(props: any) {
   const { messages, isAiTyping, chatEndRef, inputMsg, setInputMsg, sendToAI, busy, saveChanges, setShowAIChat } = props;
   
-  // Periksa apakah kesepakatan sudah dicapai oleh AI
-  const hasDeal = messages.some((m: any) => m.role === "assistant" && m.content.includes("DEAL_DATA"));
+  // FIX: Case-insensitive agar model yang menulis 'deal_data' atau 'Deal_Data' tetap terdeteksi
+  const hasDeal = messages.some((m: any) => m.role === "assistant" && /DEAL_DATA/i.test(m.content));
 
   return (
     <section className="rounded-2xl bg-white shadow-sm overflow-hidden">
@@ -26,13 +26,19 @@ export function AIChatPanel(props: any) {
         </button>
       </div>
       <div className="max-h-[300px] overflow-y-auto p-4 space-y-3 bg-slate-50">
-        {messages.map((msg: any, i: number) => (
+        {messages.map((msg: any, i: number) => {
+          // FIX: Strip DEAL_DATA lalu cek — jika kosong, tampilkan fallback
+          const displayText = msg.content.replace(/\[?DEAL_DATA:\s*\{[\s\S]*?\}\]?/gi, "").trim();
+          // Jangan render bubble kosong sama sekali
+          if (!displayText && msg.role === "assistant") return null;
+          return (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#2ABFC8] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
-              {msg.content.replace(/\[?DEAL_DATA:\s*\{[\s\S]*?\}\]?/g, "").trim()}
+              {displayText}
             </div>
           </div>
-        ))}
+          );
+        })}
         {isAiTyping && (
           <div className="flex justify-start">
             <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-none px-4 py-3 text-slate-400 flex gap-1 items-center">
