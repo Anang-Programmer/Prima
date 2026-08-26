@@ -297,16 +297,27 @@ function sanitizeDealData(
   isProb: boolean,
   bounds: { lower: number; upper: number; floor?: number }
 ): string {
-  const match = rawReply.match(/\[DEAL_DATA:\s*(\{[\s\S]*?\})\]/);
+  // Toleran: bracket opsional — cocokkan [DEAL_DATA: {...}] atau DEAL_DATA: {...}
+  const match = rawReply.match(/\[?DEAL_DATA:\s*(\{[\s\S]*?\})\]?/);
   if (!match) return rawReply;
 
   let deal: any;
   try {
-    deal = JSON.parse(match[1]);
+    // Sanitasi umum sebelum parse:
+    // 1. Ganti koma desimal Indonesia (0,45 -> 0.45)
+    // 2. Hapus placeholder <...> yang lupa diganti AI -> ganti dengan 0
+    // 3. Hapus trailing comma sebelum }
+    let raw = match[1]
+      .replace(/(\d),(\d)/g, '$1.$2')
+      .replace(/<[^>]*>/g, '0')
+      .replace(/,\s*}/g, '}');
+    deal = JSON.parse(raw);
   } catch {
-    // JSON tidak valid (misal model masih nulis placeholder <...> yang lupa diganti).
-    // Lebih aman buang baris ini daripada frontend nyoba parse & gagal diam-diam.
-    return rawReply.replace(match[0], '').trim();
+    // JSON benar-benar tidak valid setelah sanitasi.
+    // Jangan strip — biarkan frontend melihat DEAL_DATA (walau rusak),
+    // supaya tombol "Simpan" tetap disabled tapi user tahu AI sudah coba deal.
+    console.warn('sanitizeDealData: JSON tidak bisa diparsing, biarkan reply apa adanya.');
+    return rawReply;
   }
 
   const toNumber = (v: unknown) => Number(String(v).replace(',', '.'));
@@ -326,5 +337,6 @@ function sanitizeDealData(
     deal.anco = Number.isFinite(anco) ? +clamp(anco, 1.0, 3.0).toFixed(1) : 2.0;
   }
 
+  // Tulis ulang dalam format standar DENGAN bracket agar frontend pasti bisa parse
   return rawReply.replace(match[0], `[DEAL_DATA: ${JSON.stringify(deal)}]`);
 }

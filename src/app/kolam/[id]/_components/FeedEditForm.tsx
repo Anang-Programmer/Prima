@@ -49,7 +49,9 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
       {/* Status SNI pakan */}
       {/* Status SNI pakan */}
       {(() => {
-        const baseline = historicalData ? historicalData.feedKg : d.recommendedFeedKg;
+        const baseline = historicalData?.source === "historis" && (historicalData?.feedKg ?? 0) > 0
+          ? historicalData.feedKg
+          : d.recommendedFeedKg;
         const ref = Math.max(baseline, 0.01);
         const devPct = Math.abs(editFeedValues.dailyFeedKg - baseline) / ref;
         const isOff = devPct > 0.15; // toleransi 15%

@@ -117,7 +117,7 @@ export default function DetailKolamPage() {
                 supabase.from("feed_logs").select("date, feed_amount_kg").eq("cycle_id", matched.id),
                 supabase.from("probiotic_logs").select("amount_ml").eq("cycle_id", matched.id),
               ]);
-              const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? []);
+              const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? [], cycle?.initial_shrimp_count, matched.initial_shrimp_count);
               if (rec.feedKg == null) {
                 // Lolos syarat tapi tak punya log pakan -> data historis tak lengkap -> SNI total
                 verdict = makeSniVerdict([
@@ -267,29 +267,35 @@ export default function DetailKolamPage() {
   // Ambil kesepakatan (DEAL_DATA) dari balasan AI terakhir, jika ada.
   function extractDeal(): any | null {
     if (messages.length === 0) return null;
-    const lastAsst = [...messages].reverse().find((m) => m.role === "assistant");
-    if (!lastAsst) return null;
-    // Toleransi format: [DEAL_DATA: {...}] atau DEAL_DATA: {...}, termasuk newline.
-    const match = lastAsst.content.match(/DEAL_DATA:\s*(\{[\s\S]*?\})/);
-    if (!match) return null;
-    try {
-      // AI sering mengembalikan angka desimal dengan koma (format Indonesia), mis. 0,30.
-      // Ini menyebabkan JSON.parse gagal. Kita sanitasi dulu:
-      // Ganti pola "angka,angka" (desimal koma) menjadi "angka.angka" (desimal titik).
-      let raw = match[1].replace(/(\d),(\d)/g, "$1.$2");
-      const parsed = JSON.parse(raw);
-      // AI kadang juga mengembalikan nilai sebagai string ("0.30"), konversi ke number.
-      const result: any = {};
-      for (const [k, v] of Object.entries(parsed)) {
-        const n = Number(v);
-        result[k] = Number.isFinite(n) ? n : v;
+    // Cari dari pesan TERAKHIR ke PERTAMA — ambil yang pertama punya DEAL_DATA.
+    // Ini mengatasi kasus user lanjut chat setelah AI output deal.
+    for (const m of [...messages].reverse()) {
+      if (m.role !== "assistant") continue;
+      const match = m.content.match(/DEAL_DATA:\s*(\{[\s\S]*?\})/);
+      if (!match) continue;
+      try {
+        // AI sering mengembalikan angka desimal dengan koma (format Indonesia), mis. 0,30.
+        // Ini menyebabkan JSON.parse gagal. Kita sanitasi dulu:
+        let raw = match[1]
+          .replace(/(\d),(\d)/g, "$1.$2")
+          .replace(/<[^>]*>/g, "0")
+          .replace(/,\s*}/g, "}");
+        const parsed = JSON.parse(raw);
+        // AI kadang juga mengembalikan nilai sebagai string ("0.30"), konversi ke number.
+        const result: any = {};
+        for (const [k, v] of Object.entries(parsed)) {
+          const n = Number(v);
+          result[k] = Number.isFinite(n) ? n : v;
+        }
+        console.log("✅ DEAL_DATA berhasil diekstrak:", result);
+        return result;
+      } catch (e) {
+        console.error("Gagal parse DEAL_DATA", e, "raw:", match[1]);
+        // Lanjut cari di pesan sebelumnya
+        continue;
       }
-      console.log("✅ DEAL_DATA berhasil diekstrak:", result);
-      return result;
-    } catch (e) {
-      console.error("Gagal parse DEAL_DATA", e, "raw:", match[1]);
-      return null;
     }
+    return null;
   }
 
   // Simpan perubahan ke database. withAi=true ' pakai angka kesepakatan AI bila ada.
@@ -362,7 +368,13 @@ export default function DetailKolamPage() {
     let openingMsg = "";
     if (editMode === "pakan") {
       const devText: string[] = [];
-      if (deviations.pakan) devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (catatan: rekomendasi lapangan saat ini ${d.trueRecommendedFeedKg}kg, sedangkan SNI murni ${d.calc.dailyFeedKg}kg)`);
+      if (deviations.pakan) {
+        const histActive = historicalData?.source === "historis";
+        const lapanganKg = histActive && (historicalData?.feedKg ?? 0) > 0
+          ? historicalData.feedKg
+          : d.trueRecommendedFeedKg;
+        devText.push(`total pakan menjadi ${editFeedValues.dailyFeedKg}kg (catatan: rekomendasi lapangan saat ini ${lapanganKg}kg, sedangkan SNI murni ${d.calc.dailyFeedKg}kg)`);
+      }
       if (deviations.freq) devText.push(`frekuensi pakan menjadi ${editFeedValues.mealsPerDay}x/hari (standar SNI: ${d.calc.mealsPerDay}x)`);
       if (deviations.anco) devText.push(`cek anco tiap ${editFeedValues.ancoHours} jam (standar SNI: ${d.calc.ancoIntervalHours} jam)`);
       openingMsg = `Halo Pak. Saya perhatikan Bapak ingin mengubah ${devText.join(", ")}. Ada pertimbangan atau keluhan khusus di kolam yang mendasari keputusan ini?`;

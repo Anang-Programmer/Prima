@@ -107,13 +107,16 @@ export function evaluateHistoris(
  * Bangun angka rekomendasi nyata dari siklus yang lolos.
  * - Pakan: rata-rata HARIAN pada jendela DOC sekarang +/- 3 hari;
  *   kosong -> fallback rata-rata harian se-siklus; kosong juga -> null (fallback SNI).
+ *   Lalu di-scale berdasarkan rasio populasi (current vs matched) agar proporsional.
  * - Probiotik: total ml / jumlah sesi; tanpa sesi -> null (fallback SNI).
  */
 export function buildHistorisRecommendation(
   matchedCycle: any,
   currentDoc: number,
   feeds: any[],
-  probs: any[]
+  probs: any[],
+  currentPopulation?: number,
+  matchedPopulation?: number
 ): { feedKg: number | null; probMl: number | null; label: string } {
   const fcr = Number(matchedCycle.harvest_fcr) || 0;
 
@@ -149,6 +152,16 @@ export function buildHistorisRecommendation(
     const avg = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
     const rounded = (n: number | null) => (n == null ? null : +n.toFixed(2));
     feedKg = rounded(avg(windowVals)) ?? rounded(avg(allVals));
+
+    // Scale berdasarkan rasio populasi: jika siklus lama punya 1000 ekor
+    // dan sekarang punya 10000 ekor (keduanya density sama), pakan harus 10× lipat.
+    if (feedKg != null && currentPopulation && matchedPopulation && matchedPopulation > 0) {
+      const scale = currentPopulation / matchedPopulation;
+      // Hanya scale jika rasionya signifikan (> 5% beda)
+      if (Math.abs(scale - 1) > 0.05) {
+        feedKg = +(feedKg * scale).toFixed(2);
+      }
+    }
   }
 
   // ---- Probiotik ----

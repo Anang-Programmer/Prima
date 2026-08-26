@@ -246,7 +246,7 @@ async function resolveFeedAmount(cycleId: string, pondId: string) {
         supabase.from("feed_logs").select("date, feed_amount_kg").eq("cycle_id", matched.id),
         supabase.from("probiotic_logs").select("amount_ml").eq("cycle_id", matched.id)
       ]);
-      const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? []);
+      const rec = buildHistorisRecommendation(matched, docNow, mf.data ?? [], mp.data ?? [], c.data?.initial_shrimp_count, matched.initial_shrimp_count);
       if (rec.feedKg != null) dailyKg = rec.feedKg;
       if (rec.probMl != null) probMl = rec.probMl;
     }
