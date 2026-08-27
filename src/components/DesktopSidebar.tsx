@@ -21,7 +21,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:z-20 md:flex md:w-64 md:flex-col md:border-r md:border-slate-100 md:bg-white md:shadow-xl">
+    <aside className="hidden md:z-20 md:flex md:w-64 md:flex-col md:border-r md:border-slate-100 md:bg-white md:">
       <div className="flex items-center justify-center border-b border-slate-50 px-8 py-8">
         <Image src="/logo.png" alt="PRIMA Logo" width={140} height={48} className="h-10 w-auto object-contain" priority />
       </div>
@@ -33,7 +33,7 @@ export function DesktopSidebar() {
               key={label}
               href={href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold transition-all ${
-                active ? "bg-[#E3F1F2] text-[#2F6E7B]" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                active ? "bg-[#E3F1F2] text-[#2F6E7B]" : "text-slate-500 hover:bg-[#F1F4F5] hover:text-slate-900"
               }`}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 2} /> {label}

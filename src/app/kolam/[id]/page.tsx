@@ -1098,7 +1098,7 @@ export default function DetailKolamPage() {
 
   if (!d)
     return (
-      <div suppressHydrationWarning className="flex min-h-screen items-center justify-center bg-[#F2F5F7]">
+      <div suppressHydrationWarning className="flex min-h-screen items-center justify-center bg-[#F1F4F5]">
         <div suppressHydrationWarning className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
       </div>
     );
@@ -1107,7 +1107,7 @@ export default function DetailKolamPage() {
   const popLabel = d.cycle?.initial_shrimp_count >= 1000 ? `${Math.round(d.cycle.initial_shrimp_count / 1000)} rb` : `${d.cycle?.initial_shrimp_count ?? 0}`;
 
   return (
-    <div suppressHydrationWarning className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div suppressHydrationWarning className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full md:flex-1 md:overflow-y-auto">
         <div className="w-full max-w-md pb-28 md:max-w-none md:pb-12">
@@ -1147,7 +1147,7 @@ export default function DetailKolamPage() {
             />
 
             {!d.cycle ? (
-              <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-[#E8EBED]/50 py-16 text-center">
+              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-[#E8EBED]/50 py-16 text-center">
                 <p className="text-[13px] font-medium text-slate-500">Mulai Siklus untuk menambahkan data</p>
               </div>
             ) : (
@@ -1201,7 +1201,7 @@ export default function DetailKolamPage() {
                   </>
                 )}
 
-                {tab === "Log Book" && <LogBookTab d={d} />}
+                {tab === "Log Pakan" && <LogBookTab d={d} />}
 
                 {tab === "Proyeksi" && <ProjectionTab d={d} />}
 
@@ -1236,7 +1236,7 @@ export default function DetailKolamPage() {
       {/* Sticky Mulai Siklus button if !d.cycle */}
       {!d.cycle && sheet !== "startCycle" && (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none px-4">
-          <button className="pointer-events-auto flex w-full max-w-[200px] items-center justify-center gap-2 rounded-xl bg-[#25C4D4] px-6 py-3 text-[15px] font-bold text-white shadow-lg transition active:scale-95" onClick={() => setSheet("startCycle")}>
+          <button className="pointer-events-auto flex w-full max-w-[200px] items-center justify-center gap-2 rounded-xl bg-[#25C4D4] px-6 py-3 text-[15px] font-bold text-white  transition active:scale-95" onClick={() => setSheet("startCycle")}>
             Mulai Siklus <span className="text-xl leading-none">→</span>
           </button>
         </div>

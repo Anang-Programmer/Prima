@@ -38,7 +38,7 @@ export function ConfirmAncoModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col p-5 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl  overflow-hidden flex flex-col p-5 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
         
         <div className="flex justify-center pt-1 pb-4 sm:hidden shrink-0">
           <div className="w-12 h-1.5 rounded-full bg-slate-200" />
@@ -77,7 +77,7 @@ export function ConfirmAncoModal({
         <button
           onClick={() => selected && onConfirm(selected)}
           disabled={!selected || isExecuting}
-          className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white shadow-md shadow-[#1FB4B2]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+          className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white  #1FB4B2]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
         >
           {isExecuting ? "Memproses..." : "Konfirmasi Cek Anco"}
         </button>

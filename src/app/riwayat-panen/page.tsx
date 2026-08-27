@@ -60,10 +60,10 @@ export default function RiwayatPanenPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
 
-      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F2F5F7]">
+      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F1F4F5]">
         <div className="mx-auto flex h-screen w-full flex-col md:h-auto md:max-w-3xl md:py-8">
           
           {/* HEADER */}
@@ -74,12 +74,12 @@ export default function RiwayatPanenPage() {
             >
               <ArrowLeft size={21} />
             </button>
-            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-extrabold">
+            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-bold">
               Riwayat Panen
             </h1>
           </header>
 
-          <main className="flex-1 overflow-y-auto bg-[#F2F5F7] p-4 md:rounded-b-2xl md:bg-white md:px-8 md:pb-8">
+          <main className="flex-1 overflow-y-auto bg-[#F1F4F5] p-4 md:rounded-b-2xl md:bg-white md:px-8 md:pb-8">
             {!harvests ? (
               <div className="flex justify-center py-16">
                 <Loader2 className="animate-spin text-[#2ABFC8]" size={32} />
@@ -97,7 +97,7 @@ export default function RiwayatPanenPage() {
             ) : (
               <div className="space-y-4">
                 {harvests.map((h, idx) => (
-                  <div key={idx} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+                  <div key={idx} className="rounded-xl border border-slate-200 bg-white p-4  transition hover:">
                     {/* Top Info */}
                     <div className="flex justify-between items-start mb-1">
                       <h3 className="text-base font-semibold text-slate-800">{h.pond_name}</h3>

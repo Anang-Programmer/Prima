@@ -10,16 +10,16 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 
-const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
+const inputCls = "w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 function Sheet({ open, onClose, title, children }: any) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
       <button aria-label="Tutup" onClick={onClose} className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative z-10 md:w-full md:max-w-md md:rounded-[24px]">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative z-10 md:w-full md:max-w-md md:rounded-xl">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-300" />
-        <h3 className="mb-4 text-base font-extrabold text-slate-800">{title}</h3>
+        <h3 className="mb-4 text-base font-bold text-slate-800">{title}</h3>
         {children}
       </div>
     </div>
@@ -27,7 +27,7 @@ function Sheet({ open, onClose, title, children }: any) {
 }
 function MenuRow({ icon: Icon, label, onClick, danger }: any) {
   return (
-    <button onClick={onClick} className="flex w-full items-center gap-3 border-b border-slate-100 bg-white px-4 py-4 text-left last:border-0 transition active:bg-slate-50">
+    <button onClick={onClick} className="flex w-full items-center gap-3 border-b border-slate-100 bg-white px-4 py-4 text-left last:border-0 transition active:bg-[#F1F4F5]">
       <Icon size={20} className={danger ? "text-[#F26B4E]" : "text-[#2ABFC8]"} />
       <span className={`flex-1 text-sm font-medium ${danger ? "text-[#F26B4E]" : "text-slate-700"}`}>{label}</span>
       <ChevronRight size={16} className="text-slate-400" />
@@ -132,20 +132,20 @@ export default function ProfilPage() {
     setBusy(false);
   }
 
-  if (!d) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>;
+  if (!d) return <div className="flex min-h-screen items-center justify-center bg-[#F1F4F5]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>;
 
   const initial = (d.name || "?")[0]?.toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full pb-28 md:flex-1 md:overflow-y-auto md:pb-12">
         {/* ============ HEADER ============ */}
-        <header className="relative overflow-hidden bg-[#2ABFC8] px-5 pb-6 pt-12 md:rounded-b-3xl md:px-10 md:pb-12 md:pt-14 shadow-sm">
+        <header className="relative overflow-hidden bg-[#2ABFC8] px-5 pb-6 pt-12 md:rounded-b-3xl md:px-10 md:pb-12 md:pt-14 ">
           
           <div className="relative mx-auto w-full max-w-md md:max-w-5xl z-10">
             <div className="flex items-center gap-4 md:gap-6">
-              <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[#BEE5EA] text-[26px] font-medium text-[#2F6E7B] md:h-20 md:w-20 md:text-3xl shadow-sm">
+              <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[#BEE5EA] text-[26px] font-medium text-[#2F6E7B] md:h-20 md:w-20 md:text-3xl ">
                 {initial}
               </div>
               <div className="min-w-0">
@@ -153,11 +153,11 @@ export default function ProfilPage() {
                 <p className="truncate text-xs text-white/90 font-light mt-0.5 md:text-sm">{d.location || "Lokasi belum diisi"}</p>
                 <div className="mt-2">
                   {d.isPremium ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#003746] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#003746] px-2.5 py-1 text-[10px] font-bold text-white ">
                       Prime <BadgeCheck size={12} className="text-white fill-white stroke-[#003746]" />
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm border border-white/30">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold text-white  border border-white/30">
                       Gratis
                     </span>
                   )}
@@ -185,10 +185,10 @@ export default function ProfilPage() {
           {/* ============ UPGRADE CARD ============ */}
           {!d.isPremium && (
             <section className="px-5 mt-4 md:px-0">
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 shadow-md">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#002D3A] to-[#00586D] p-5 ">
                 <div className="relative z-10">
                   <h3 className="text-[17px] font-medium text-white mb-8 tracking-wide">Upgrade Akun ke Prime</h3>
-                  <button onClick={() => setConfirmAction("upgrade")} className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 shadow-sm">
+                  <button onClick={() => setConfirmAction("upgrade")} className="flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[13px] font-bold text-[#003746] transition active:scale-95 ">
                     Upgrade <ChevronRight size={14} className="stroke-[2.5]" />
                   </button>
                 </div>
@@ -199,10 +199,10 @@ export default function ProfilPage() {
           {/* ============ DOWNGRADE CARD ============ */}
           {d.isPremium && (
             <section className="px-5 mt-4 md:px-0">
-              <div className="relative overflow-hidden rounded-2xl bg-[#E3F1F2] p-5 shadow-sm border border-[#2ABFC8]/20">
+              <div className="relative overflow-hidden rounded-xl bg-[#E3F1F2] p-5  border border-[#2ABFC8]/20">
                 <div className="relative z-10">
                   <h3 className="text-[17px] font-medium text-[#2F6E7B] mb-8 tracking-wide">Akun Prime Aktif</h3>
-                  <button onClick={() => setConfirmAction("downgrade")} className="flex items-center gap-1.5 rounded-lg bg-white border border-[#2ABFC8] px-4 py-2 text-[13px] font-bold text-[#2ABFC8] transition active:scale-95 shadow-sm">
+                  <button onClick={() => setConfirmAction("downgrade")} className="flex items-center gap-1.5 rounded-lg bg-white border border-[#2ABFC8] px-4 py-2 text-[13px] font-bold text-[#2ABFC8] transition active:scale-95 ">
                     Kembali ke Gratis <ChevronRight size={14} className="stroke-[2.5]" />
                   </button>
                 </div>
@@ -211,14 +211,14 @@ export default function ProfilPage() {
           )}
 
           {/* ============ MENU ============ */}
-          <section className="mt-4 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl md:mt-6 border-y border-slate-100 md:border-0">
+          <section className="mt-4 overflow-hidden rounded-none bg-white  md:rounded-xl md:mt-6 border-y border-slate-100 md:border-0">
             <MenuRow icon={CircleUser} label="Akun & Data Pribadi" onClick={() => router.push("/profil/edit")} />
             <MenuRow icon={FileText} label="Data Tambak" onClick={() => { setFarm({ farmName: d.farmName, location: d.location, phone: d.phone }); setSheet("farm"); }} />
             <MenuRow icon={History} label="Riwayat Panen" onClick={() => router.push("/riwayat-panen")} />
             <MenuRow icon={ShieldCheck} label="Privasi & Keamanan" onClick={() => router.push("/privasi")} />
           </section>
           
-          <section className="mt-3 overflow-hidden rounded-none bg-white shadow-sm md:rounded-2xl border-y border-slate-100 md:border-0">
+          <section className="mt-3 overflow-hidden rounded-none bg-white  md:rounded-xl border-y border-slate-100 md:border-0">
             <MenuRow icon={HelpCircle} label="Pusat Bantuan" onClick={() => router.push("/profil/bantuan")} />
             <MenuRow icon={Info} label="Tentang Aplikasi" onClick={() => setSheet("about")} />
           </section>
@@ -233,8 +233,8 @@ export default function ProfilPage() {
 
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          <button onClick={() => router.push("/dashboard")} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70">
+        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
+          <button onClick={() => router.push("/dashboard")} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -257,7 +257,7 @@ export default function ProfilPage() {
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button aria-label="Tutup" onClick={() => setConfirmAction(null)} className="absolute inset-0 bg-black/40" />
-          <div className="relative w-full max-w-sm rounded-[24px] bg-white p-6 shadow-xl">
+          <div className="relative w-full max-w-sm rounded-xl bg-white p-6 ">
             <h3 className="text-center text-[18px] font-bold text-slate-800">
               {confirmAction === "upgrade" ? "Upgrade ke Prime?" : "Kembali ke Gratis?"}
             </h3>
@@ -278,7 +278,7 @@ export default function ProfilPage() {
               <button 
                 onClick={() => setConfirmAction(null)}
                 disabled={busy}
-                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 active:scale-95 disabled:opacity-60"
+                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-[#F1F4F5] active:scale-95 disabled:opacity-60"
               >
                 Batal
               </button>

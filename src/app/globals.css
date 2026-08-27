@@ -8,6 +8,6 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-[#F1F4F5] text-slate-900 antialiased;
   min-height: 101vh;
 }

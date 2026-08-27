@@ -34,7 +34,7 @@ export function ConfirmFeedModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col p-5 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl  overflow-hidden flex flex-col p-5 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
         
         <div className="flex justify-center pt-1 pb-4 sm:hidden shrink-0">
           <div className="w-12 h-1.5 rounded-full bg-slate-200" />
@@ -48,7 +48,7 @@ export function ConfirmFeedModal({
           </div>
           <button
             onClick={() => router.push(`/kolam/${pondId}`)}
-            className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] px-4 py-2 text-sm font-semibold text-[#1FB4B2] transition active:bg-slate-50"
+            className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] px-4 py-2 text-sm font-semibold text-[#1FB4B2] transition active:bg-[#F1F4F5]"
           >
             <Pencil size={16} /> Edit
           </button>
@@ -67,7 +67,7 @@ export function ConfirmFeedModal({
         <button
           onClick={onConfirm}
           disabled={isExecuting}
-          className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white shadow-md shadow-[#1FB4B2]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+          className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white  #1FB4B2]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
         >
           {isExecuting ? "Memproses..." : "Sudah Kasih Pakan"}
         </button>

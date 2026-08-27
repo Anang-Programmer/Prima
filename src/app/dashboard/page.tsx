@@ -102,10 +102,10 @@ const DEMO: DashData = {
 ============================================================ */
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-xl p-3 shadow-sm flex flex-col justify-center ${highlight ? "bg-[#2A7B88]" : "bg-white"}`}>
+    <div className={`rounded-xl p-3  flex flex-col justify-center ${highlight ? "bg-[#2A7B88]" : "bg-white"}`}>
       <p className={`text-[11px] md:text-xs font-medium ${highlight ? "text-white/80" : "text-slate-400"}`}>{label}</p>
       <div className="mt-1 flex items-center gap-1.5">
-        <p className={`text-[22px] md:text-2xl font-extrabold leading-none ${highlight ? "text-white" : "text-slate-800"}`}>
+        <p className={`text-[22px] md:text-2xl font-bold leading-none ${highlight ? "text-white" : "text-slate-800"}`}>
           {value}
         </p>
         {highlight && <CheckCircle size={18} className="text-white" strokeWidth={2.5} />}
@@ -118,7 +118,7 @@ function AlarmBox({ label, due, now }: { label: string; due?: string; now: numbe
   return (
     <div className="rounded-xl bg-[#F9D9CE] px-3 py-3 text-center">
       <p className="text-xs font-semibold text-slate-700">{label}</p>
-      <p className="mt-1 text-xl font-extrabold tabular-nums text-[#F2811B]">
+      <p className="mt-1 text-xl font-bold tabular-nums text-[#F2811B]">
         {due ? fmtMs(new Date(due).getTime() - now) : "00:00:00"}
       </p>
     </div>
@@ -131,10 +131,10 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
   const pct = Math.min(100, Math.round((pond.doc / TARGET_HARI) * 100));
   const fcrColor = fcr != null && fcr > 1.5 ? "text-[#F2811B]" : "text-[#1C9098]";
   return (
-    <button type="button" onClick={() => router.push(`/kolam/${pond.pond_id}`)} className="w-full rounded-xl bg-white p-4 text-left shadow-sm transition hover:shadow-md">
+    <button type="button" onClick={() => router.push(`/kolam/${pond.pond_id}`)} className="w-full bg-white px-4 py-4 border-b border-slate-200 text-left transition hover:bg-slate-50 md:rounded-xl md:border md:p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-extrabold text-slate-800">{pond.pond_name}</span>
+          <span className="text-sm font-bold text-slate-800">{pond.pond_name}</span>
           <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${stage.cls}`}>{stage.label}</span>
         </div>
         <span className={`flex items-center gap-0.5 text-sm font-bold ${fcrColor}`}>
@@ -153,15 +153,15 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
       <div className="mt-4 hidden md:flex flex-col gap-2.5 border-t border-slate-100 pt-4">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-slate-500">Luas Kolam</span>
-          <span className="text-[11px] font-extrabold text-slate-700">{pond.area_m2.toLocaleString('id-ID')} m²</span>
+          <span className="text-[11px] font-bold text-slate-700">{pond.area_m2.toLocaleString('id-ID')} m²</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-slate-500">Populasi Awal</span>
-          <span className="text-[11px] font-extrabold text-slate-700">{pond.initial_shrimp_count ? pond.initial_shrimp_count.toLocaleString('id-ID') : '-'} ekor</span>
+          <span className="text-[11px] font-bold text-slate-700">{pond.initial_shrimp_count ? pond.initial_shrimp_count.toLocaleString('id-ID') : '-'} ekor</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-slate-500">Biomassa Terkini</span>
-          <span className="text-[11px] font-extrabold text-slate-700">{pond.current_biomass_kg.toLocaleString('id-ID')} kg</span>
+          <span className="text-[11px] font-bold text-slate-700">{pond.current_biomass_kg.toLocaleString('id-ID')} kg</span>
         </div>
       </div>
     </button>
@@ -171,11 +171,11 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
 function BottomNav({ onAdd }: { onAdd?: () => void }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-      <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
         <button
           type="button"
           onClick={onAdd}
-          className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95"
+          className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95"
         >
           <Plus size={24} />
         </button>
@@ -214,7 +214,7 @@ async function resolveFeedAmount(cycleId: string, pondId: string) {
     supabase.from("ponds").select("*").eq("id", pondId).single(),
     supabase.from("cycles").select("*").eq("id", cycleId).single()
   ]);
-  
+
   if (!c.data || !p.data) return { amount: 0, brand: "Pelet", meals: 1, ancoHours: 2.25 };
 
   const d = buildDetail({
@@ -226,7 +226,7 @@ async function resolveFeedAmount(cycleId: string, pondId: string) {
     timers: [],
     logbook: []
   });
-  
+
   const meals = Math.max(d.feed.mealsPerDay || 1, 1);
   let dailyKg = d.feed.dailyFeedKg;
 
@@ -234,7 +234,7 @@ async function resolveFeedAmount(cycleId: string, pondId: string) {
   const { data: userPonds } = await supabase.from("ponds").select("id, area_m2").eq("user_id", p.data.user_id);
   const pondIds = (userPonds ?? []).map((x: any) => x.id);
   const pondAreaById = new Map<string, number>((userPonds ?? []).map((x: any) => [x.id, Number(x.area_m2)]));
-  
+
   let probMl = d.prob.doseMl;
   if (pondIds.length > 0) {
     const { data: pastCycles } = await supabase.from("cycles").select("*").in("pond_id", pondIds).eq("status", "Selesai");
@@ -252,7 +252,7 @@ async function resolveFeedAmount(cycleId: string, pondId: string) {
     }
   }
 
-  return { 
+  return {
     amount: dailyKg / meals,
     brand: d.feed.brand || "Pelet",
     meals,
@@ -301,7 +301,7 @@ export default function DashboardPage() {
     try {
       const res = await resolveFeedAmount(cycleId, pondId);
       setConfirmFeedAmount(res.amount);
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       setConfirmFeedAmount(0);
     } finally {
@@ -354,22 +354,22 @@ export default function DashboardPage() {
           const ancoIntervalMs = (ancoHours || 2.25) * 60 * 60 * 1000;
 
           await supabase.from("feed_logs").insert({
-              cycle_id: cycleId,
-              date: new Date(actionTime).toISOString(),
-              feed_amount_kg: amount,
-              feed_type: brand,
-              anco_result: "Belum Dicek",
-              notes: "Aksi Cepat Pakan (Dashboard)"
-            });
+            cycle_id: cycleId,
+            date: new Date(actionTime).toISOString(),
+            feed_amount_kg: amount,
+            feed_type: brand,
+            anco_result: "Belum Dicek",
+            notes: "Aksi Cepat Pakan (Dashboard)"
+          });
 
-            await supabase.from("active_timers").insert({
-              pond_id: pondOpt.pond_id, type: "Pakan",
-              due_time: new Date(actionTime + feedIntervalMs).toISOString(),
-            });
-            await supabase.from("active_timers").insert({
-              pond_id: pondOpt.pond_id, type: "Cek Anco",
-              due_time: new Date(actionTime + ancoIntervalMs).toISOString(),
-            });
+          await supabase.from("active_timers").insert({
+            pond_id: pondOpt.pond_id, type: "Pakan",
+            due_time: new Date(actionTime + feedIntervalMs).toISOString(),
+          });
+          await supabase.from("active_timers").insert({
+            pond_id: pondOpt.pond_id, type: "Cek Anco",
+            due_time: new Date(actionTime + ancoIntervalMs).toISOString(),
+          });
         } else if (selectedAction === "Probiotik") {
           const res = await resolveFeedAmount(cycleId, pondOpt.pond_id);
           const { probMl, probMethod, probFreq } = res;
@@ -405,14 +405,14 @@ export default function DashboardPage() {
             supabase.from("ponds").select("*").eq("id", pondOpt.pond_id).single(),
             supabase.from("cycles").select("*").eq("id", cycleId).single()
           ]);
-          
+
           if (cResp.data && pResp.data) {
             const d = buildDetail({
               pond: pResp.data, cycle: cResp.data, feeds: [], samps: [], probs: [], timers: [], logbook: []
             });
             const ancoIntervalMs = (d.feed.ancoIntervalHours || 2.25) * 60 * 60 * 1000;
             const nextAncoDue = new Date(actionTime + ancoIntervalMs);
-            
+
             const { data: pakanTimer } = await supabase
               .from("active_timers")
               .select("due_time")
@@ -420,7 +420,7 @@ export default function DashboardPage() {
               .eq("type", "Pakan")
               .eq("is_completed", false)
               .maybeSingle();
-              
+
             let shouldSchedule = true;
             if (pakanTimer && pakanTimer.due_time) {
               const pakanDue = new Date(pakanTimer.due_time).getTime();
@@ -429,7 +429,7 @@ export default function DashboardPage() {
                 shouldSchedule = false;
               }
             }
-            
+
             if (shouldSchedule) {
               await supabase.from("active_timers").insert({
                 pond_id: pondOpt.pond_id, type: "Cek Anco",
@@ -496,7 +496,7 @@ export default function DashboardPage() {
             if (!(s.cycle_id in srByCycle) && s.estimated_sr_pct != null)
               srByCycle[s.cycle_id] = Number(s.estimated_sr_pct);
           });
-          
+
           // 2. Populate SR fallbacks
           rows.forEach((p) => {
             if (p.cycle_id && !(p.cycle_id in srByCycle)) {
@@ -510,18 +510,18 @@ export default function DashboardPage() {
             const doc = Number(p.doc || 0);
             const sr = srByCycle[p.cycle_id] ?? estimateSr(doc);
             const abw = Number(p.current_abw_gram) > 0 ? Number(p.current_abw_gram) : estimateAbw(doc);
-            
+
             const calc = calculateDailyFeed(doc, Number(p.initial_shrimp_count || 0), Number(p.area_m2 || 0), abw, sr);
             const biomass = Number(p.current_biomass_kg) > 0 ? Number(p.current_biomass_kg) : calc.biomassKg;
-            
+
             const totalF = totalFeed[p.cycle_id] ?? 0;
             let fcr = biomass > 0 ? totalF / biomass : 0;
-            
+
             // Penyesuaian/Penghalusan FCR untuk UI
             if (doc < 90 && fcr > 1.4 && totalF > 0) {
               fcr = 1.15 + (fcr - 1.15) * (doc / 90);
             }
-            
+
             fcrByCycle[p.cycle_id] = round2(fcr);
           });
         }
@@ -604,6 +604,7 @@ export default function DashboardPage() {
         pond,
         anco: ts.find((t) => t.type === "Cek Anco"),
         pakan: ts.find((t) => t.type === "Pakan"),
+        prob: ts.find((t) => t.type === "Probiotik"),
         earliest
       };
     });
@@ -630,12 +631,12 @@ export default function DashboardPage() {
   const visiblePonds = useMemo(() => {
     if (!data) return [];
     let ponds = data.ponds;
-    
+
     // Filter by stage
     if (stageFilter !== "Semua") {
       ponds = ponds.filter(p => (p.stage || stageOf(p.doc).label) === stageFilter);
     }
-    
+
     // Filter by query
     const q = query.trim().toLowerCase();
     return q ? ponds.filter((p) => p.pond_name.toLowerCase().includes(q)) : ponds;
@@ -650,15 +651,15 @@ export default function DashboardPage() {
 
   if (!data)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]">
+      <div className="flex min-h-screen items-center justify-center bg-[#F1F4F5]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
       </div>
     );
 
   return (
-    <div className="min-h-screen md:h-screen md:flex bg-[#F2F5F7] text-slate-800 md:overflow-hidden">
+    <div className="min-h-screen md:h-screen md:flex bg-[#F1F4F5] text-slate-800 md:overflow-hidden">
       {/* ================= DESKTOP SIDEBAR ================= */}
-      <aside className="hidden md:flex md:w-64 md:flex-col md:bg-white md:shadow-xl md:z-20 md:border-r md:border-slate-100">
+      <aside className="hidden md:flex md:w-64 md:flex-col md:bg-white md: md:z-20 md:border-r md:border-slate-100">
         {/* <div className="px-8 py-8 flex items-center justify-center border-b border-slate-50">
           <Image src="/logo.png" alt="PRIMA Logo" width={140} height={48} className="h-10 w-auto object-contain" priority />
         </div> */}
@@ -667,7 +668,7 @@ export default function DashboardPage() {
             <a
               key={label}
               href={href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold transition-all ${active ? "bg-[#E3F1F2] text-[#2F6E7B]" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+              className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold transition-all ${active ? "bg-[#E3F1F2] text-[#2F6E7B]" : "text-slate-500 hover:bg-[#F1F4F5] hover:text-slate-900"
                 }`}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 2} /> {label}
@@ -680,10 +681,10 @@ export default function DashboardPage() {
       </aside>
 
       {/* ================= KONTEN UTAMA ================= */}
-      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F2F5F7]">
+      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F1F4F5]">
         <div className="mx-auto w-full md:max-w-7xl">
           {/* ================= HEADER TEAL ================= */}
-          <header className="bg-[#74B6BE] px-4 pb-6 pt-5 md:rounded-b-3xl md:px-10 md:pt-10 md:pb-12">
+          <header className="bg-gradient-to-b from-[#93FBFB] to-[#F1F4F5] px-4 pb-4 pt-5 md:px-10 md:pt-10">
             {/* Logo khusus mobile */}
             {/* <div className="flex items-center justify-between md:hidden">
               <div className="flex items-center text-white">
@@ -694,11 +695,11 @@ export default function DashboardPage() {
             <div className="mt-5 md:mt-0 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="flex items-start justify-between md:block">
                 <div>
-                  <p className="text-xs text-white/80 md:text-sm">Selamat datang</p>
-                  <h1 className="text-xl font-extrabold text-white md:text-3xl">{data.fullName}</h1>
+                  <p className="text-xs text-slate-600 md:text-sm">Selamat datang</p>
+                  <h1 className="text-xl font-bold text-slate-900 md:text-3xl">{data.fullName}</h1>
                 </div>
                 <div className="flex items-center gap-1 md:hidden relative">
-                  <Link href="/notifikasi" className="relative rounded-full p-2 text-white transition hover:bg-white/10">
+                  <Link href="/notifikasi" className="relative rounded-full p-2 text-slate-800 transition hover:bg-slate-800/10">
                     <Bell size={20} />
                     {(dueAlarms.length + unreadNotifsCount) > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />}
                   </Link>
@@ -712,35 +713,26 @@ export default function DashboardPage() {
                   <div className="md:w-36"><StatCard label="FCR Rata-rata" value={stats.fcr.toFixed(2)} highlight /></div>
                 </div>
                 <div className="hidden md:block relative">
-                  <Link href="/notifikasi" className="flex rounded-full p-3 text-white transition hover:bg-white/20 items-center justify-center bg-white/10 relative">
+                  <Link href="/notifikasi" className="flex rounded-full p-3 text-slate-800 transition hover:bg-slate-800/10 items-center justify-center bg-white/50 relative">
                     <Bell size={24} />
                     {(dueAlarms.length + unreadNotifsCount) > 0 && <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse border-2 border-[#74B6BE]" />}
                   </Link>
                 </div>
               </div>
             </div>
-          </header>
 
-          {isDemo && (
-            <p className="mx-4 mt-4 rounded-lg bg-amber-100 px-4 py-3 text-xs text-amber-700 md:mx-10 shadow-sm border border-amber-200">
-              Mode pratinjau: menampilkan data contoh sesuai desain. Login untuk melihat data asli.
-            </p>
-          )}
-
-          {/* ================= KONTEN ================= */}
-          <main className="space-y-4 px-4 pb-40 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-8">
             {/* --- Kartu Alarm --- */}
             {alarms.length > 0 && (
-              <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-4 snap-x md:mx-0 md:px-0 md:flex md:flex-row md:flex-wrap md:gap-4 md:overflow-visible">
+              <div className="-mx-4 mt-6 flex gap-4 overflow-x-auto px-4 pb-4 snap-x md:mx-0 md:px-0 md:flex md:flex-row md:flex-wrap md:gap-4 md:overflow-visible">
                 {alarms.map((alarm) => (
-                  <section key={alarm.pond.pond_id} className="min-w-[85vw] snap-center rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col justify-between border border-slate-100 md:min-w-0 md:flex-none md:w-[350px]">
+                  <section key={alarm.pond.pond_id} className="min-w-[85vw] snap-center rounded-xl bg-white  overflow-hidden flex flex-col justify-between border border-slate-100 md:min-w-0 md:flex-none md:w-[350px]">
                     <div className="p-4 flex items-start justify-between">
                       <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5 text-red-500">
+                        <div className="flex items-center gap-1.5 text-[#FB4A2E]">
                           <AlertTriangle size={14} />
                           <span className="text-[10px] font-semibold">Alarm Kolam</span>
                         </div>
-                        <h3 className="mt-1.5 text-sm font-extrabold text-slate-800">{alarm.pond.pond_name}</h3>
+                        <h3 className="mt-1.5 text-sm font-bold text-slate-800">{alarm.pond.pond_name}</h3>
                         <p className="text-[10px] text-slate-500 mt-0.5">{alarm.pond.stage || "Remaja"}</p>
                       </div>
 
@@ -750,13 +742,12 @@ export default function DashboardPage() {
                           const msLeft = alarm.anco?.due_time ? new Date(alarm.anco.due_time).getTime() - now : null;
                           const isLocked = msLeft !== null && msLeft > 30 * 60 * 1000;
                           return (
-                            <div className={`flex overflow-hidden rounded-full ${
-                              msLeft !== null && msLeft <= 0
-                                ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                            <div className={`flex overflow-hidden rounded-full ${msLeft !== null && msLeft <= 0
+                                ? "ring-2 ring-red-500  animate-pulse"
                                 : ""
-                            }`}>
+                              }`}>
                               <div className={`${isLocked ? "bg-amber-100" : "bg-[#F9D9CE]"} py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center`}>Cek Anco</div>
-                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#F26B4E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
+                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#FB4A2E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
                             </div>
                           );
                         })()}
@@ -766,19 +757,33 @@ export default function DashboardPage() {
                           const msLeft = alarm.pakan?.due_time ? new Date(alarm.pakan.due_time).getTime() - now : null;
                           const isLocked = msLeft !== null && msLeft > 30 * 60 * 1000;
                           return (
-                            <div className={`flex overflow-hidden rounded-full ${
-                              msLeft !== null && msLeft <= 0
-                                ? "ring-2 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse"
+                            <div className={`flex overflow-hidden rounded-full ${msLeft !== null && msLeft <= 0
+                                ? "ring-2 ring-red-500  animate-pulse"
                                 : ""
-                            }`}>
+                              }`}>
                               <div className={`${isLocked ? "bg-amber-100" : "bg-[#F9D9CE]"} py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center`}>Beri Pakan</div>
-                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#F26B4E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
+                              <div className={`${isLocked ? "bg-amber-500" : "bg-[#FB4A2E]"} py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center`}>{msLeft !== null ? fmtMs(msLeft) : "--:--:--"}</div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Timer Probiotik */}
+                        {(() => {
+                          const msLeft = alarm.prob?.due_time ? new Date(alarm.prob.due_time).getTime() - now : null;
+                          if (msLeft === null || msLeft > 30 * 60 * 1000) return null; // Hanya muncul 30 menit terakhir
+                          return (
+                            <div className={`flex overflow-hidden rounded-full ${msLeft <= 0
+                                ? "ring-2 ring-red-500  animate-pulse"
+                                : ""
+                              }`}>
+                              <div className="bg-[#F9D9CE] py-1.5 text-[10px] font-semibold text-slate-700 w-[75px] text-center">Probiotik</div>
+                              <div className="bg-[#FB4A2E] py-1.5 text-[10px] font-bold text-white tabular-nums w-[65px] text-center">{fmtMs(msLeft)}</div>
                             </div>
                           );
                         })()}
                       </div>
                     </div>
-                    
+
                     {(() => {
                       const isLocked = (alarm.earliest - now) > 30 * 60 * 1000;
                       return (
@@ -786,14 +791,13 @@ export default function DashboardPage() {
                           type="button"
                           onClick={() => { if (!isLocked) router.push(`/kolam/${alarm.pond.pond_id}`) }}
                           disabled={isLocked}
-                          className={`flex items-center justify-between px-4 py-3 text-xs font-bold transition ${
-                            isLocked 
-                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                              : 'bg-[#A5E3E8] text-[#2A7B88] active:bg-[#91D0D5]'
-                          }`}
+                          className={`flex items-center justify-between px-4 py-3 text-xs font-bold transition ${isLocked
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              : 'bg-[#FB4A2E] text-[#FFFFFF] active:bg-[#E03A1F]'
+                            }`}
                         >
                           {isLocked ? "Belum Waktunya" : "Menuju Kolam"}
-                          {!isLocked && <span className="text-base leading-none">→</span>}
+                          {!isLocked && <span className="text-base leading-none">&rarr;</span>}
                         </button>
                       );
                     })()}
@@ -801,7 +805,16 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </header>
 
+          {isDemo && (
+            <p className="mx-4 mt-4 rounded-lg bg-amber-100 px-4 py-3 text-xs text-amber-700 md:mx-10 border border-amber-200">
+              Mode pratinjau: menampilkan data contoh sesuai desain. Login untuk melihat data asli.
+            </p>
+          )}
+
+          {/* ================= KONTEN ================= */}
+          <main className="space-y-4 px-4 pb-40 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-4">
             {/* --- Search + Daftar Kolam --- */}
             <section className="space-y-4 md:space-y-6">
               <div className="flex gap-2">
@@ -811,11 +824,11 @@ export default function DashboardPage() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Cari kolam..."
-                    className="w-full rounded-full bg-white py-3 pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2ABFC8]/40"
+                    className="w-full rounded-full bg-[#E7EAEB] py-3 pl-10 pr-4 text-sm outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#2ABFC8]/40"
                   />
                 </div>
                 <div className="relative">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowFilter(!showFilter)}
                     className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#EAEFEF] text-slate-800 transition active:scale-95 shrink-0"
@@ -825,7 +838,7 @@ export default function DashboardPage() {
 
                   {/* Filter Dropdown */}
                   {showFilter && (
-                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-100 z-50">
+                    <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white p-2  ring-1 ring-slate-100 z-50">
                       <p className="mb-2 px-3 pt-1 text-xs font-bold text-slate-400">Filter Tahap</p>
                       {["Semua", "Benur", "Remaja", "Pembesaran"].map((f) => (
                         <button
@@ -835,11 +848,10 @@ export default function DashboardPage() {
                             setStageFilter(f);
                             setShowFilter(false);
                           }}
-                          className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                            stageFilter === f
+                          className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${stageFilter === f
                               ? "bg-[#E3F1F2] text-[#2F6E7B]"
-                              : "text-slate-600 hover:bg-slate-50"
-                          }`}
+                              : "text-slate-600 hover:bg-[#F1F4F5]"
+                            }`}
                         >
                           {f === "Semua" ? "Semua Tahap" : f}
                         </button>
@@ -850,7 +862,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-extrabold">Kolam Saya</h2>
+                <h2 className="text-base font-bold">Kolam Saya</h2>
                 {/* TODO: buka modal / halaman tambah kolam */}
                 <button
                   type="button"
@@ -861,18 +873,18 @@ export default function DashboardPage() {
                       setShowTambah(true);
                     }
                   }}
-                  className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] bg-white px-4 py-1.5 text-xs font-semibold text-[#1FB4B2] transition active:bg-slate-50"
+                  className="flex items-center gap-1.5 rounded-full border border-[#1FB4B2] bg-white px-4 py-1.5 text-xs font-semibold text-[#1FB4B2] transition active:bg-[#F1F4F5]"
                 >
                   <Plus size={14} /> Tambah
                 </button>
               </div>
 
-              <div className="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:space-y-0">
+              <div className="-mx-4 flex flex-col md:mx-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
                 {visiblePonds.map((p) => (
                   <PondCard key={p.pond_id} pond={p} fcr={p.cycle_id ? data.fcrByCycle[p.cycle_id] : undefined} />
                 ))}
                 {visiblePonds.length === 0 && (
-                  <p className="rounded-xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm md:col-span-2 xl:col-span-3">
+                  <p className="rounded-xl bg-white p-6 text-center text-sm text-slate-500  md:col-span-2 xl:col-span-3">
                     Belum ada kolam. Tekan “+ Tambah” untuk membuat kolam pertama.
                   </p>
                 )}
@@ -937,7 +949,7 @@ export default function DashboardPage() {
       <ConfirmAncoModal
         open={activeModal === "anco_popup"}
         pondName={
-          selectedCycles.length === 1 
+          selectedCycles.length === 1
             ? data?.ponds.find(p => p.cycle_id === selectedCycles[0])?.pond_name || "Kolam"
             : `${selectedCycles.length} Kolam`
         }
@@ -951,7 +963,7 @@ export default function DashboardPage() {
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button aria-label="Tutup" onClick={() => setShowUpgradeModal(false)} className="absolute inset-0 bg-black/40" />
-          <div className="relative w-full max-w-sm rounded-[24px] bg-white p-6 shadow-xl">
+          <div className="relative w-full max-w-sm rounded-xl bg-white p-6 ">
             <div className="mb-4 flex items-center justify-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E3F1F2]">
                 <AlertTriangle className="text-[#2F6E7B]" size={28} />
@@ -962,15 +974,15 @@ export default function DashboardPage() {
               Akun <span className="font-bold text-slate-700">Gratis</span> maksimal hanya bisa memiliki 1 kolam. Upgrade ke <span className="font-bold text-[#2ABFC8]">Prime</span> untuk menambah kolam tanpa batas dan fitur premium lainnya!
             </p>
             <div className="mt-6 flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => router.push("/profil")}
                 className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-bold text-white transition active:scale-95"
               >
                 Lihat Paket Prime
               </button>
-              <button 
+              <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 active:scale-95"
+                className="w-full rounded-[10px] py-3 text-sm font-semibold text-slate-500 transition hover:bg-[#F1F4F5] active:scale-95"
               >
                 Nanti Saja
               </button>

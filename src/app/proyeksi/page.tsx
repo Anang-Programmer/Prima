@@ -134,7 +134,7 @@ export default function ProyeksiPage() {
     return { list, act, totalKg };
   }, [ponds, selected]);
 
-  if (!ponds) return <div className="flex min-h-screen items-center justify-center bg-[#F2F5F7]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>;
+  if (!ponds) return <div className="flex min-h-screen items-center justify-center bg-[#F1F4F5]"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" /></div>;
 
   const single = selected ? agg.act[0] : null;
   const weeks = single?.proj.weeks ?? [];
@@ -142,36 +142,36 @@ export default function ProyeksiPage() {
   const niceMax = maxWeek * 1.1;
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full md:flex-1 md:overflow-y-auto">
       <div className="mx-auto w-full max-w-md pb-28 md:max-w-3xl md:pb-12 md:pt-4">
         {/* ============ HEADER ============ */}
         <header className="flex items-center gap-2 px-4 pb-4 pt-6 md:px-8">
           <button onClick={() => router.push("/dashboard")} className="rounded-full p-1.5 text-slate-700 hover:bg-white md:hidden"><ArrowLeft size={20} /></button>
-          <h1 className="text-base font-extrabold md:text-2xl">Proyeksi Pakan</h1>
+          <h1 className="text-base font-bold md:text-2xl">Proyeksi Pakan</h1>
         </header>
 
         <main className="space-y-4 px-4 md:px-8">
           {/* ============ KARTU RINGKASAN ============ */}
           {!single ? (
-            <div className="grid grid-cols-1 overflow-hidden rounded-xl shadow-sm">
+            <div className="grid grid-cols-1 overflow-hidden rounded-xl ">
               <div className="bg-white p-4">
                 <p className="text-[11px] text-slate-500">Total Pakan</p>
-                <p className="mt-1 text-xl font-extrabold text-slate-800">{fmtKg(agg.totalKg)}</p>
+                <p className="mt-1 text-xl font-bold text-slate-800">{fmtKg(agg.totalKg)}</p>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 rounded-xl bg-white p-4 shadow-sm">
-              <div><p className="text-base font-extrabold text-[#2F6E7B]">{fmtKg(single.proj.totalKg)}</p><p className="text-[10px] text-slate-500">Total Pakan</p></div>
-              <div><p className="text-base font-extrabold text-[#2F6E7B]">{Math.max(0, TARGET_HARI - single.doc)} hari</p><p className="text-[10px] text-slate-500">Sisa Hari</p></div>
+            <div className="grid grid-cols-2 rounded-xl bg-white p-4 ">
+              <div><p className="text-base font-bold text-[#2F6E7B]">{fmtKg(single.proj.totalKg)}</p><p className="text-[10px] text-slate-500">Total Pakan</p></div>
+              <div><p className="text-base font-bold text-[#2F6E7B]">{Math.max(0, TARGET_HARI - single.doc)} hari</p><p className="text-[10px] text-slate-500">Sisa Hari</p></div>
             </div>
           )}
 
           {/* ============ PEMILIH KOLAM ============ */}
           {!single && <p className="mb-2 text-[11px] font-semibold text-slate-700">Pilih Kolam</p>}
           <div className="relative">
-            <button onClick={() => setShowPicker(!showPicker)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm text-slate-700 shadow-sm ring-1 ring-slate-100">
+            <button onClick={() => setShowPicker(!showPicker)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm text-slate-700  ring-1 ring-slate-100">
               {single ? single.pond_name : "Semua Kolam"}
               <ChevronRight size={16} className={`text-slate-400 transition-transform ${showPicker ? 'rotate-90' : ''}`} />
             </button>
@@ -180,12 +180,12 @@ export default function ProyeksiPage() {
             {showPicker && (
               <>
                 <button aria-label="Tutup" onClick={() => setShowPicker(false)} className="fixed inset-0 z-40 cursor-default" />
-                <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-100 z-50">
-                  <button onClick={() => { setSelected(null); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === null ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                <div className="absolute left-0 right-0 top-full mt-2 rounded-xl bg-white p-2  ring-1 ring-slate-100 z-50">
+                  <button onClick={() => { setSelected(null); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === null ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-[#F1F4F5]"}`}>
                     Semua Kolam {selected === null && <Check size={16} className="text-[#2ABFC8]" />}
                   </button>
                   {(ponds ?? []).map((p) => (
-                    <button key={p.pond_id} onClick={() => { setSelected(p.pond_id); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === p.pond_id ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                    <button key={p.pond_id} onClick={() => { setSelected(p.pond_id); setShowPicker(false); }} className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm transition ${selected === p.pond_id ? "bg-[#E3F1F2] text-[#2F6E7B] font-semibold" : "text-slate-600 hover:bg-[#F1F4F5]"}`}>
                       <span>{p.pond_name} <span className="text-[10px] text-slate-400 font-normal ml-1">DOC {p.doc}</span></span>
                       {selected === p.pond_id && <Check size={16} className="text-[#2ABFC8]" />}
                     </button>
@@ -226,11 +226,11 @@ export default function ProyeksiPage() {
 
               <section>
                 <h2 className="mb-3 text-xs font-bold">Rincian Pakan Perminggu</h2>
-                <div className="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-sm">
+                <div className="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white ">
                   {weeks.map((w: any) => (
                     <div key={w.week} className="flex items-center justify-between px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="rounded-lg bg-[#F2F5F7] px-3 py-2 text-xs font-medium text-slate-700">Minggu {w.week}</span>
+                        <span className="rounded-lg bg-[#F1F4F5] px-3 py-2 text-xs font-medium text-slate-700">Minggu {w.week}</span>
                         {w.isReal && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Aktual</span>}
                       </div>
                       <span className="text-right">
@@ -251,8 +251,8 @@ export default function ProyeksiPage() {
 
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70">
+        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
+          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">

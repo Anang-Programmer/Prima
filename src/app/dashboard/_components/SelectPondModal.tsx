@@ -64,7 +64,7 @@ export function SelectPondModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl  overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:fade-in-0 duration-300">
         
         <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
           <div className="w-12 h-1.5 rounded-full bg-slate-200" />
@@ -93,7 +93,7 @@ export function SelectPondModal({
                 type="button"
                 onClick={() => handleExecute(activePonds.map(p => p.cycle_id!))}
                 disabled={isExecuting}
-                className="flex items-center justify-between p-4 bg-white border-b border-slate-200 border-dashed hover:bg-slate-50 transition-colors text-left"
+                className="flex items-center justify-between p-4 bg-white border-b border-slate-200 border-dashed hover:bg-[#F1F4F5] transition-colors text-left"
               >
                 <span className="text-sm font-semibold text-slate-400">Semua Kolam</span>
                 <span className="text-slate-300 text-lg font-light">{'>'}</span>
@@ -129,7 +129,7 @@ export function SelectPondModal({
                     }}
                     disabled={disabled}
                     className={`flex items-center justify-between p-4 border-b border-slate-300 transition-colors text-left w-full
-                      ${disabled ? 'bg-[#C1C4C7]' : 'bg-white hover:bg-slate-50'}
+                      ${disabled ? 'bg-[#C1C4C7]' : 'bg-white hover:bg-[#F1F4F5]'}
                     `}
                   >
                     <span className={`text-sm font-semibold ${disabled ? 'text-slate-400' : 'text-slate-600'}`}>

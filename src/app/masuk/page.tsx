@@ -59,7 +59,7 @@ function Field({ label, icon, bordered, ...rest }: FieldProps) {
             <div className="relative">
                 <input
                     {...rest}
-                    className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 pr-11 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 ${bordered ? "border-[1.5px] border-[#2ABFC8]" : ""
+                    className={`w-full rounded-[10px] bg-[#E7EAEB] py-3.5 pl-4 pr-11 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 ${bordered ? "border-[1.5px] border-[#2ABFC8]" : ""
                         }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-800">{icon}</span>
@@ -122,7 +122,7 @@ export default function MasukPage() {
                     <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-300 md:hidden" />
 
                     <div className="hidden md:block text-center mt-6 mb-8">
-                        <h3 className="text-2xl font-extrabold text-slate-800">Masuk Akun</h3>
+                        <h3 className="text-2xl font-bold text-slate-800">Masuk Akun</h3>
                         <p className="text-sm text-slate-500 mt-2">Silakan masuk menggunakan Email atau Username.</p>
                     </div>
 
@@ -158,7 +158,7 @@ export default function MasukPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+                                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white  transition active:scale-[0.98] disabled:opacity-60"
                             >
                                 {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Masuk"}
                             </button>

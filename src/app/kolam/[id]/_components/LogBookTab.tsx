@@ -65,7 +65,7 @@ export default function LogBookTab({ d }: { d: any }) {
     <section className="space-y-4">
       {/* ============ ALERT 3 HARI / 1 MINGGU ANCO HABIS ============ */}
       {d.anco?.isHabis1Week ? (
-        <div className="rounded-2xl bg-indigo-50 p-4 border border-indigo-100 flex gap-3 shadow-sm">
+        <div className="rounded-xl bg-indigo-50 p-4 border border-indigo-100 flex gap-3 ">
           <AlertCircle className="text-indigo-600 shrink-0 mt-0.5" size={18} />
           <div>
             <h4 className="text-sm font-bold text-indigo-900">Anco Habis 1 Minggu Berturut-turut!</h4>
@@ -75,7 +75,7 @@ export default function LogBookTab({ d }: { d: any }) {
           </div>
         </div>
       ) : d.anco?.isHabis3Days ? (
-        <div className="rounded-2xl bg-[#FFF6E5] p-4 border border-[#FFE1B5] flex gap-3 shadow-sm">
+        <div className="rounded-xl bg-[#FFF6E5] p-4 border border-[#FFE1B5] flex gap-3 ">
           <AlertTriangle className="text-[#F2A93B] shrink-0 mt-0.5" size={18} />
           <div>
             <h4 className="text-sm font-bold text-[#9E6200]">Anco Habis 3 Hari Berturut-turut</h4>
@@ -85,34 +85,35 @@ export default function LogBookTab({ d }: { d: any }) {
           </div>
         </div>
       ) : null}
+      {/* Sampai sini */}
 
       {/* ============ STATS SUMMARY BAR ============ */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100/80">
+        <div className="rounded-xl bg-white p-3  border border-slate-100/80">
           <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
             <Utensils size={11} className="text-[#F08C8C]" /> Total Pakan
           </p>
-          <p className="mt-1 text-sm font-extrabold text-slate-800">
+          <p className="mt-1 text-sm font-bold text-slate-800">
             {fmtFeed(d.totalFeed || 0)}
           </p>
           <p className="text-[9px] text-slate-400 mt-0.5">{d.feeds?.length || 0} kali tebar</p>
         </div>
 
-        <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100/80">
+        <div className="rounded-xl bg-white p-3  border border-slate-100/80">
           <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
             <CheckCircle2 size={11} className="text-emerald-500" /> Nafsu Makan
           </p>
-          <p className="mt-1 text-sm font-extrabold text-slate-800">
+          <p className="mt-1 text-sm font-bold text-slate-800">
             {totalAncoChecked > 0 ? `${ancoHabisRate}%` : "-"}
           </p>
           <p className="text-[9px] text-emerald-600 font-medium mt-0.5">{d.anco.habis} anco habis</p>
         </div>
 
-        <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100/80">
+        <div className="rounded-xl bg-white p-3  border border-slate-100/80">
           <p className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
             <Droplets size={11} className="text-[#2ABFC8]" /> Probiotik
           </p>
-          <p className="mt-1 text-sm font-extrabold text-slate-800">
+          <p className="mt-1 text-sm font-bold text-slate-800">
             {fmt1((d.probs || []).reduce((acc: number, p: any) => acc + Number(p.amount_ml || 0), 0))} ml
           </p>
           <p className="text-[9px] text-slate-400 mt-0.5">{d.probs?.length || 0} aplikasi</p>
@@ -125,8 +126,8 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("all"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "all"
-              ? "bg-[#2ABFC8] text-white shadow-sm"
-              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
+              ? "bg-[#2ABFC8] text-white "
+              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-[#F1F4F5]"
           }`}
         >
           <Layers size={12} /> Semua Log ({allLogs.length})
@@ -135,8 +136,8 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("feed"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "feed"
-              ? "bg-[#2ABFC8] text-white shadow-sm"
-              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
+              ? "bg-[#2ABFC8] text-white "
+              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-[#F1F4F5]"
           }`}
         >
           <Utensils size={12} /> Sesi Pakan & Anco ({d.feeds?.length || 0})
@@ -145,8 +146,8 @@ export default function LogBookTab({ d }: { d: any }) {
           onClick={() => { setFilter("prob"); setLimit(15); }}
           className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             filter === "prob"
-              ? "bg-[#2ABFC8] text-white shadow-sm"
-              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50"
+              ? "bg-[#2ABFC8] text-white "
+              : "bg-white text-slate-600 border border-slate-200/80 hover:bg-[#F1F4F5]"
           }`}
         >
           <Droplets size={12} /> Probiotik ({d.probs?.length || 0})
@@ -155,7 +156,7 @@ export default function LogBookTab({ d }: { d: any }) {
 
       {/* ============ LOG LIST ============ */}
       {displayedLogs.length === 0 ? (
-        <div className="rounded-2xl bg-white p-8 text-center shadow-sm border border-slate-100">
+        <div className="rounded-xl bg-white p-8 text-center  border border-slate-100">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-3">
             <Layers size={22} />
           </div>
@@ -165,7 +166,7 @@ export default function LogBookTab({ d }: { d: any }) {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="-mx-4 flex flex-col md:mx-0 md:space-y-3">
           {displayedLogs.slice(0, limit).map((log: any) => {
             if (log.itemCategory === "pakan") {
               const ancoLabel = log.anco_result && log.anco_result !== "Belum Dicek" ? log.anco_result : null;
@@ -173,12 +174,12 @@ export default function LogBookTab({ d }: { d: any }) {
               const ancoTime = ancoTimeMatch ? ancoTimeMatch[1].replace(".", ":") : null;
 
               return (
-                <article key={`feed-${log.id}`} className="rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-100/80">
+                <article key={`feed-${log.id}`} className="w-full bg-white px-4 py-4 border-b border-slate-200 md:rounded-xl md:border md:mb-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <img src="/images/icon/pakan.webp" alt="Pakan" className="h-9 w-9 shrink-0" />
                       <div>
-                        <p className="text-base font-extrabold text-slate-800">{fmtFeedWithHint(Number(log.feed_amount_kg || 0))}</p>
+                        <p className="text-base font-bold text-slate-800">{fmtFeedWithHint(Number(log.feed_amount_kg || 0))}</p>
                         <p className="text-[11px] text-slate-400">{log.feed_type || "Pelet"}</p>
                       </div>
                     </div>
@@ -209,12 +210,12 @@ export default function LogBookTab({ d }: { d: any }) {
             }
 
             return (
-              <article key={`prob-${log.id}`} className="rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-100/80">
+              <article key={`prob-${log.id}`} className="w-full bg-white px-4 py-4 border-b border-slate-200 md:rounded-xl md:border md:mb-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-9 w-9 shrink-0" />
                     <div>
-                      <p className="text-base font-extrabold text-slate-800">{log.amount_ml}ml</p>
+                      <p className="text-base font-bold text-slate-800">{log.amount_ml}ml</p>
                       <p className="text-[11px] text-slate-400">{log.probiotic_type || "Merk Probi"}</p>
                     </div>
                   </div>

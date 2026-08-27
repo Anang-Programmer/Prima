@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { Send } from "lucide-react";
 import { Sheet } from "./Sheet";
 import { inputCls } from "../_lib/constants";

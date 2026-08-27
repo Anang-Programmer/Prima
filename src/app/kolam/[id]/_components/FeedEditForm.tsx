@@ -6,7 +6,7 @@ import { inputCls, fmt1, fmtFeed } from "../_lib/constants";
 
 export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation, setEditMode, historicalData }: any) {
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm">
+    <section className="rounded-xl bg-white p-5 ">
       <h4 className="text-sm font-bold text-slate-800 mb-5">Edit Pakan</h4>
 
       {/* Stepper Total Pakan */}
@@ -16,7 +16,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             const newVal = Math.max(0, +(editFeedValues.dailyFeedKg - 0.1).toFixed(2));
             setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white shadow-sm transition active:scale-90"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white  transition active:scale-90"
         >
           <Minus size={16} />
         </button>
@@ -24,7 +24,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
           type="number"
           min={0}
           step={0.1}
-          className="min-w-0 flex-1 rounded-xl bg-[#EAEAEA] px-3 py-3 text-center text-xl font-extrabold text-slate-800 outline-none focus:ring-2 focus:ring-[#2ABFC8]/50"
+          className="min-w-0 flex-1 rounded-xl bg-[#E7EAEB] px-3 py-3 text-center text-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-[#2ABFC8]/50"
           value={editFeedValues._rawDailyFeedKg ?? editFeedValues.dailyFeedKg}
           onChange={(e) => {
             const val = e.target.value;
@@ -40,7 +40,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
             const newVal = +(editFeedValues.dailyFeedKg + 0.1).toFixed(2);
             setEditFeedValues({ ...editFeedValues, dailyFeedKg: newVal, _rawDailyFeedKg: newVal.toString() });
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white shadow-sm transition active:scale-90"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2ABFC8] text-white  transition active:scale-90"
         >
           <Plus size={16} />
         </button>
@@ -121,7 +121,7 @@ export function FeedEditForm({ d, busy, editFeedValues, setEditFeedValues, handl
         <button
           onClick={handleConfirmEdit}
           disabled={busy}
-          className="flex-1 rounded-xl bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
+          className="flex-1 rounded-xl bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white  transition active:scale-[0.98] disabled:opacity-50"
         >
           Konfirmasi
         </button>

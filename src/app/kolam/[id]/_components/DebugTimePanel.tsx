@@ -8,7 +8,7 @@ export function DebugTimePanel(props: any) {
   const [targetDoc, setTargetDoc] = useState<number | "">(120);
 
   return (
-    <section className="rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-4">
+    <section className="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-4">
       <div className="mb-2 flex items-center gap-2 text-[11px] font-bold text-amber-700">
         <AlarmClock size={13} /> Debug: Simulasi Waktu
       </div>

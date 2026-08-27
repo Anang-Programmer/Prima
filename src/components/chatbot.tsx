@@ -117,7 +117,7 @@ export function Chatbot({ doc, populasi, luas, calcResult, ancoStatus, probiotik
   }
 
   return (
-    <section className="bg-white border border-[#002530]/10 rounded-xl overflow-hidden shadow-sm">
+    <section className="bg-white border border-[#002530]/10 rounded-xl overflow-hidden ">
       <div className="bg-[#002530] p-4 flex items-center gap-3 shrink-0">
         <div className="relative">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#56C1CD] to-[#0A4D58] flex items-center justify-center">
@@ -139,7 +139,7 @@ export function Chatbot({ doc, populasi, luas, calcResult, ancoStatus, probiotik
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[90%] ${m.role === 'user' ? '' : 'w-full'}`}>
-              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
+              <div className={`rounded-xl px-4 py-3 text-sm leading-relaxed 
                 ${m.role === 'user'
                   ? 'bg-[#0A4D58] text-white rounded-tr-sm'
                   : 'bg-white border border-[#002530]/10 text-[#002530] rounded-tl-sm'}`}>
@@ -190,7 +190,7 @@ export function Chatbot({ doc, populasi, luas, calcResult, ancoStatus, probiotik
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-white border border-[#002530]/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] shadow-sm">
+            <div className="bg-white border border-[#002530]/10 rounded-xl rounded-tl-sm px-4 py-3 max-w-[85%] ">
               <div className="flex items-center gap-2 text-[11px] text-[#0A4D58]">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 <span className="font-data tracking-wide">{typingPhase}</span>

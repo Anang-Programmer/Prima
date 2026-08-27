@@ -56,7 +56,7 @@ function Field({ label, icon, ...rest }: FieldProps) {
       <div className="relative">
         <input
           {...rest}
-          className={`w-full rounded-[10px] bg-[#EAEAEA] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all`}
+          className={`w-full rounded-[10px] bg-[#E7EAEB] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all`}
         />
         {icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">{icon}</span>}
       </div>
@@ -143,9 +143,9 @@ export default function DaftarPage() {
 
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-[#F2F5F7] flex flex-col pt-16 md:justify-center md:pt-0">
+      <div className="min-h-screen bg-[#F1F4F5] flex flex-col pt-16 md:justify-center md:pt-0">
         <LogoOnGray />
-        <div className="w-full max-w-md mx-auto bg-white rounded-t-[24px] md:rounded-[24px] shadow-sm flex flex-col flex-1 md:flex-none overflow-hidden relative md:my-8 md:max-h-[90vh]">
+        <div className="w-full max-w-md mx-auto bg-white rounded-t-[24px] md:rounded-xl  flex flex-col flex-1 md:flex-none overflow-hidden relative md:my-8 md:max-h-[90vh]">
           <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-300 md:hidden" />
           
           <form onSubmit={handleDaftar} className="flex flex-col flex-1 px-6 pt-6 pb-8 overflow-y-auto">
@@ -159,14 +159,14 @@ export default function DaftarPage() {
                     value={form.firstName}
                     onChange={set("firstName")}
                     required
-                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
+                    className="w-full rounded-[10px] bg-[#E7EAEB] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
                   />
                   <input
                     type="text"
                     placeholder="Nama Belakang"
                     value={form.lastName}
                     onChange={set("lastName")}
-                    className="w-full rounded-[10px] bg-[#EAEAEA] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
+                    className="w-full rounded-[10px] bg-[#E7EAEB] py-3.5 px-4 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function DaftarPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-8 shrink-0 w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+              className="mt-8 shrink-0 w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white  transition active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Daftar"}
             </button>
@@ -233,7 +233,7 @@ export default function DaftarPage() {
           <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-300 md:hidden" />
 
           <div className="hidden md:block text-center mt-6 mb-8">
-            <h3 className="text-2xl font-extrabold text-slate-800">Daftar Akun</h3>
+            <h3 className="text-2xl font-bold text-slate-800">Daftar Akun</h3>
             <p className="text-sm text-slate-500 mt-2">Lengkapi data di bawah untuk bergabung.</p>
           </div>
 
@@ -307,7 +307,7 @@ export default function DaftarPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+                className="w-full rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white  transition active:scale-[0.98] disabled:opacity-60"
               >
                 {loading ? <Loader2 className="mx-auto animate-spin" size={18} /> : "Selanjutnya"}
               </button>

@@ -6,7 +6,7 @@ import { inputCls } from "../_lib/constants";
 
 export function ProbioticEditForm({ d, busy, editProbValues, setEditProbValues, setEditMode, setShowSNIAlert, handleConfirmEdit, showSNIAlert, deviations, saveChanges, startAIConsultation }: any) {
   return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm">
+    <section className="rounded-xl bg-white p-4 ">
       <h4 className="text-sm font-bold text-slate-800 mb-4">Modifikasi Jadwal Probiotik</h4>
       <div className="space-y-4">
         <div>

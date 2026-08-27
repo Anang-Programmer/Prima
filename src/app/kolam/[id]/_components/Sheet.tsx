@@ -8,9 +8,9 @@ export function Sheet({ open, onClose, title, children }: any) {
   return (
     <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
       <button aria-label="Tutup" onClick={onClose} className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative z-10 md:max-h-[90vh] md:w-full md:max-w-md md:rounded-[24px]">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative z-10 md:max-h-[90vh] md:w-full md:max-w-md md:rounded-xl">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-300" />
-        <h3 className="mb-4 text-base font-extrabold text-slate-800">{title}</h3>
+        <h3 className="mb-4 text-base font-bold text-slate-800">{title}</h3>
         {children}
       </div>
     </div>

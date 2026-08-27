@@ -52,7 +52,7 @@ export default function ProjectionTab({ d }: { d: any }) {
       })()}
 
       <h4 className="mb-3 mt-10 text-xs font-bold text-slate-800">Rincian Pakan Perminggu</h4>
-      <div className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm">
+      <div className="divide-y divide-slate-100 rounded-xl bg-white ">
         {d.proyeksiMingguan.map((w: any, i: number) => (
           <div key={i} className="flex items-center justify-between px-4 py-3">
             <span className="text-xs font-semibold text-slate-700">{w.listLabel}</span>

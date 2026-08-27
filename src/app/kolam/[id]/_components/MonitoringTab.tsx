@@ -7,7 +7,7 @@ export default function MonitoringTab({ d }: { d: any }) {
   return (
     <section className="space-y-4 pl-6 pr-2">
       {/* Status FCR Card */}
-      <div className="rounded-xl bg-[#BEE5E8] p-4 shadow-sm">
+      <div className="rounded-xl bg-[#BEE5E8] p-4 ">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-[#0A4D58]">Status FCR</span>
           <div className="text-right">
@@ -30,7 +30,7 @@ export default function MonitoringTab({ d }: { d: any }) {
       </div>
 
       {/* Survival Rate Card */}
-      <div className="rounded-xl bg-[#BEE5E8] p-4 shadow-sm">
+      <div className="rounded-xl bg-[#BEE5E8] p-4 ">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-[#0A4D58]">Survival Rate</span>
           <div className="text-right">
@@ -48,7 +48,7 @@ export default function MonitoringTab({ d }: { d: any }) {
       {/* Alert Sampling ABW */}
       {d.abwSamplingAlert && (
         <div
-          className={`rounded-xl p-4 shadow-sm flex items-start gap-3 ${d.abwSamplingAlert.type === "missed"
+          className={`rounded-xl p-4  flex items-start gap-3 ${d.abwSamplingAlert.type === "missed"
               ? "bg-red-50 border border-red-200"
               : "bg-amber-50 border border-amber-200"
             }`}
@@ -94,7 +94,7 @@ export default function MonitoringTab({ d }: { d: any }) {
 
           if (daily.length === 0) {
             return (
-              <div className="flex h-32 w-full items-center justify-center rounded-xl bg-slate-50 text-center text-[11px] text-slate-400">
+              <div className="flex h-32 w-full items-center justify-center rounded-xl bg-[#F1F4F5] text-center text-[11px] text-slate-400">
                 Belum ada data ABW.
                 <br />
                 Sampling pertama di H-15.
@@ -214,7 +214,7 @@ export default function MonitoringTab({ d }: { d: any }) {
               {samplingPoints.map((p, i) => (
                 <div
                   key={i}
-                  className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#2ABFC8] shadow-sm"
+                  className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#2ABFC8] "
                   style={{
                     left: `calc(1.5rem + ${getX(p.doc)}% - (1.5rem + 0.5rem) * ${getX(p.doc) / 100})`, // adjust for pl-6 pr-2 container
                     top: `${getY(p.act)}%`,

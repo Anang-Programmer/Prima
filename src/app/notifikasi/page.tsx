@@ -185,7 +185,7 @@ export default function NotifikasiPage() {
                 <Link
                   key={pt.pond.pond_id}
                   href={`/kolam/${pt.pond.pond_id}`}
-                  className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-transform active:scale-[0.985]"
+                  className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3.5  transition-transform active:scale-[0.985]"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <AlertTriangle className="shrink-0 text-[#FF4D3D]" size={27} strokeWidth={2.2} />

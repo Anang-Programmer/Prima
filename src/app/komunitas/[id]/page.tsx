@@ -225,10 +225,10 @@ export default function PostDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
 
-      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F2F5F7]">
+      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F1F4F5]">
         <div className="mx-auto flex h-screen w-full flex-col md:h-auto md:max-w-7xl md:py-8">
 
           {/* HEADER */}
@@ -240,7 +240,7 @@ export default function PostDetailPage({
               <ArrowLeft size={21} />
             </button>
 
-            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-extrabold">
+            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-bold">
               Komunitas
             </h1>
           </header>
@@ -252,7 +252,7 @@ export default function PostDetailPage({
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2ABFC8] border-t-transparent" />
               </div>
             ) : (
-              <div className="flex flex-1 flex-col md:rounded-2xl md:border md:border-slate-100 md:bg-white md:shadow-sm">
+              <div className="flex flex-1 flex-col md:rounded-xl md:border md:border-slate-100 md:bg-white md:">
 
                 {/* POST */}
                 <div className="bg-white p-4 pb-2 md:rounded-t-2xl md:p-6">
@@ -405,7 +405,7 @@ export default function PostDetailPage({
                   <button
                     onClick={addComment}
                     disabled={busy || !newComment.trim()}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#25C4D4] text-white shadow-sm transition active:scale-95 disabled:opacity-60"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#25C4D4] text-white  transition active:scale-95 disabled:opacity-60"
                   >
                     {busy ? (
                       <Loader2 className="animate-spin" size={17} />

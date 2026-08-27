@@ -102,7 +102,7 @@ export default function OnboardingPage() {
             {SLIDES.map((s, i) => (
               <article
                 key={i}
-                className="flex flex-col w-full shrink-0 snap-center rounded-[20px] bg-white px-6 pb-8 pt-8 shadow-[0_14px_35px_rgba(18,63,76,0.08)] md:snap-none md:hover:-translate-y-2 md:transition-transform md:duration-300 md:px-8 md:pb-10 md:pt-10 md:items-center md:justify-center md:text-center"
+                className="flex flex-col w-full shrink-0 snap-center rounded-xl bg-white px-6 pb-8 pt-8  md:snap-none md:hover:-translate-y-2 md:transition-transform md:duration-300 md:px-8 md:pb-10 md:pt-10 md:items-center md:justify-center md:text-center"
               >
                 {s.img && (
                   <div className="flex h-56 items-center justify-center md:h-64 w-full mb-6">
@@ -136,13 +136,13 @@ export default function OnboardingPage() {
         <footer className="space-y-3 px-7 pb-9 md:flex md:flex-row md:justify-center md:gap-6 md:space-y-0 md:px-0 md:mt-4 md:pb-0">
           <Link
             href={LINK_DAFTAR}
-            className="block w-full rounded-xl bg-[#2ABFC8] py-3.5 text-center text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] md:w-56 md:py-4 md:text-base md:hover:bg-[#3A7C86]"
+            className="block w-full rounded-xl bg-[#2ABFC8] py-3.5 text-center text-sm font-semibold text-white  transition active:scale-[0.98] md:w-56 md:py-4 md:text-base md:hover:bg-[#3A7C86]"
           >
             Daftar
           </Link>
           <Link
             href={LINK_MASUK}
-            className="block w-full rounded-xl border-[1.5px] border-[#2ABFC8] py-3 text-center text-sm font-semibold text-[#2ABFC8] transition active:scale-[0.98] md:w-56 md:py-4 md:text-base md:hover:bg-slate-50"
+            className="block w-full rounded-xl border-[1.5px] border-[#2ABFC8] py-3 text-center text-sm font-semibold text-[#2ABFC8] transition active:scale-[0.98] md:w-56 md:py-4 md:text-base md:hover:bg-[#F1F4F5]"
           >
             Masuk
           </Link>

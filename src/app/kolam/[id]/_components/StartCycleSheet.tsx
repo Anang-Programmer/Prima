@@ -42,17 +42,17 @@ export default function StartCycleSheet({ pond, open, onClose, onSaved }: { pond
     }
   }
 
-  const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
+  const inputCls = "w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
   return (
     <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
       <button aria-label="Tutup" onClick={onClose} className="absolute inset-0 bg-black/40" />
 
-      <div className="absolute inset-x-0 bottom-0 top-[auto] flex flex-col overflow-hidden rounded-t-[24px] bg-white md:relative md:inset-auto md:w-full md:max-w-sm md:rounded-[24px]">
+      <div className="absolute inset-x-0 bottom-0 top-[auto] flex flex-col overflow-hidden rounded-t-[24px] bg-white md:relative md:inset-auto md:w-full md:max-w-sm md:rounded-xl">
         <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-300 md:hidden" />
 
         <div className="px-5 py-6 pb-10 md:pb-6">
-          <h2 className="text-lg font-extrabold text-[#125B69]">Mulai Siklus</h2>
+          <h2 className="text-lg font-bold text-[#125B69]">Mulai Siklus</h2>
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div>
@@ -70,7 +70,7 @@ export default function StartCycleSheet({ pond, open, onClose, onSaved }: { pond
 
             {error && <p className="text-xs text-red-500">{error}</p>}
 
-            <button disabled={loading} type="submit" className="mt-4 w-full rounded-xl bg-[#3EC4CE] py-3.5 text-sm font-bold text-white shadow-md transition active:scale-95 disabled:opacity-50">
+            <button disabled={loading} type="submit" className="mt-4 w-full rounded-xl bg-[#3EC4CE] py-3.5 text-sm font-bold text-white  transition active:scale-95 disabled:opacity-50">
               {loading ? "Menyimpan..." : "Mulai Siklus"}
             </button>
           </form>

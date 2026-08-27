@@ -11,7 +11,7 @@ import { estimateHarvestYield } from "@/lib/feed-calculator";
 ============================================================ */
 
 const inputCls =
-  "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
+  "w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{children}</p>;
@@ -114,11 +114,11 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
       <button aria-label="Tutup" onClick={onClose} className="absolute inset-0 bg-black/40" />
 
       {/* sheet */}
-      <div className="absolute inset-x-0 bottom-0 top-[14%] flex flex-col overflow-hidden rounded-t-[24px] bg-white md:relative md:inset-auto md:max-h-[90vh] md:w-full md:max-w-md md:rounded-[24px]">
+      <div className="absolute inset-x-0 bottom-0 top-[14%] flex flex-col overflow-hidden rounded-t-[24px] bg-white md:relative md:inset-auto md:max-h-[90vh] md:w-full md:max-w-md md:rounded-xl">
         <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-300 md:hidden" />
 
         <div className="flex-1 overflow-y-auto px-4 pb-7 pt-4">
-          <h2 className="text-base font-extrabold text-slate-800">Tambah Kolam</h2>
+          <h2 className="text-base font-bold text-slate-800">Tambah Kolam</h2>
 
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div>
@@ -159,7 +159,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
               <input className={inputCls} placeholder="cth. blok A kanan" value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
 
-            <div className="flex items-center justify-between rounded-[10px] bg-slate-50 p-4 ring-1 ring-slate-100">
+            <div className="flex items-center justify-between rounded-[10px] bg-[#F1F4F5] p-4 ring-1 ring-slate-100">
               <div>
                 <p className="text-sm font-bold text-slate-800">Mulai Siklus Sekarang?</p>
                 <p className="mt-0.5 text-[10px] text-slate-500">Aktifkan untuk mengisi jumlah benur & tanggal tebar.</p>
@@ -170,7 +170,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#2ABFC8]/50 ${isCycleActive ? "bg-[#2ABFC8]" : "bg-slate-300"}`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isCycleActive ? "translate-x-5" : "translate-x-0"}`}
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white  ring-0 transition duration-200 ease-in-out ${isCycleActive ? "translate-x-5" : "translate-x-0"}`}
                 />
               </button>
             </div>
@@ -219,7 +219,7 @@ export default function TambahKolamSheet({ open, onClose, onSaved }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#2ABFC8] py-3.5 text-sm font-semibold text-white  transition active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               Tambah

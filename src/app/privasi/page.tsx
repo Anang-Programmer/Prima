@@ -8,10 +8,10 @@ export default function PrivasiPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
 
-      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F2F5F7]">
+      <div className="w-full md:flex-1 md:overflow-y-auto bg-[#F1F4F5]">
         <div className="mx-auto flex h-screen w-full flex-col md:h-auto md:max-w-3xl md:py-8">
           
           {/* HEADER */}
@@ -22,7 +22,7 @@ export default function PrivasiPage() {
             >
               <ArrowLeft size={21} />
             </button>
-            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-extrabold">
+            <h1 className="text-[18px] font-semibold text-slate-800 md:text-2xl md:font-bold">
               Privasi & Keamanan
             </h1>
           </header>

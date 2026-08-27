@@ -10,7 +10,7 @@ export function AIChatPanel(props: any) {
   const hasDeal = messages.some((m: any) => m.role === "assistant" && /DEAL_DATA/i.test(m.content));
 
   return (
-    <section className="rounded-2xl bg-white shadow-sm overflow-hidden">
+    <section className="rounded-xl bg-white  overflow-hidden">
       <div className="bg-[#2ABFC8] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => setShowAIChat(false)} className="text-white/80 hover:text-white transition">
@@ -25,7 +25,7 @@ export function AIChatPanel(props: any) {
           Tutup
         </button>
       </div>
-      <div className="max-h-[300px] overflow-y-auto p-4 space-y-3 bg-slate-50">
+      <div className="max-h-[300px] overflow-y-auto p-4 space-y-3 bg-[#F1F4F5]">
         {messages.map((msg: any, i: number) => {
           // FIX: Strip DEAL_DATA lalu cek — jika kosong, tampilkan fallback
           const displayText = msg.content.replace(/\[?DEAL_DATA:\s*\{[\s\S]*?\}\]?/gi, "").trim();
@@ -33,7 +33,7 @@ export function AIChatPanel(props: any) {
           if (!displayText && msg.role === "assistant") return null;
           return (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#2ABFC8] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
+            <div className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-xs leading-relaxed ${msg.role === "user" ? "bg-[#2ABFC8] text-white rounded-br-none" : "bg-white border border-slate-200 text-slate-700 rounded-bl-none"}`}>
               {displayText}
             </div>
           </div>
@@ -41,7 +41,7 @@ export function AIChatPanel(props: any) {
         })}
         {isAiTyping && (
           <div className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-none px-4 py-3 text-slate-400 flex gap-1 items-center">
+            <div className="bg-white border border-slate-200 rounded-xl rounded-bl-none px-4 py-3 text-slate-400 flex gap-1 items-center">
               <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" />
               <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0.1s]" />
               <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0.2s]" />

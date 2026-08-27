@@ -111,13 +111,13 @@ export default function KomunitasPage() {
   // addComment is no longer used here as it's moved to the detail page
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] text-slate-800 md:flex md:h-screen md:overflow-hidden">
+    <div className="min-h-screen bg-[#F1F4F5] text-slate-800 md:flex md:h-screen md:overflow-hidden">
       <DesktopSidebar />
       <div className="w-full md:flex-1 md:overflow-y-auto">
       <div className="mx-auto w-full max-w-md pb-28 md:max-w-7xl md:pb-12 md:pt-4">
         {/* ============ HEADER ============ */}
         <header className="flex items-center justify-between px-4 pb-4 pt-6 md:px-8">
-          <h1 className="text-lg font-extrabold md:text-2xl">Komunitas</h1>
+          <h1 className="text-lg font-bold md:text-2xl">Komunitas</h1>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCreate(true)}
@@ -142,7 +142,7 @@ export default function KomunitasPage() {
             <article 
               key={p.id} 
               onClick={() => router.push(`/komunitas/${p.id}`)}
-              className="rounded-2xl bg-white p-4 shadow-sm hover:bg-slate-50 transition cursor-pointer"
+              className="rounded-xl bg-white p-4  hover:bg-[#F1F4F5] transition cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <Avatar name={p.author_name} url={p.avatar_url} />
@@ -182,9 +182,9 @@ export default function KomunitasPage() {
 
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
           <button onClick={() => setShowCreate(true)}
-            className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white shadow-lg ring-4 ring-white/70 transition active:scale-95">
+            className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -207,12 +207,12 @@ export default function KomunitasPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center">
           <button aria-label="Tutup" onClick={() => setShowCreate(false)} className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-x-0 bottom-0 z-10 rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative md:w-full md:max-w-md md:rounded-[24px] md:p-6">
+          <div className="absolute inset-x-0 bottom-0 z-10 rounded-t-[24px] bg-white px-4 pb-8 pt-3 md:relative md:w-full md:max-w-md md:rounded-xl md:p-6">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-300" />
-            <h3 className="mb-4 text-base font-extrabold">Bagikan Pengalaman</h3>
+            <h3 className="mb-4 text-base font-bold">Bagikan Pengalaman</h3>
             <textarea rows={4} value={newPost} onChange={(e) => setNewPost(e.target.value)}
               placeholder="cth. Panen kemarin 4.2 ton dari 600m2. ABW 18gr, FCR 1.35..."
-              className="w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50" />
+              className="w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50" />
             <button onClick={createPost} disabled={busy || !newPost.trim()}
               className="mt-4 w-full rounded-[10px] bg-[#2ABFC8] py-3 text-sm font-semibold text-white disabled:opacity-60">
               {busy ? <Loader2 className="mx-auto animate-spin" size={16} /> : "Posting"}

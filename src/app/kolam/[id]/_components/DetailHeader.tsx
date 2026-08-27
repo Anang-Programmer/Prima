@@ -25,7 +25,7 @@ export function DetailHeader({ d, router, setPondForm, setSheet, onEndCycle, onD
             <ArrowLeft size={20} />
           </button>
           <div className="min-w-0">
-            <h1 className="truncate text-base font-extrabold text-white">{d.pond.name}</h1>
+            <h1 className="truncate text-base font-bold text-white">{d.pond.name}</h1>
             <p className="truncate text-[11px] text-white/80">
               {Number(d.pond.area_m2).toLocaleString("id-ID")} m² | {d.pond.location || "-"}
             </p>
@@ -40,14 +40,14 @@ export function DetailHeader({ d, router, setPondForm, setSheet, onEndCycle, onD
           </button>
           
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-40 rounded-xl bg-white p-2 shadow-lg ring-1 ring-black/5 z-50">
+            <div className="absolute right-0 top-full mt-2 w-40 rounded-xl bg-white p-2  ring-1 ring-black/5 z-50">
               <button
                 onClick={() => {
                   setMenuOpen(false);
                   setPondForm({ name: d.pond.name, area: d.pond.area_m2, depth: d.pond.depth_m, location: d.pond.location });
                   setSheet("editPond");
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-[#F1F4F5] transition"
               >
                 <Pencil size={15} /> Edit
               </button>

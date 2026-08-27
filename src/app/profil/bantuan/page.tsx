@@ -44,8 +44,8 @@ export default function BantuanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] flex flex-col md:justify-center md:items-center">
-      <div className="w-full max-w-md bg-[#F2F5F7] min-h-screen md:min-h-0 md:rounded-[24px] md:shadow-sm md:overflow-hidden flex flex-col relative">
+    <div className="min-h-screen bg-[#F1F4F5] flex flex-col md:justify-center md:items-center">
+      <div className="w-full max-w-md bg-[#F1F4F5] min-h-screen md:min-h-0 md:rounded-xl md: md:overflow-hidden flex flex-col relative">
         {/* Header */}
         <header className="flex items-center px-4 py-4 sticky top-0 z-10 bg-transparent">
           <button onClick={() => router.back()} className="mr-3 p-1 text-slate-600 hover:bg-slate-200 rounded-full transition">
@@ -69,7 +69,7 @@ export default function BantuanPage() {
           <div className="w-full space-y-3">
             <button 
               onClick={handleSocialClick}
-              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4 shadow-sm active:scale-[0.98] transition-transform"
+              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4  active:scale-[0.98] transition-transform"
             >
               <FacebookIcon className="text-[#1877F2]" size={24} />
               <span className="text-sm font-medium text-slate-700">Prima Linc Indonesia</span>
@@ -77,7 +77,7 @@ export default function BantuanPage() {
 
             <button 
               onClick={handleSocialClick}
-              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4 shadow-sm active:scale-[0.98] transition-transform"
+              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4  active:scale-[0.98] transition-transform"
             >
               <InstagramIcon className="text-[#E4405F]" size={24} />
               <span className="text-sm font-medium text-slate-700">@prima.linc</span>
@@ -85,7 +85,7 @@ export default function BantuanPage() {
 
             <button 
               onClick={handleSocialClick}
-              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4 shadow-sm active:scale-[0.98] transition-transform"
+              className="flex items-center gap-3 w-full bg-white rounded-xl px-5 py-4  active:scale-[0.98] transition-transform"
             >
               <LinkedinIcon className="text-[#0A66C2]" size={24} />
               <span className="text-sm font-medium text-slate-700">Prima Linc Indonesia</span>
@@ -98,7 +98,7 @@ export default function BantuanPage() {
       {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowPopup(false)} />
-          <div className="relative z-10 w-full max-w-[280px] rounded-2xl bg-white p-6 text-center shadow-xl">
+          <div className="relative z-10 w-full max-w-[280px] rounded-xl bg-white p-6 text-center ">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E5F5F7]">
               <Clock size={24} className="text-[#2ABFC8]" />
             </div>

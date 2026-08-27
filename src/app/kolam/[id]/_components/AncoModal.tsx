@@ -12,10 +12,10 @@ export function AncoModal(props: any) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button aria-label="Tutup" onClick={() => setAncoModal(null)} className="absolute inset-0 bg-black/40" />
-      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="relative w-full max-w-sm rounded-xl bg-white p-6 ">
         <div className="mb-1 flex items-center gap-2">
           <Droplets size={18} className="text-[#2ABFC8]" />
-          <h3 className="text-base font-extrabold text-slate-800">Laporan Cek Anco</h3>
+          <h3 className="text-base font-bold text-slate-800">Laporan Cek Anco</h3>
         </div>
         <p className="mb-5 text-xs text-slate-500">Bagaimana kondisi pakan di dalam anco saat ini?</p>
 
@@ -31,8 +31,8 @@ export function AncoModal(props: any) {
               disabled={disabled}
               className={`flex w-full items-start gap-3 rounded-xl border-[1.5px] px-4 py-3 text-left transition ${
                 disabled
-                  ? "border-slate-100 bg-slate-50 opacity-40 cursor-not-allowed"
-                  : ancoResult === value ? "border-[#2ABFC8] bg-[#2ABFC8]/10" : "border-slate-200 hover:bg-slate-50"
+                  ? "border-slate-100 bg-[#F1F4F5] opacity-40 cursor-not-allowed"
+                  : ancoResult === value ? "border-[#2ABFC8] bg-[#2ABFC8]/10" : "border-slate-200 hover:bg-[#F1F4F5]"
               }`}
             >
               <span className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${

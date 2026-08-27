@@ -145,7 +145,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
       {/* Welcome Permission Modal UI */}
       {showPermissionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#002530]/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full  animate-in fade-in zoom-in duration-300">
             <div className="w-12 h-12 bg-[#56C1CD]/20 rounded-full flex items-center justify-center mb-4 mx-auto">
               <span className="text-2xl">🔔</span>
             </div>

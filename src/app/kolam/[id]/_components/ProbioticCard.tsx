@@ -10,13 +10,13 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
   const badgeColor = d.prob.isCustom ? "bg-blue-100 text-blue-700 border-blue-200" : (historicalData ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200");
 
   return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm">
+    <section className="rounded-xl bg-white p-4 ">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src="/images/icon/probiotik.webp" alt="Probiotik" className="h-11 w-11 shrink-0" />
           <div>
             <p className="text-[11px] text-slate-500">Probiotik</p>
-            <p className="text-lg font-extrabold">{displayProb} ml</p>
+            <p className="text-lg font-bold">{displayProb} ml</p>
           </div>
         </div>
         <button
@@ -50,7 +50,7 @@ export function ProbioticCard({ d, now, busy, startEditProb, handleCatatProbioti
               <button
                 onClick={() => handleCatatProbiotik()}
                 disabled={busy || d.doc < 0}
-                className="mt-3 w-full rounded-[10px] bg-[#2ABFC8] py-2.5 text-xs font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-3 w-full rounded-[10px] bg-[#2ABFC8] py-2.5 text-xs font-semibold text-white  transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Konfirmasi & Aktifkan Peringatan
               </button>

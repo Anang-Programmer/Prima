@@ -27,8 +27,8 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white shadow-xl ring-1 ring-black/5 z-50 overflow-hidden text-slate-800">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50">
+      <div className="absolute right-0 top-full mt-2 w-80 rounded-xl bg-white  ring-1 ring-black/5 z-50 overflow-hidden text-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-[#F1F4F5]">
           <h3 className="font-bold text-sm">Notifikasi</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition">
             <X size={18} />
@@ -41,7 +41,7 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
             <div 
               key={notif.id} 
               onClick={() => handleCommunityNotifClick(notif)}
-              className={`flex items-start gap-3 border-b border-slate-100 p-4 hover:bg-slate-50 transition cursor-pointer ${!notif.is_read ? 'bg-blue-50/50' : 'bg-white'}`}
+              className={`flex items-start gap-3 border-b border-slate-100 p-4 hover:bg-[#F1F4F5] transition cursor-pointer ${!notif.is_read ? 'bg-blue-50/50' : 'bg-white'}`}
             >
               <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.type === 'LIKE' ? 'bg-pink-100 text-pink-500' : 'bg-blue-100 text-blue-500'}`}>
                 {notif.type === 'LIKE' ? <Heart size={20} className="fill-current" /> : <MessageCircle size={20} />}
@@ -60,7 +60,7 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
 
           {/* Due Alarms */}
           {dueAlarms.map((item, idx) => (
-            <div key={item.timer.id || idx} className="flex flex-col gap-2 border-b border-slate-100 p-4 hover:bg-slate-50 transition">
+            <div key={item.timer.id || idx} className="flex flex-col gap-2 border-b border-slate-100 p-4 hover:bg-[#F1F4F5] transition">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
                   <AlertTriangle size={20} />
@@ -76,7 +76,7 @@ export function NotificationDropdown({ isOpen, onClose, dueAlarms, communityNoti
                     router.push(`/kolam/${item.pond?.pond_id}`);
                     onClose();
                   }}
-                  className="rounded-lg bg-[#2ABFC8] px-3 py-2 text-[11px] font-bold text-white shadow-sm transition active:scale-95"
+                  className="rounded-lg bg-[#2ABFC8] px-3 py-2 text-[11px] font-bold text-white  transition active:scale-95"
                 >
                   Buka Kolam
                 </button>

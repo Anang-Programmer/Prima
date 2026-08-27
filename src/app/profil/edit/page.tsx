@@ -5,7 +5,7 @@ import { ChevronLeft, Loader2, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const inputCls = "w-full rounded-[10px] bg-[#EAEAEA] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
+const inputCls = "w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
 function Label({ children }: any) {
   return <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{children}</p>;
@@ -71,14 +71,14 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F5F7] flex flex-col md:justify-center md:items-center">
-      <div className="w-full max-w-md bg-white min-h-screen md:min-h-0 md:rounded-[24px] md:shadow-sm md:overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#F1F4F5] flex flex-col md:justify-center md:items-center">
+      <div className="w-full max-w-md bg-white min-h-screen md:min-h-0 md:rounded-xl md: md:overflow-hidden flex flex-col">
         {/* Header */}
         <header className="flex items-center px-4 py-4 border-b border-slate-100 bg-white sticky top-0 z-10">
           <button onClick={() => router.back()} className="mr-3 p-1 text-slate-600 hover:bg-slate-100 rounded-full transition">
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-base font-extrabold text-slate-800">Profile</h1>
+          <h1 className="text-base font-bold text-slate-800">Profile</h1>
         </header>
 
         {loadingData ? (
@@ -89,7 +89,7 @@ export default function EditProfilePage() {
           <main className="flex-1 px-5 py-6 overflow-y-auto">
             <div className="space-y-4">
               <div className="flex justify-center mb-6">
-                <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#8E9F9F] text-white shadow-sm border-4 border-white">
+                <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#8E9F9F] text-white  border-4 border-white">
                    <Pencil size={28} className="opacity-80" />
                 </div>
               </div>
