@@ -1103,7 +1103,7 @@ export default function DetailKolamPage() {
       </div>
     );
 
-  const stage = d.doc <= 30 ? "Benur" : d.doc <= 70 ? "Remaja" : "Pembesaran";
+  const stage = d.doc <= 30 ? "Benur" : "Pembesaran";
   const popLabel = d.cycle?.initial_shrimp_count >= 1000 ? `${Math.round(d.cycle.initial_shrimp_count / 1000)} rb` : `${d.cycle?.initial_shrimp_count ?? 0}`;
 
   return (

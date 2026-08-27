@@ -46,7 +46,6 @@ function fmtMs(ms: number) {
 
 function stageOf(doc: number) {
   if (doc <= 30) return { label: "Benur", cls: "bg-[#FDEBDD] text-[#F2811B]" };
-  if (doc <= 70) return { label: "Remaja", cls: "bg-sky-100 text-sky-600" };
   return { label: "Pembesaran", cls: "bg-[#E3F1F2] text-[#2F6E7B]" };
 }
 
@@ -733,7 +732,7 @@ export default function DashboardPage() {
                           <span className="text-[10px] font-semibold">Alarm Kolam</span>
                         </div>
                         <h3 className="mt-1.5 text-sm font-bold text-slate-800">{alarm.pond.pond_name}</h3>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{alarm.pond.stage || "Remaja"}</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">{alarm.pond.stage || "Pembesaran"}</p>
                       </div>
 
                       <div className="flex flex-col gap-2 text-right">
@@ -840,7 +839,7 @@ export default function DashboardPage() {
                   {showFilter && (
                     <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white p-2  ring-1 ring-slate-100 z-50">
                       <p className="mb-2 px-3 pt-1 text-xs font-bold text-slate-400">Filter Tahap</p>
-                      {["Semua", "Benur", "Remaja", "Pembesaran"].map((f) => (
+                      {["Semua", "Benur", "Pembesaran"].map((f) => (
                         <button
                           key={f}
                           type="button"
