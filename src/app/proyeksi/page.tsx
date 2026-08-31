@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { projectRemainingFeed, pelletType, calculateDailyFeed } from "@/lib/feed-calculator";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
+import TambahKolamSheet from "@/components/tambah-kolam-sheet";
 
 const TARGET_HARI = 120;
 
@@ -17,6 +18,7 @@ export default function ProyeksiPage() {
   const [ponds, setPonds] = useState<any[] | null>(null);
   const [selected, setSelected] = useState<string | null>(null); // null = semua kolam
   const [showPicker, setShowPicker] = useState(false);
+  const [showTambah, setShowTambah] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -252,7 +254,7 @@ export default function ProyeksiPage() {
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
-          <button className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70">
+          <button onClick={() => setShowTambah(true)} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -270,6 +272,15 @@ export default function ProyeksiPage() {
           </div>
         </div>
       </nav>
+
+      <TambahKolamSheet
+        open={showTambah}
+        onClose={() => setShowTambah(false)}
+        onSaved={() => {
+          setShowTambah(false);
+          router.push("/dashboard");
+        }}
+      />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, Bell, Heart, Home, Loader2, MessageCircle, Plus, Send, Share2, User } from "lucide-react";
+import { BarChart3, Heart, Home, Loader2, MessageCircle, Plus, Send, Share2, User} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
+import TambahKolamSheet from "@/components/tambah-kolam-sheet";
 
 type Post = {
   id: string; author_name: string; avatar_url: string; content: string;
@@ -46,6 +47,7 @@ export default function KomunitasPage() {
   const [commentPost, setCommentPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [showTambah, setShowTambah] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -121,11 +123,10 @@ export default function KomunitasPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCreate(true)}
-              className="hidden items-center gap-1.5 rounded-full bg-[#2ABFC8] px-4 py-2 text-xs font-semibold text-white transition active:scale-95 md:flex"
+              className="flex items-center gap-1.5 rounded-full bg-[#2ABFC8] px-4 py-2 text-xs font-semibold text-white transition active:scale-95"
             >
               <Plus size={14} /> Buat Post
             </button>
-            <button className="rounded-full p-2 text-slate-700 hover:bg-white"><Bell size={20} /></button>
           </div>
         </header>
 
@@ -183,7 +184,7 @@ export default function KomunitasPage() {
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
-          <button onClick={() => setShowCreate(true)}
+          <button onClick={() => setShowTambah(true)}
             className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
@@ -223,6 +224,15 @@ export default function KomunitasPage() {
 
       {/* ============ SHEET: KOMENTAR ============ */}
       {/* Komentar Popup dihilangkan, sekarang menggunakan halaman detail */}
+
+      <TambahKolamSheet
+        open={showTambah}
+        onClose={() => setShowTambah(false)}
+        onSaved={() => {
+          setShowTambah(false);
+          router.push("/dashboard");
+        }}
+      />
     </div>
   );
 }

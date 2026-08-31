@@ -5,7 +5,7 @@ import { fmt1 } from "../_lib/constants";
 
 export default function MonitoringTab({ d }: { d: any }) {
   return (
-    <section className="space-y-4 pl-6 pr-2">
+    <section className="space-y-4">
       {/* Status FCR Card */}
       <div className="rounded-xl bg-[#BEE5E8] p-4 ">
         <div className="flex items-center justify-between">
@@ -146,7 +146,7 @@ export default function MonitoringTab({ d }: { d: any }) {
           ];
 
           return (
-            <div className="relative h-48 w-full pl-6 pr-2">
+            <div className="relative h-48 w-full pl-6 pr-1">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible">
                 <defs>
                   <linearGradient id="actualGradient" x1="0" x2="0" y1="0" y2="1">
@@ -216,7 +216,7 @@ export default function MonitoringTab({ d }: { d: any }) {
                   key={i}
                   className="absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-white bg-[#2ABFC8] "
                   style={{
-                    left: `calc(1.5rem + ${getX(p.doc)}% - (1.5rem + 0.5rem) * ${getX(p.doc) / 100})`, // adjust for pl-6 pr-2 container
+                    left: `calc(1.5rem + ${getX(p.doc)}% - (1.5rem + 0.25rem) * ${getX(p.doc) / 100})`, // adjust for pl-6 pr-1 container
                     top: `${getY(p.act)}%`,
                   }}
                 />

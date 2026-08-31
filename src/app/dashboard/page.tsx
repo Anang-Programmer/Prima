@@ -15,6 +15,7 @@ import {
   Smile,
   User,
   Menu,
+  Funnel,
   CheckCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -167,14 +168,17 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
   );
 }
 
-function BottomNav({ onAdd }: { onAdd?: () => void }) {
+function BottomNav({ onAdd, disabled }: { onAdd?: () => void; disabled?: boolean }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
       <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
         <button
           type="button"
           onClick={onAdd}
-          className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95"
+          disabled={disabled}
+          className={`absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full text-white ring-4 ring-white/70 transition ${
+            disabled ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#2ABFC8] active:scale-95'
+          }`}
         >
           <Plus size={24} />
         </button>
@@ -830,9 +834,9 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowFilter(!showFilter)}
-                    className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#EAEFEF] text-slate-800 transition active:scale-95 shrink-0"
+                    className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#E7EAEB] text-slate-800 transition active:scale-95 shrink-0"
                   >
-                    <Menu size={20} />
+                    <Funnel size={20} />
                   </button>
 
                   {/* Filter Dropdown */}
@@ -893,7 +897,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <BottomNav onAdd={() => setActiveModal("quick_action")} />
+      <BottomNav 
+        onAdd={() => {
+          if (data && !data.is_premium && data.ponds.length >= 1) {
+            setShowUpgradeModal(true);
+          } else {
+            setShowTambah(true);
+          }
+        }} 
+      />
 
       <QuickActionModal
         open={activeModal === "quick_action"}

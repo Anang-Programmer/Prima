@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
+import TambahKolamSheet from "@/components/tambah-kolam-sheet";
 
 const inputCls = "w-full rounded-[10px] bg-[#E7EAEB] px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50";
 
@@ -55,6 +56,7 @@ export default function ProfilPage() {
   const [sheet, setSheet] = useState<null | string>(null);
   const [farm, setFarm] = useState<any>({});
   const [busy, setBusy] = useState(false);
+  const [showTambah, setShowTambah] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -234,7 +236,7 @@ export default function ProfilPage() {
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
         <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
-          <button onClick={() => router.push("/dashboard")} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70">
+          <button onClick={() => setShowTambah(true)} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
           <div className="grid grid-cols-4">
@@ -335,6 +337,15 @@ export default function ProfilPage() {
           </div>
         </div>
       </Sheet>
+
+      <TambahKolamSheet
+        open={showTambah}
+        onClose={() => setShowTambah(false)}
+        onSaved={() => {
+          setShowTambah(false);
+          router.push("/dashboard");
+        }}
+      />
     </div>
   );
 }

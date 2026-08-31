@@ -129,10 +129,10 @@ export default function MasukPage() {
                     <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden md:flex-none md:overflow-visible">
                         <div className="space-y-4 overflow-y-auto px-4 pt-5 md:px-4 md:pt-0 md:overflow-visible">
                             <Field
-                                label="Email atau Username"
+                                label="Email"
                                 icon={<User size={18} />}
                                 type="text"
-                                placeholder="Ketik Username / Email"
+                                placeholder="Ketik Email"
                                 value={identifier}
                                 onChange={(e) => setIdentifier(e.target.value)}
                                 required
@@ -142,7 +142,7 @@ export default function MasukPage() {
                                 label="Password"
                                 icon={<Lock size={18} />}
                                 type="password"
-                                placeholder="Ketik Nama"
+                                placeholder="Ketik Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
