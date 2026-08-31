@@ -93,16 +93,16 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                       </span>
                     </div>
                     {isDue && t.type === "Pakan" && (
-                      <p className="text-[10px] text-red-600/70 mt-0.5">Berikan {fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))} lalu tekan tombol di bawah</p>
+                      <p className="text-xs text-red-600/70 mt-0.5">Berikan {fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))} lalu tekan tombol di bawah</p>
                     )}
                     {isDue && t.type === "Cek Anco" && (
-                      <p className="text-[10px] text-red-600/70 mt-0.5">Periksa sisa pakan di anco lalu isi hasilnya</p>
+                      <p className="text-xs text-red-600/70 mt-0.5">Periksa sisa pakan di anco lalu isi hasilnya</p>
                     )}
                     {isDue && t.type === "Cek Anco" && (
                       <button
                         onClick={() => { setAncoResult("Habis"); setAncoModal({ timerId: t.id }); }}
                         disabled={busy || d.doc < 0}
-                        className="mt-2 w-full rounded-lg bg-red-500 py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-2 w-full rounded-lg bg-red-500 py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Isi Hasil Anco
                       </button>
@@ -111,7 +111,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                       <button
                         onClick={() => confirmFeedDone(t.id)}
                         disabled={busy || d.doc < 0}
-                        className="mt-2 w-full rounded-lg bg-[#2ABFC8] py-2 text-[11px] font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-2 w-full rounded-lg bg-[#2ABFC8] py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Sudah Diberi Pakan
                       </button>
