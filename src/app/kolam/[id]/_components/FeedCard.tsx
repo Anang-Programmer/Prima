@@ -82,27 +82,27 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                     className={`rounded-xl border p-3 ${isDue ? "border-red-200 bg-red-50" : "border-[#2ABFC8]/20 bg-[#F2FAFB]"}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
-                        <AlarmClock size={13} className={isDue ? "text-red-500" : "text-[#2ABFC8]"} />
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                        <AlarmClock size={13} className={isDue ? "text-red-500" : "text-[#1C9098]"} />
                         {isDue
                           ? (t.type === "Pakan" ? "Waktunya Memberi Pakan!" : "Waktunya Cek Anco!")
                           : (t.type === "Pakan" ? "Pakan Berikutnya" : "Cek Anco")}
                       </span>
-                      <span className={`font-mono text-sm font-bold ${isDue ? "animate-pulse text-red-600" : "text-[#1C9098]"}`}>
+                      <span className={`text-xs font-bold ${isDue ? "animate-pulse text-red-600" : "text-[#1C9098]"}`}>
                         {formatTimeLeft(t.due_time)}
                       </span>
                     </div>
                     {isDue && t.type === "Pakan" && (
-                      <p className="text-xs text-red-600/70 mt-0.5">Berikan {fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))} lalu tekan tombol di bawah</p>
+                      <p className="text-xs text-red-600/70 mt-2">Berikan {fmtFeedWithHint(displayFeed / Math.max(d.feed.mealsPerDay || 1, 1))} lalu tekan tombol di bawah</p>
                     )}
                     {isDue && t.type === "Cek Anco" && (
-                      <p className="text-xs text-red-600/70 mt-0.5">Periksa sisa pakan di anco lalu isi hasilnya</p>
+                      <p className="text-xs text-red-600/70 mt-2">Periksa sisa pakan di anco lalu isi hasilnya</p>
                     )}
                     {isDue && t.type === "Cek Anco" && (
                       <button
                         onClick={() => { setAncoResult("Habis"); setAncoModal({ timerId: t.id }); }}
                         disabled={busy || d.doc < 0}
-                        className="mt-2 w-full rounded-lg bg-red-500 py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-3 w-full rounded-lg bg-red-500 py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Isi Hasil Anco
                       </button>
@@ -111,7 +111,7 @@ export function FeedCard({ d, now, busy, insertError, startEditPakan, handleCata
                       <button
                         onClick={() => confirmFeedDone(t.id)}
                         disabled={busy || d.doc < 0}
-                        className="mt-2 w-full rounded-lg bg-[#2ABFC8] py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-3 w-full rounded-lg bg-red-500 py-2 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Sudah Diberi Pakan
                       </button>
