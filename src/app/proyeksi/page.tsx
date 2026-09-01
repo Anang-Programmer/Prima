@@ -171,7 +171,7 @@ export default function ProyeksiPage() {
           )}
 
           {/* ============ PEMILIH KOLAM ============ */}
-          {!single && <p className="mb-2 text-[11px] font-semibold text-slate-700">Pilih Kolam</p>}
+          {!single && <p className="mb-2 text-[14px] font-semibold text-slate-700">Pilih Kolam</p>}
           <div className="relative">
             <button onClick={() => setShowPicker(!showPicker)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm text-slate-700  ring-1 ring-slate-100">
               {single ? single.pond_name : "Semua Kolam"}
@@ -203,7 +203,7 @@ export default function ProyeksiPage() {
           {single && (
             <>
               <section>
-                <h2 className="mb-3 text-xs font-bold">Kebutuhan Pakan Mingguan</h2>
+                <h2 className="mb-3 text-[14px] font-bold">Kebutuhan Pakan Mingguan</h2>
                 <div className="flex h-56 w-full gap-1">
                   <div className="flex flex-col justify-between pb-6 pr-2 text-right text-[9px] text-slate-400">
                     {[1, 0.75, 0.5, 0.25, 0].map((t) => <span key={t} className="leading-none">{Math.round(niceMax * t)}</span>)}
@@ -227,7 +227,7 @@ export default function ProyeksiPage() {
               </section>
 
               <section>
-                <h2 className="mb-3 text-xs font-bold">Rincian Pakan Perminggu</h2>
+                <h2 className="mb-3 text-[14px] font-bold">Rincian Pakan Perminggu</h2>
                 <div className="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white ">
                   {weeks.map((w: any) => (
                     <div key={w.week} className="flex items-center justify-between px-4 py-3">
@@ -257,18 +257,23 @@ export default function ProyeksiPage() {
           <button onClick={() => setShowTambah(true)} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
-          <div className="grid grid-cols-4">
+          <div className="grid grid-cols-5">
             {[
               { label: "Beranda", icon: Home, href: "/dashboard", active: false },
               { label: "Proyeksi", icon: BarChart3, href: "/proyeksi", active: true },
+              { empty: true },
               { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: false },
               { label: "Profil", icon: User, href: "/profil", active: false },
-            ].map(({ label, icon: Icon, href, active }) => (
-              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#1C9098]" : ""} />
-                {label}
-              </a>
-            ))}
+            ].map((item: any) => {
+              if (item.empty) return <div key="empty" className="pointer-events-none" />;
+              const { label, icon: Icon, href, active } = item;
+              return (
+                <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
+                  <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#1C9098]" : ""} />
+                  {label}
+                </a>
+              );
+            })}
           </div>
         </div>
       </nav>

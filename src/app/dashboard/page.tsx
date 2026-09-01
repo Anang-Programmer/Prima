@@ -31,6 +31,7 @@ const TARGET_HARI = 120; // TODO: ambil dari field target kalau nanti ada
 const NAV = [
   { label: "Beranda", icon: Home, href: "/", active: true },
   { label: "Proyeksi", icon: BarChart3, href: "/proyeksi", active: false },
+  { empty: true },
   { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: false },
   { label: "Profil", icon: User, href: "/profil", active: false },
 ];
@@ -182,18 +183,22 @@ function BottomNav({ onAdd, disabled }: { onAdd?: () => void; disabled?: boolean
         >
           <Plus size={24} />
         </button>
-        <div className="grid grid-cols-4">
-          {NAV.map(({ label, icon: Icon, href, active }) => (
-            <a
-              key={label}
-              href={href}
-              className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"
-                }`}
-            >
-              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-              {label}
-            </a>
-          ))}
+        <div className="grid grid-cols-5">
+          {NAV.map((item: any) => {
+            if (item.empty) return <div key="empty" className="pointer-events-none" />;
+            const { label, icon: Icon, href, active } = item;
+            return (
+              <a
+                key={label}
+                href={href}
+                className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"
+                  }`}
+              >
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+                {label}
+              </a>
+            );
+          })}
         </div>
       </div>
     </nav>
@@ -667,14 +672,14 @@ export default function DashboardPage() {
           <Image src="/logo.png" alt="PRIMA Logo" width={140} height={48} className="h-10 w-auto object-contain" priority />
         </div> */}
         <nav className="flex-1 px-4 py-8 space-y-2">
-          {NAV.map(({ label, icon: Icon, href, active }) => (
+          {NAV.filter(item => !item.empty).map(({ label, icon: Icon, href, active }: any) => (
             <a
               key={label}
               href={href}
               className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold transition-all ${active ? "bg-[#E3F1F2] text-[#2F6E7B]" : "text-slate-500 hover:bg-[#F1F4F5] hover:text-slate-900"
                 }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 2} /> {label}
+              {Icon && <Icon size={20} strokeWidth={active ? 2.5 : 2} />} {label}
             </a>
           ))}
         </nav>

@@ -239,18 +239,23 @@ export default function ProfilPage() {
           <button onClick={() => setShowTambah(true)} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
-          <div className="grid grid-cols-4">
+          <div className="grid grid-cols-5">
             {[
               { label: "Beranda", icon: Home, href: "/dashboard", active: false },
               { label: "Proyeksi", icon: BarChart3, href: "/proyeksi", active: false },
+              { empty: true },
               { label: "Komunitas", icon: MessageCircle, href: "/komunitas", active: false },
               { label: "Profil", icon: User, href: "/profil", active: true },
-            ].map(({ label, icon: Icon, href, active }) => (
-              <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-                {label}
-              </a>
-            ))}
+            ].map((item: any) => {
+              if (item.empty) return <div key="empty" className="pointer-events-none" />;
+              const { label, icon: Icon, href, active } = item;
+              return (
+                <a key={label} href={href} className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${active ? "text-[#1C9098]" : "text-slate-400"}`}>
+                  <Icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? "fill-[#1C9098]/20" : ""} />
+                  {label}
+                </a>
+              );
+            })}
           </div>
         </div>
       </nav>

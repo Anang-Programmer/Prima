@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Loader2, Lock, Mail, Phone, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, Phone, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -50,15 +50,29 @@ type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   icon?: React.ReactNode;
 };
 function Field({ label, icon, ...rest }: FieldProps) {
+  const isPassword = rest.type === "password";
+  const [showPw, setShowPw] = useState(false);
   return (
     <div>
       <p className="mb-1.5 text-[11px] font-semibold text-slate-800">{label}</p>
       <div className="relative">
         <input
           {...rest}
+          type={isPassword ? (showPw ? "text" : "password") : rest.type}
           className={`w-full rounded-[10px] bg-[#E7EAEB] py-3.5 pl-4 ${icon ? 'pr-11' : 'pr-4'} text-sm text-slate-800 outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-[#2ABFC8]/50 focus:bg-white transition-all`}
         />
-        {icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">{icon}</span>}
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setShowPw(!showPw)}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700"
+            tabIndex={-1}
+          >
+            {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        ) : (
+          icon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">{icon}</span>
+        )}
       </div>
     </div>
   );
