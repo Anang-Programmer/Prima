@@ -14,17 +14,17 @@ import { supabase } from "@/lib/supabase";
 // TODO: ganti src dengan asset ilustrasi kamu sendiri (taruh di /public/images)
 const SLIDES = [
   {
-    // img: "/images/onboarding-1.png",
-    // alt: "Tebar benur",
+    img: "/images/onboarding/onboarding 1.webp",
+    alt: "Tebar benur",
     text: "Mulai budidaya tanpa tebak-tebakan. Catat tebar benur dan pakan, Prima yang hitung.",
   },
   {
-    img: "/images/onboarding-2.png",
+    img: "/images/onboarding/onboarding 2.webp",
     alt: "Pantau pakan dan air",
     text: "Pantau pakan, air, dan pertumbuhan udang tanpa ribet cukup catat, Prima yang angkat.",
   },
   {
-    img: "/images/onboarding-3.png",
+    img: "/images/onboarding/onboarding 3.webp",
     alt: "Panen maksimal",
     text: "Hemat pakan, air tetap sehat, udang cepat besar, dan panen maksimal bersama Prima.",
   },

@@ -1,7 +1,8 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Pencil, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 import { fmtFeed } from "@/app/kolam/[id]/_lib/constants";
 
 export function ConfirmFeedModal({
@@ -22,6 +23,27 @@ export function ConfirmFeedModal({
   isExecuting: boolean;
 }) {
   const router = useRouter();
+  const [success, setSuccess] = useState(false);
+  const wasExecuting = useRef(false);
+
+  useEffect(() => {
+    if (wasExecuting.current && !isExecuting) {
+      setSuccess(true);
+      const t = setTimeout(() => {
+        setSuccess(false);
+        onClose();
+      }, 2000);
+      return () => clearTimeout(t);
+    }
+    wasExecuting.current = isExecuting;
+  }, [isExecuting, onClose]);
+
+  useEffect(() => {
+    if (!open) {
+      setSuccess(false);
+      wasExecuting.current = false;
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -63,14 +85,21 @@ export function ConfirmFeedModal({
           Pakan sudah sesuai dengan rekomendasi PRIMA
         </p>
 
-        {/* Action Button */}
-        <button
-          onClick={onConfirm}
-          disabled={isExecuting}
-          className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white  #1FB4B2]/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
-        >
-          {isExecuting ? "Memproses..." : "Sudah Kasih Pakan"}
-        </button>
+        {/* Action Button / Success State */}
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-2 animate-in fade-in zoom-in duration-300">
+            <CheckCircle2 size={48} className="text-[#1FB4B2] mb-3 drop-shadow-sm" />
+            <p className="text-[#1FB4B2] font-bold text-lg">Pakan Berhasil Dicatat!</p>
+          </div>
+        ) : (
+          <button
+            onClick={onConfirm}
+            disabled={isExecuting}
+            className="w-full rounded-xl bg-[#1FB4B2] py-4 text-base font-bold text-white transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+          >
+            {isExecuting ? "Memproses..." : "Sudah Kasih Pakan"}
+          </button>
+        )}
       </div>
     </div>
   );

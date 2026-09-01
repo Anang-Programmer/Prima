@@ -448,8 +448,11 @@ export default function DashboardPage() {
         }
       }
 
-      setActiveModal(null);
-      setSelectedAction(null);
+      // Jangan tutup modal jika sedang di confirm_feed — biar ConfirmFeedModal yang tutup sendiri setelah animasi sukses
+      if (activeModal !== "confirm_feed") {
+        setActiveModal(null);
+        setSelectedAction(null);
+      }
       setReload(r => r + 1); // Refresh dashboard data
     } catch (e: any) {
       console.error("Gagal mengeksekusi quick action:", e);
@@ -892,9 +895,12 @@ export default function DashboardPage() {
                   <PondCard key={p.pond_id} pond={p} fcr={p.cycle_id ? data.fcrByCycle[p.cycle_id] : undefined} />
                 ))}
                 {visiblePonds.length === 0 && (
-                  <p className="rounded-xl bg-white p-6 text-center text-sm text-slate-500  md:col-span-2 xl:col-span-3">
-                    Belum ada kolam. Tekan “+ Tambah” untuk membuat kolam pertama.
-                  </p>
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-white p-8 md:col-span-2 xl:col-span-3">
+                    <img src="/images/icon/kolam kosong.webp" alt="Kolam kosong" className="mb-4 h-28 w-28 object-contain opacity-80" />
+                    <p className="text-sm text-slate-500 text-center">
+                      Belum ada kolam. Tekan &quot;+&quot; untuk membuat kolam pertama.
+                    </p>
+                  </div>
                 )}
               </div>
             </section>
@@ -951,11 +957,13 @@ export default function DashboardPage() {
           pondName={data?.ponds.find(p => p.cycle_id === confirmFeedCycleId)?.pond_name || ""}
           pondId={data?.ponds.find(p => p.cycle_id === confirmFeedCycleId)?.pond_id || ""}
           feedAmount={confirmFeedAmount}
-          onClose={() => setActiveModal("select_pond")}
-          onConfirm={() => {
-            handleExecuteQuickAction([confirmFeedCycleId]);
+          onClose={() => {
             setActiveModal(null);
             setConfirmFeedCycleId(null);
+            setSelectedAction(null);
+          }}
+          onConfirm={() => {
+            handleExecuteQuickAction([confirmFeedCycleId]);
           }}
           isExecuting={isExecutingAction}
         />
