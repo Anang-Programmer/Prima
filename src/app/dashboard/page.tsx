@@ -172,7 +172,7 @@ function PondCard({ pond, fcr }: { pond: PondDash; fcr?: number }) {
 function BottomNav({ onAdd, disabled }: { onAdd?: () => void; disabled?: boolean }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-      <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
+      <div className="relative border-t border-slate-100 bg-white">
         <button
           type="button"
           onClick={onAdd}

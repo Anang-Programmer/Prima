@@ -238,7 +238,7 @@ export default function ProfilPage() {
 
       {/* ============ BOTTOM NAV + FAB ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 md:hidden">
-        <div className="relative border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] ">
+        <div className="relative border-t border-slate-100 bg-white">
           <button onClick={() => setShowTambah(true)} className="absolute -top-6 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-[#2ABFC8] text-white  ring-4 ring-white/70 transition active:scale-95">
             <Plus size={24} />
           </button>
