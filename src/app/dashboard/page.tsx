@@ -825,7 +825,7 @@ export default function DashboardPage() {
           )}
 
           {/* ================= KONTEN ================= */}
-          <main className="space-y-4 px-4 pb-40 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-4">
+          <main className="space-y-4 px-4 pb-24 pt-4 md:space-y-8 md:px-10 md:pb-24 md:pt-4">
             {/* --- Search + Daftar Kolam --- */}
             <section className="space-y-4 md:space-y-6">
               <div className="flex gap-2">
